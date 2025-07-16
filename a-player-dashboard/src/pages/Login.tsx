@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { Button, ErrorMessage } from '../components/ui';
 import { ROUTES, APP_CONFIG } from '../constants/config';
 
 interface LoginFormData {
@@ -9,12 +11,29 @@ interface LoginFormData {
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading, error: authError, login, clearError } = useAuth();
+  
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user && !authLoading) {
+      navigate(ROUTES.EMPLOYEE_SELECTION);
+    }
+  }, [user, authLoading, navigate]);
+
+  // Clear errors when form data changes
+  useEffect(() => {
+    if (error || authError) {
+      setError(null);
+      clearError();
+    }
+  }, [formData, error, authError, clearError]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -26,25 +45,51 @@ export const Login: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
+    
+    // Basic validation
+    if (!formData.email.trim() || !formData.password.trim()) {
+      setError('Please fill in all fields');
+      return;
+    }
 
     try {
-      // TODO: Implement Supabase authentication in Stage 2
-      // For now, simulate successful login for Stage 1 completion
-      if (formData.email && formData.password) {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        navigate(ROUTES.EMPLOYEE_SELECTION);
-      } else {
-        throw new Error('Please fill in all fields');
-      }
+      setLoading(true);
+      setError(null);
+      
+      await login(formData);
+      // Navigation will happen automatically via useEffect when user state updates
+      
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      // Error is handled by auth context, but we can show additional validation
+      if (err instanceof Error) {
+        if (err.message.includes('Invalid login credentials')) {
+          setError('Invalid email or password. Please check your credentials and try again.');
+        } else if (err.message.includes('Email not confirmed')) {
+          setError('Please check your email and confirm your account before signing in.');
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError('Login failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  // Show loading spinner while checking initial auth state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-4 text-secondary-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const displayError = error || authError;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-secondary-50">
@@ -73,6 +118,7 @@ export const Login: React.FC = () => {
                 className="input-field"
                 placeholder="Enter your email"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -89,32 +135,22 @@ export const Login: React.FC = () => {
                 className="input-field"
                 placeholder="Enter your password"
                 required
+                disabled={loading}
               />
             </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                {error}
-              </div>
+            {displayError && (
+              <ErrorMessage message={displayError} />
             )}
 
-            <button
+            <Button
               type="submit"
-              disabled={loading}
-              className="btn-primary w-full"
+              loading={loading}
+              className="w-full"
+              disabled={loading || !formData.email.trim() || !formData.password.trim()}
             >
-              {loading ? (
-                <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Signing in...
-                </span>
-              ) : (
-                'Sign In'
-              )}
-            </button>
+              Sign In
+            </Button>
           </form>
 
           <div className="mt-6 text-center">

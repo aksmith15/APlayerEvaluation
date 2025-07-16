@@ -447,7 +447,11 @@ font-family: 'JetBrains Mono', 'Fira Code', Consolas, 'Courier New', monospace;
 }
 ```
 
-### 3. Employee Analytics Page Layout
+### 3. Enhanced Employee Analytics Page Layout ✨ **UPDATED**
+**Last Updated:** January 16, 2025
+
+The Employee Analytics page has been restructured for improved visual hierarchy and better use of space.
+
 ```css
 .analytics-container {
   max-width: 1400px;
@@ -479,35 +483,44 @@ font-family: 'JetBrains Mono', 'Fira Code', Consolas, 'Courier New', monospace;
   gap: 24px;
 }
 
-/* Employee Profile Section */
+/* Enhanced Employee Profile Section - Full Width Horizontal Card */
 .profile-section {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
+  background: var(--bg-primary);
+  border: 1px solid var(--secondary-200);
+  border-radius: 12px;
+  padding: 32px;
   margin-bottom: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
 }
 
 .profile-info {
   display: flex;
   flex-direction: column;
-  justify-content: center;
 }
 
 .profile-name {
-  font-size: 1.875rem;
+  font-size: 2.25rem; /* Increased for prominence */
   font-weight: 700;
   color: var(--secondary-800);
   margin-bottom: 8px;
 }
 
 .profile-role {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   color: var(--primary-600);
   font-weight: 500;
   margin-bottom: 4px;
 }
 
 .profile-department {
+  font-size: 1.125rem;
   color: var(--secondary-600);
   margin-bottom: 8px;
 }
@@ -517,40 +530,179 @@ font-family: 'JetBrains Mono', 'Fira Code', Consolas, 'Courier New', monospace;
   font-size: 0.875rem;
 }
 
-/* Charts Grid */
+.profile-meta {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--secondary-200);
+  font-size: 0.875rem;
+  color: var(--secondary-600);
+}
+
+.profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Performance Overview Section - Full Width */
+.performance-overview {
+  background: var(--bg-primary);
+  border: 1px solid var(--secondary-200);
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 32px;
+  min-height: 600px; /* Generous space for radar chart */
+}
+
+.performance-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--secondary-800);
+  margin-bottom: 24px;
+}
+
+/* Charts Grid - Responsive Layout */
 .charts-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 24px;
   margin-bottom: 32px;
+}
+
+/* Large screens: Two column layout for secondary charts */
+@media (min-width: 1200px) {
+  .charts-grid.secondary {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .chart-full-width {
   grid-column: 1 / -1;
 }
+
+/* Quarter Filter Integration */
+.quarter-filter-section {
+  display: flex;
+  justify-content: between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 16px 24px;
+  background: var(--secondary-50);
+  border-radius: 8px;
+}
+
+.quarter-info {
+  font-size: 0.875rem;
+  color: var(--secondary-600);
+}
 ```
+
+#### Key Layout Improvements:
+- **Full-Width Employee Profile**: Horizontal card layout with enhanced typography hierarchy
+- **Dedicated Performance Overview**: Large, full-width section for the radar chart component
+- **Improved Visual Hierarchy**: Clear separation between profile information and analytics
+- **Better Space Utilization**: More generous spacing for better readability
+- **Enhanced Profile Display**: Larger name typography and better information organization
+- **Responsive Grid System**: Adapts chart layout based on screen size
+- **Quarter Filter Integration**: Prominent placement of quarter selection controls
 
 ## Chart Design Patterns
 
-### 1. Radar Chart Specifications
+### 1. Enhanced Radar Chart Specifications ✨ **UPDATED**
+**Last Updated:** January 16, 2025
+
+The radar chart component has been enhanced with evaluation type selection and improved sizing for better readability.
+
+#### Component Structure:
+```css
+.radar-chart-container {
+  background: var(--bg-primary);
+  border-radius: 12px;
+  padding: 24px;
+  min-height: 500px; /* Increased from 300px for better visibility */
+}
+
+.chart-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.evaluation-type-selector {
+  min-width: 200px;
+}
+
+.chart-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 0.875rem;
+  color: var(--secondary-600);
+}
+```
+
+#### TypeScript Configuration:
 ```typescript
 const radarChartConfig = {
   margin: { top: 20, right: 30, bottom: 20, left: 30 },
+  height: 500, // Increased for better readability
   colors: {
-    fill: 'rgba(59, 130, 246, 0.1)',
-    stroke: '#3b82f6',
-    strokeWidth: 2
+    // Single evaluation type display (no overlapping)
+    'Total Score': {
+      fill: 'rgba(59, 130, 246, 0.15)',
+      stroke: '#3b82f6',
+      strokeWidth: 3
+    },
+    'Manager': {
+      fill: 'rgba(5, 150, 105, 0.15)',
+      stroke: '#059669',
+      strokeWidth: 3
+    },
+    'Peer': {
+      fill: 'rgba(220, 38, 38, 0.15)',
+      stroke: '#dc2626',
+      strokeWidth: 3
+    },
+    'Self': {
+      fill: 'rgba(124, 58, 237, 0.15)',
+      stroke: '#7c3aed',
+      strokeWidth: 3
+    }
   },
   grid: {
     stroke: '#e2e8f0',
-    strokeDasharray: '3 3'
+    strokeDasharray: '3 3',
+    strokeWidth: 1
   },
   labels: {
     fontSize: 12,
-    fill: '#64748b'
-  }
+    fill: '#64748b',
+    fontWeight: 500
+  },
+  domain: [0, 10], // Fixed scale for consistency
+  tickCount: 5
 };
 ```
+
+#### Evaluation Type Options:
+```typescript
+const evaluationTypes = [
+  { value: 'weighted', label: 'Total Score', description: 'Weighted average (Manager 55%, Peer 35%, Self 10%)' },
+  { value: 'manager', label: 'Manager', description: 'Manager evaluation scores only' },
+  { value: 'peer', label: 'Peer', description: 'Peer evaluation scores only' },
+  { value: 'self', label: 'Self', description: 'Self-evaluation scores only' }
+];
+```
+
+#### Features:
+- **Evaluation Type Selector**: Dropdown to switch between Total Score, Manager, Peer, and Self evaluations
+- **Enhanced Size**: 500px height for improved readability
+- **Single Type Display**: Shows one evaluation type at a time to reduce visual clutter
+- **Statistical Display**: Shows average and count for selected evaluation type
+- **Professional Styling**: Consistent with overall design system
+- **Responsive Design**: Adapts to different screen sizes
 
 ### 2. Clustered Bar Chart Specifications
 ```typescript
@@ -879,4 +1031,198 @@ const chartAnimationConfig = {
 }
 ```
 
-This comprehensive UI/UX documentation provides the foundation for creating a consistent, accessible, and user-friendly A-Player Evaluations Dashboard that effectively presents complex evaluation data in an intuitive interface.
+## Recent UI/UX Enhancements ✨
+
+### Authentication Flow Improvements
+**Updated:** January 16, 2025
+
+The authentication system has been enhanced for better user experience and reliability:
+
+#### Loading States
+```css
+.auth-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.auth-spinner-text {
+  color: var(--secondary-600);
+  font-size: 0.875rem;
+}
+```
+
+#### Error Handling
+```css
+.auth-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.auth-error-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.auth-error-details {
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+```
+
+#### Features:
+- **Improved Loading States**: Clear feedback during authentication process
+- **Enhanced Error Messages**: Specific error messages for different failure scenarios
+- **Graceful Timeouts**: Proper handling of network timeouts and connection issues
+- **State Management**: Reliable authentication state management without infinite loops
+
+### Employee Selection Enhancements
+
+#### Score Badges
+```css
+.score-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.score-badge.high {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.score-badge.medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.score-badge.low {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.score-badge.no-score {
+  background: var(--secondary-100);
+  color: var(--secondary-600);
+}
+```
+
+#### Employee Cards
+```css
+.employee-card-enhanced {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid var(--secondary-200);
+}
+
+.employee-card-enhanced:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  border-color: var(--primary-300);
+}
+
+.employee-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.employee-score-section {
+  text-align: right;
+}
+```
+
+### Data Visualization Improvements
+
+#### Chart Loading States
+```css
+.chart-skeleton {
+  background: var(--secondary-100);
+  border-radius: 8px;
+  height: 400px;
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: loading 1.5s infinite;
+}
+```
+
+#### Empty States
+```css
+.chart-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  color: var(--secondary-500);
+}
+
+.empty-state-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state-text {
+  font-size: 0.875rem;
+  text-align: center;
+  max-width: 300px;
+}
+```
+
+## Design System Updates
+
+### Enhanced Component States
+- **Interactive Feedback**: Improved hover and focus states for all interactive elements
+- **Loading Patterns**: Consistent skeleton loading across all data components
+- **Error Recovery**: Clear error states with actionable recovery options
+- **Progressive Enhancement**: Graceful degradation for slower connections
+
+### Accessibility Improvements
+- **Screen Reader Support**: Enhanced ARIA labels and descriptions for complex charts
+- **Keyboard Navigation**: Full keyboard accessibility for all interactive components
+- **Color Contrast**: All UI elements meet WCAG 2.1 AA standards
+- **Focus Management**: Clear focus indicators and logical tab order
+
+### Performance Optimizations
+- **Lazy Loading**: Charts and heavy components load on demand
+- **Efficient Re-renders**: Optimized React rendering with proper memoization
+- **Responsive Images**: Proper image sizing and lazy loading for better performance
+- **Bundle Optimization**: Code splitting and tree shaking for smaller bundles
+
+---
+
+This comprehensive UI/UX documentation provides the foundation for creating a consistent, accessible, and user-friendly A-Player Evaluations Dashboard that effectively presents complex evaluation data in an intuitive interface. The recent enhancements focus on improved authentication flow, better data visualization, and enhanced user feedback throughout the application.

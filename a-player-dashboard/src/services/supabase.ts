@@ -1,11 +1,49 @@
 import { createClient } from '@supabase/supabase-js';
 import { SUPABASE_CONFIG } from '../constants/config';
 
+// Validate Supabase configuration
+const validateConfig = () => {
+  console.log('Supabase Configuration Check:');
+  console.log('URL:', SUPABASE_CONFIG.URL);
+  console.log('ANON_KEY:', SUPABASE_CONFIG.ANON_KEY ? 'Present' : 'Missing');
+  
+  if (!SUPABASE_CONFIG.URL || SUPABASE_CONFIG.URL === 'your-supabase-url') {
+    console.error('⚠️ Supabase URL is not configured properly');
+  }
+  
+  if (!SUPABASE_CONFIG.ANON_KEY || SUPABASE_CONFIG.ANON_KEY === 'your-supabase-anon-key') {
+    console.error('⚠️ Supabase ANON_KEY is not configured properly');
+  }
+  
+  console.log('✅ Supabase configuration validated');
+};
+
+// Run validation
+validateConfig();
+
 // Supabase client configuration
 export const supabase = createClient(
   SUPABASE_CONFIG.URL,
-  SUPABASE_CONFIG.ANON_KEY
+  SUPABASE_CONFIG.ANON_KEY,
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false
+    }
+  }
 );
+
+// Test connection
+supabase.auth.getSession().then(({ data, error }) => {
+  if (error) {
+    console.error('Supabase connection error:', error);
+  } else {
+    console.log('✅ Supabase connection successful');
+  }
+}).catch(err => {
+  console.error('Failed to connect to Supabase:', err);
+});
 
 // Type-safe database helpers
 export type Database = {

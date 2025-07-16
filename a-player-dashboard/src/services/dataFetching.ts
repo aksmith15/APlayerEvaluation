@@ -6,19 +6,35 @@ import type { Employee, Quarter } from '../types/evaluation';
 
 export const fetchEmployees = async (): Promise<Employee[]> => {
   try {
-    const { data, error } = await supabase
+    console.log('Fetching employees from people table...');
+    
+    // Get all active employees (simplified version)
+    const { data: people, error: peopleError } = await supabase
       .from('people')
       .select('*')
       .eq('active', true)
       .order('name');
 
-    if (error) throw error;
+    if (peopleError) {
+      console.error('Error fetching people:', peopleError);
+      throw peopleError;
+    }
 
-    return data.map(person => ({
+    if (!people || people.length === 0) {
+      console.warn('No people found in database');
+      return [];
+    }
+
+    console.log(`Found ${people.length} people in database`);
+
+    // Convert to Employee format with basic data
+    const employees: Employee[] = people.map((person) => ({
       ...person,
-      overallScore: undefined, // Will be calculated separately
-      latestQuarter: undefined // Will be fetched separately
+      overallScore: undefined, // We'll add score calculation later
+      latestQuarter: undefined
     }));
+
+    return employees;
   } catch (error) {
     console.error('Error fetching employees:', error);
     throw error;
