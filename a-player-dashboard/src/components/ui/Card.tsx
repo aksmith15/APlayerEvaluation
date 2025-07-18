@@ -5,32 +5,48 @@ interface CardProps {
   className?: string;
   hoverable?: boolean;
   onClick?: () => void;
-  padding?: 'sm' | 'md' | 'lg';
+  // Enhanced accessibility props
+  role?: string;
+  ariaLabel?: string;
+  ariaDescribedBy?: string;
+  tabIndex?: number;
 }
 
-export const Card: React.FC<CardProps> = ({
-  children,
-  className = '',
-  hoverable = false,
+export const Card: React.FC<CardProps> = ({ 
+  children, 
+  className = '', 
+  hoverable = false, 
   onClick,
-  padding = 'md'
+  role,
+  ariaLabel,
+  ariaDescribedBy,
+  tabIndex
 }) => {
-  const baseClasses = 'bg-white border border-secondary-200 rounded-xl shadow-sm';
-  
-  const paddingClasses = {
-    sm: 'p-4',
-    md: 'p-6',
-    lg: 'p-8'
+  const isInteractive = Boolean(onClick);
+  const cardRole = role || (isInteractive ? 'button' : undefined);
+  const cardTabIndex = tabIndex ?? (isInteractive ? 0 : undefined);
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (onClick && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault();
+      onClick();
+    }
   };
 
-  const hoverClasses = hoverable
-    ? 'cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-lg'
-    : '';
-
-  const combinedClassName = `${baseClasses} ${paddingClasses[padding]} ${hoverClasses} ${className}`;
+  const baseClasses = 'card bg-white rounded-lg shadow-sm border border-secondary-200 p-6 transition-all duration-200';
+  const hoverClasses = hoverable ? 'hover:shadow-md hover:border-secondary-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2' : '';
+  const combinedClassName = `${baseClasses} ${hoverClasses} ${className}`;
 
   return (
-    <div className={combinedClassName} onClick={onClick}>
+    <div
+      className={combinedClassName}
+      onClick={onClick}
+      onKeyDown={isInteractive ? handleKeyDown : undefined}
+      role={cardRole}
+      tabIndex={cardTabIndex}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
+    >
       {children}
     </div>
   );

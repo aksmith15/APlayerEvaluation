@@ -49,8 +49,27 @@ export interface WebhookPayload {
   evaluateeId: string;
 }
 
+// Analysis job tracking for long-running processes
+export interface AnalysisJob {
+  id: string;
+  evaluatee_id: string;
+  quarter_id: string;
+  status: 'pending' | 'processing' | 'completed' | 'error';
+  stage?: string; // Current processing stage
+  created_at: string;
+  updated_at: string;
+  completed_at?: string;
+  pdf_url?: string;
+  error_message?: string;
+}
+
 export interface AIAnalysisResult {
-  url?: string;
-  status: 'pending' | 'completed' | 'error';
+  jobId?: string; // For async operations
+  url?: string; // PDF URL (backward compatibility)
+  pdfData?: string; // Base64 encoded PDF data
+  pdfFilename?: string; // Original filename
+  status: 'pending' | 'processing' | 'completed' | 'error';
+  stage?: string;
   error?: string;
+  createdAt?: string; // For job resumption
 } 

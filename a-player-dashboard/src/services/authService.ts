@@ -69,9 +69,9 @@ export const authService = {
     try {
       console.log('Fetching profile for:', email);
       
-      // Create a timeout promise
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Profile query timed out')), 5000);
+      // Create a timeout promise that matches the query result type
+      const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
+        setTimeout(() => resolve({ data: null, error: new Error('Profile query timed out') }), 5000);
       });
 
       // Execute the query
@@ -85,7 +85,7 @@ export const authService = {
       const { data: profile, error: profileError } = await Promise.race([
         queryPromise,
         timeoutPromise
-      ]) as any;
+      ]);
 
       if (profileError) {
         console.warn('Could not fetch user profile:', profileError);

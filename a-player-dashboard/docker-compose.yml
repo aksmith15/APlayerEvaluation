@@ -1,0 +1,115 @@
+version: '3.8'
+
+services:
+  # Main application service
+  a-player-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: a-player-dashboard:latest
+    container_name: a-player-dashboard-app
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - NODE_ENV=production
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+      - VITE_ANALYTICS_ENDPOINT=${VITE_ANALYTICS_ENDPOINT}
+    volumes:
+      # SSL certificates (if using custom certificates)
+      - ./ssl:/etc/nginx/ssl:ro
+      # Nginx logs
+      - ./logs/nginx:/var/log/nginx
+    networks:
+      - a-player-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Development service (for local development with hot reload)
+  a-player-dashboard-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    image: a-player-dashboard:dev
+    container_name: a-player-dashboard-dev
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+      - VITE_ANALYTICS_ENDPOINT=${VITE_ANALYTICS_ENDPOINT}
+    volumes:
+      # Mount source code for hot reload
+      - .:/app
+      - /app/node_modules
+    networks:
+      - a-player-network
+    command: npm run dev
+    profiles:
+      - development
+
+  # Optional: Analytics/Monitoring service (if using self-hosted analytics)
+  analytics:
+    image: plausible/analytics:latest
+    container_name: a-player-analytics
+    ports:
+      - "8000:8000"
+    environment:
+      - BASE_URL=http://localhost:8000
+      - SECRET_KEY_BASE=${ANALYTICS_SECRET_KEY}
+      - DATABASE_URL=${ANALYTICS_DATABASE_URL}
+    networks:
+      - a-player-network
+    restart: unless-stopped
+    profiles:
+      - analytics
+    depends_on:
+      - analytics-db
+
+  # Analytics database (if using self-hosted analytics)
+  analytics-db:
+    image: postgres:15-alpine
+    container_name: a-player-analytics-db
+    environment:
+      - POSTGRES_DB=plausible
+      - POSTGRES_USER=${ANALYTICS_DB_USER}
+      - POSTGRES_PASSWORD=${ANALYTICS_DB_PASSWORD}
+    volumes:
+      - analytics-data:/var/lib/postgresql/data
+    networks:
+      - a-player-network
+    restart: unless-stopped
+    profiles:
+      - analytics
+
+  # Optional: Redis for caching (if needed for analytics)
+  redis:
+    image: redis:7-alpine
+    container_name: a-player-redis
+    volumes:
+      - redis-data:/data
+    networks:
+      - a-player-network
+    restart: unless-stopped
+    profiles:
+      - analytics
+
+networks:
+  a-player-network:
+    driver: bridge
+    name: a-player-network
+
+volumes:
+  analytics-data:
+    driver: local
+  redis-data:
+    driver: local 

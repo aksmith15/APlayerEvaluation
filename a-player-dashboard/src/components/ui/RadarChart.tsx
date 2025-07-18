@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo } from 'react';
 import { RadarChart as RechartsRadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from 'recharts';
 
 interface AttributeData {
@@ -27,11 +27,11 @@ const evaluationTypes = [
   { value: 'self' as EvaluationType, label: 'Self', color: '#8B5CF6', description: 'Self evaluation scores' }
 ];
 
-export const RadarChart: React.FC<RadarChartProps> = ({ 
+export const RadarChart: React.FC<RadarChartProps> = memo(({ 
   data, 
   height = 400
 }) => {
-  const [selectedType, setSelectedType] = useState<EvaluationType>('total');
+  const [selectedType, setSelectedType] = React.useState<EvaluationType>('total');
 
   // Transform data for radar chart based on selected type
   const chartData = data.map(item => {
@@ -179,4 +179,6 @@ export const RadarChart: React.FC<RadarChartProps> = ({
       </div>
     </div>
   );
-}; 
+});
+
+RadarChart.displayName = 'RadarChart'; 

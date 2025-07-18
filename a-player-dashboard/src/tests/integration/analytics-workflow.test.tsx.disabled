@@ -1,0 +1,450 @@
+// Analytics Workflow Integration Tests
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, waitFor } from '../../test-utils'
+import userEvent from '@testing-library/user-event'
+import { EmployeeAnalytics } from '../../pages/EmployeeAnalytics'
+import { authService } from '../../services/authService'
+import * as dataFetching from '../../services/dataFetching'
+
+// Mock navigation
+const mockNavigate = vi.fn()
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+    useParams: () => ({ employeeId: 'test-employee-1' }),
+    BrowserRouter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>
+  }
+})
+
+// Mock services
+vi.mock('../../services/authService', () => ({
+  authService: {
+    getCurrentUser: vi.fn(),
+    signIn: vi.fn(),
+    signOut: vi.fn(),
+    getUserProfile: vi.fn()
+  }
+}))
+
+vi.mock('../../services/dataFetching')
+
+// Mock chart libraries for performance
+vi.mock('recharts', () => ({
+  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="responsive-container">{children}</div>,
+  RadarChart: ({ children }: { children: React.ReactNode }) => <div data-testid="radar-chart">{children}</div>,
+  BarChart: ({ children }: { children: React.ReactNode }) => <div data-testid="bar-chart">{children}</div>,
+  LineChart: ({ children }: { children: React.ReactNode }) => <div data-testid="line-chart">{children}</div>,
+  PolarGrid: () => <div data-testid="polar-grid" />,
+  PolarAngleAxis: () => <div data-testid="polar-angle-axis" />,
+  PolarRadiusAxis: () => <div data-testid="polar-radius-axis" />,
+  Radar: () => <div data-testid="radar" />,
+  XAxis: () => <div data-testid="x-axis" />,
+  YAxis: () => <div data-testid="y-axis" />,
+  CartesianGrid: () => <div data-testid="cartesian-grid" />,
+  Tooltip: () => <div data-testid="tooltip" />,
+  Legend: () => <div data-testid="legend" />,
+  Bar: () => <div data-testid="bar" />,
+  Line: () => <div data-testid="line" />
+}))
+
+const mockAuthService = vi.mocked(authService)
+const mockDataFetching = vi.mocked(dataFetching)
+
+// Mock evaluation data
+const mockEmployeeData = {
+  id: 'test-employee-1',
+  name: 'John Smith',
+  email: 'john.smith@company.com',
+  role: 'Senior Developer',
+  department: 'Engineering',
+  active: true,
+  hire_date: '2023-01-15',
+  created_at: '2023-01-15T10:00:00Z'
+}
+
+const mockQuarterOptions = [
+  { id: 'Q4_2023', name: 'Q4 2023', startDate: '2023-10-01', endDate: '2023-12-31' },
+  { id: 'Q3_2023', name: 'Q3 2023', startDate: '2023-07-01', endDate: '2023-09-30' },
+  { id: 'Q2_2023', name: 'Q2 2023', startDate: '2023-04-01', endDate: '2023-06-30' },
+  { id: 'Q1_2023', name: 'Q1 2023', startDate: '2023-01-01', endDate: '2023-03-31' }
+]
+
+const mockEvaluationScores = [
+  {
+    evaluatee_id: 'test-employee-1',
+    evaluatee_name: 'John Smith',
+    quarter_id: 'Q4_2023',
+    quarter_name: 'Q4 2023',
+    quarter_start_date: '2023-10-01',
+    quarter_end_date: '2023-12-31',
+    attribute_name: 'Communication',
+    manager_score: 8.5,
+    peer_score: 8.0,
+    self_score: 7.5,
+    weighted_final_score: 8.2,
+    has_manager_eval: true,
+    has_peer_eval: true,
+    has_self_eval: true,
+    completion_percentage: 100
+  },
+  {
+    id: '2',
+    person_id: 'test-employee-1',
+    quarter_id: 'Q4_2023',
+    attribute: 'Technical Skills',
+    manager_score: 9.0,
+    peer_score: 8.5,
+    self_score: 8.0,
+    weighted_score: 8.7,
+    created_at: '2023-12-01T10:00:00Z'
+  }
+]
+
+const mockTrendData = [
+  { quarter: 'Q1 2023', score: 7.8, date: '2023-03-31' },
+  { quarter: 'Q2 2023', score: 8.1, date: '2023-06-30' },
+  { quarter: 'Q3 2023', score: 8.3, date: '2023-09-30' },
+  { quarter: 'Q4 2023', score: 8.5, date: '2023-12-31' }
+]
+
+describe('Analytics Workflow Integration', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockNavigate.mockClear()
+    
+    // Set up default auth state
+    mockAuthService.getCurrentUser.mockResolvedValue({
+      id: 'manager-123',
+      email: 'manager@company.com',
+      name: 'Test Manager',
+      role: 'Manager',
+      department: 'Management'
+    })
+
+    // Set up default data fetching
+    mockDataFetching.fetchEmployeeData.mockResolvedValue(mockEmployeeData)
+    mockDataFetching.fetchQuarters.mockResolvedValue(mockQuarterOptions)
+    mockDataFetching.fetchEvaluationScores.mockResolvedValue(mockEvaluationScores)
+    mockDataFetching.fetchQuarterlyTrendData.mockResolvedValue(mockTrendData)
+    mockDataFetching.fetchAnalysisJobs.mockResolvedValue([])
+  })
+
+  describe('Initial Page Load', () => {
+    it('renders analytics page with employee header and charts', async () => {
+      render(<EmployeeAnalytics />)
+
+      await waitFor(() => {
+        expect(screen.getByText('John Smith')).toBeInTheDocument()
+      })
+
+      // Employee header information
+      expect(screen.getByText('john.smith@company.com')).toBeInTheDocument()
+      expect(screen.getByText('Senior Developer')).toBeInTheDocument()
+      expect(screen.getByText('Engineering')).toBeInTheDocument()
+
+      // Chart containers should be rendered
+      expect(screen.getByTestId('radar-chart')).toBeInTheDocument()
+      expect(screen.getByTestId('bar-chart')).toBeInTheDocument()
+      expect(screen.getByTestId('line-chart')).toBeInTheDocument()
+    })
+
+    it('displays quarter selector with available quarters', async () => {
+      render(<EmployeeAnalytics />)
+
+      await waitFor(() => {
+        expect(screen.getByText('Q4 2023')).toBeInTheDocument()
+      })
+
+      // Should show quarter options
+      expect(screen.getByText('Q4 2023')).toBeInTheDocument()
+      
+      // Quarter selector should be interactive
+      const quarterSelector = screen.getByRole('combobox') || screen.getByTestId('quarter-selector')
+      expect(quarterSelector).toBeInTheDocument()
+    })
+
+    it('handles employee data loading errors gracefully', async () => {
+      mockDataFetching.fetchEmployeeData.mockRejectedValue(
+        new Error('Failed to fetch employee data')
+      )
+
+      render(<EmployeeAnalytics />)
+
+      await waitFor(() => {
+        expect(screen.getByText(/error loading employee data/i)).toBeInTheDocument()
+      })
+    })
+  })
+
+  describe('Quarter Filtering', () => {
+    it('updates all charts when quarter is changed', async () => {
+      const user = userEvent.setup()
+
+      render(<EmployeeAnalytics />)
+
+      await waitFor(() => {
+        expect(screen.getByText('John Smith')).toBeInTheDocument()
+      })
+
+      // Find and interact with quarter selector
+      const quarterSelector = screen.getByRole('combobox') || screen.getByTestId('quarter-selector')
+      
+      await user.click(quarterSelector)
+      
+      // Select different quarter
+      const q3Option = screen.getByText('Q3 2023')
+      await user.click(q3Option)
+
+             // Verify data fetching was called with new quarter
+       await waitFor(() => {
+         expect(mockDataFetching.fetchEvaluationScores).toHaveBeenCalledWith(
+           'test-employee-1',
+           'Q3_2023'
+         )
+       })
+    })
+
+    it('maintains chart data consistency across quarter changes', async () => {
+      const user = userEvent.setup()
+
+      render(<EmployeeAnalytics />)
+
+      await waitFor(() => {
+        expect(screen.getByText('John Smith')).toBeInTheDocument()
+      })
+
+      // Initial load should show Q4 2023 data
+      expect(screen.getByTestId('radar-chart')).toBeInTheDocument()
+      expect(screen.getByTestId('bar-chart')).toBeInTheDocument()
+
+      // Change quarter
+      const quarterSelector = screen.getByRole('combobox') || screen.getByTestId('quarter-selector')
+      await user.click(quarterSelector)
+      
+      const q2Option = screen.getByText('Q2 2023')
+      await user.click(q2Option)
+
+      // Charts should still be rendered with new data
+      await waitFor(() => {
+        expect(screen.getByTestId('radar-chart')).toBeInTheDocument()
+        expect(screen.getByTestId('bar-chart')).toBeInTheDocument()
+      })
+    })
+  })
+
+  describe('Chart Rendering and Interactions', () => {
+    it('renders radar chart with performance attributes', async () => {
+      render(<EmployeeAnalytics />)
+
+      await waitFor(() => {
+        expect(screen.getByTestId('radar-chart')).toBeInTheDocument()
+      })
+
+      // Radar chart components should be present
+      expect(screen.getByTestId('polar-grid')).toBeInTheDocument()
+      expect(screen.getByTestId('polar-angle-axis')).toBeInTheDocument()
+      expect(screen.getByTestId('radar')).toBeInTheDocument()
+    })
+
+    it('renders clustered bar chart with weighted scores', async () => {
+      render(<EmployeeAnalytics />)
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bar-chart')).toBeInTheDocument()
+      })
+
+      // Bar chart components should be present
+      expect(screen.getByTestId('x-axis')).toBeInTheDocument()
+      expect(screen.getByTestId('y-axis')).toBeInTheDocument()
+      expect(screen.getByTestId('cartesian-grid')).toBeInTheDocument()
+      expect(screen.getByTestId('bar')).toBeInTheDocument()
+    })
+
+    it('renders trend line chart with historical data', async () => {
+      render(<EmployeeAnalytics />)
+
+      await waitFor(() => {
+        expect(screen.getByTestId('line-chart')).toBeInTheDocument()
+      })
+
+      // Line chart components should be present
+      expect(screen.getByTestId('line')).toBeInTheDocument()
+      expect(screen.getByTestId('tooltip')).toBeInTheDocument()
+    })
+
+         it('handles empty evaluation data gracefully', async () => {
+       mockDataFetching.fetchEvaluationScores.mockResolvedValue([])
+
+       render(<EmployeeAnalytics />)
+
+       await waitFor(() => {
+         expect(screen.getByText(/no evaluation data available/i)).toBeInTheDocument()
+       })
+     })
+  })
+
+  describe('AI Analysis Integration', () => {
+    it('displays AI analysis section with generation button', async () => {
+      render(<EmployeeAnalytics />)
+
+      await waitFor(() => {
+        expect(screen.getByText('John Smith')).toBeInTheDocument()
+      })
+
+      // AI analysis section should be present
+      expect(screen.getByText(/AI Meta-Analysis/i)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /generate analysis/i })).toBeInTheDocument()
+    })
+
+    it('handles AI analysis generation workflow', async () => {
+      const user = userEvent.setup()
+
+      // Mock successful analysis job creation
+      mockDataFetching.createAnalysisJob.mockResolvedValue({
+        jobId: 'test-job-123',
+        status: 'pending'
+      })
+
+      render(<EmployeeAnalytics />)
+
+      await waitFor(() => {
+        expect(screen.getByText('John Smith')).toBeInTheDocument()
+      })
+
+      const generateButton = screen.getByRole('button', { name: /generate analysis/i })
+      await user.click(generateButton)
+
+      await waitFor(() => {
+        expect(mockDataFetching.createAnalysisJob).toHaveBeenCalledWith({
+          quarterId: 'Q4_2023',
+          evaluateeId: 'test-employee-1'
+        })
+      })
+
+      // Should show processing state
+      expect(screen.getByText(/generating analysis/i)).toBeInTheDocument()
+    })
+
+    it('displays completed AI analysis with PDF viewer', async () => {
+      // Mock completed analysis job
+      const mockCompletedJob = {
+        id: 'test-job-123',
+        status: 'completed',
+        pdf_url: 'https://example.com/analysis.pdf',
+        completed_at: '2023-12-31T10:00:00Z'
+      }
+
+      mockDataFetching.fetchAnalysisJobsForEmployee.mockResolvedValue([mockCompletedJob])
+
+      render(<EmployeeAnalytics />)
+
+      await waitFor(() => {
+        expect(screen.getByText('John Smith')).toBeInTheDocument()
+      })
+
+      // Should show completed analysis
+      expect(screen.getByText(/analysis complete/i)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /view report/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /download/i })).toBeInTheDocument()
+    })
+  })
+
+  describe('Error Handling and Edge Cases', () => {
+    it('handles chart rendering errors gracefully', async () => {
+      mockDataFetching.fetchWeightedEvaluationScores.mockRejectedValue(
+        new Error('Chart data error')
+      )
+
+      render(<EmployeeAnalytics />)
+
+      await waitFor(() => {
+        expect(screen.getByText(/error loading chart data/i)).toBeInTheDocument()
+      })
+    })
+
+    it('handles AI analysis errors with proper feedback', async () => {
+      const user = userEvent.setup()
+
+      mockDataFetching.createAnalysisJob.mockRejectedValue(
+        new Error('Analysis generation failed')
+      )
+
+      render(<EmployeeAnalytics />)
+
+      await waitFor(() => {
+        expect(screen.getByText('John Smith')).toBeInTheDocument()
+      })
+
+      const generateButton = screen.getByRole('button', { name: /generate analysis/i })
+      await user.click(generateButton)
+
+      await waitFor(() => {
+        expect(screen.getByText(/analysis generation failed/i)).toBeInTheDocument()
+      })
+    })
+
+    it('maintains responsive behavior with different screen sizes', async () => {
+      // Mock different viewport sizes
+      Object.defineProperty(window, 'innerWidth', {
+        writable: true,
+        configurable: true,
+        value: 768,
+      })
+
+      render(<EmployeeAnalytics />)
+
+      await waitFor(() => {
+        expect(screen.getByText('John Smith')).toBeInTheDocument()
+      })
+
+      // Charts should still render in responsive containers
+      expect(screen.getByTestId('responsive-container')).toBeInTheDocument()
+    })
+  })
+
+  describe('Performance and Accessibility', () => {
+    it('provides proper ARIA labels for chart elements', async () => {
+      render(<EmployeeAnalytics />)
+
+      await waitFor(() => {
+        expect(screen.getByText('John Smith')).toBeInTheDocument()
+      })
+
+      // Charts should have proper accessibility attributes
+      const radarChart = screen.getByTestId('radar-chart')
+      expect(radarChart).toHaveAttribute('aria-label', expect.stringContaining('radar'))
+      
+      const barChart = screen.getByTestId('bar-chart')
+      expect(barChart).toHaveAttribute('aria-label', expect.stringContaining('bar'))
+    })
+
+    it('handles large datasets efficiently', async () => {
+      // Mock large dataset
+      const largeScoresDataset = Array.from({ length: 100 }, (_, index) => ({
+        id: `score-${index}`,
+        person_id: 'test-employee-1',
+        quarter_id: 'Q4_2023',
+        attribute: `Attribute ${index % 10}`,
+        manager_score: Math.random() * 10,
+        peer_score: Math.random() * 10,
+        self_score: Math.random() * 10,
+        weighted_score: Math.random() * 10,
+        created_at: '2023-12-01T10:00:00Z'
+      }))
+
+      mockDataFetching.fetchWeightedEvaluationScores.mockResolvedValue(largeScoresDataset)
+
+      const { container } = render(<EmployeeAnalytics />)
+
+      await waitFor(() => {
+        expect(screen.getByText('John Smith')).toBeInTheDocument()
+      }, { timeout: 5000 })
+
+      // Should render without performance issues
+      expect(container).toBeInTheDocument()
+      expect(screen.getByTestId('radar-chart')).toBeInTheDocument()
+    })
+  })
+}) 
