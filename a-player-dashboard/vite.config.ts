@@ -37,6 +37,16 @@ export default defineConfig({
     port: 3000,
     host: true
   },
+  // Configure preview server for production hosting
+  preview: {
+    port: 4173,
+    host: '0.0.0.0',
+    strictPort: true,
+    allowedHosts: [
+      'a-player-evaluations.onrender.com',
+      '.onrender.com' // Allow all Render subdomains
+    ]
+  },
   // Enable dependency pre-bundling for faster dev builds
   optimizeDeps: {
     include: [
