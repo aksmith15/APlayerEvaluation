@@ -3,9 +3,11 @@
 export interface User {
   id: string;
   email: string;
-  name?: string;
-  role?: string;
-  department?: string;
+  name: string;
+  role: string;
+  department: string;
+  // Add JWT role for RLS policies
+  jwtRole?: 'hr_admin' | 'super_admin' | null;
 }
 
 export interface AuthState {

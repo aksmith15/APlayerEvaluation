@@ -36,13 +36,21 @@ export const authService = {
       // Get additional user profile from people table
       const profile = await this.getUserProfile(data.user.email!);
 
-      return {
+      const user: User = {
         id: data.user.id,
         email: data.user.email!,
         name: profile?.name || data.user.user_metadata?.name || 'Test User',
         role: profile?.role || 'Manager',
-        department: profile?.department || 'Test Department'
+        department: profile?.department || 'Test Department',
+        jwtRole: profile?.jwtRole || null
       };
+
+      // Update JWT custom claims if user has elevated role
+      if (profile?.jwtRole) {
+        await this.updateJWTClaims(profile.jwtRole);
+      }
+
+      return user;
     } catch (error) {
       console.error('Sign in error:', error);
       throw error;
@@ -64,8 +72,13 @@ export const authService = {
     }
   },
 
-  // Helper function to get user profile with timeout
-  async getUserProfile(email: string): Promise<{ name: string; role: string; department: string } | null> {
+  // Helper function to get user profile with timeout and JWT role
+  async getUserProfile(email: string): Promise<{ 
+    name: string; 
+    role: string; 
+    department: string; 
+    jwtRole?: 'hr_admin' | 'super_admin' | null;
+  } | null> {
     try {
       console.log('Fetching profile for:', email);
       
@@ -74,10 +87,10 @@ export const authService = {
         setTimeout(() => resolve({ data: null, error: new Error('Profile query timed out') }), 5000);
       });
 
-      // Execute the query
+      // Execute the query - add jwt_role column if it exists
       const queryPromise = supabase
         .from('people')
-        .select('name, role, department')
+        .select('name, role, department, jwt_role')
         .eq('email', email)
         .eq('active', true)
         .maybeSingle();
@@ -93,10 +106,37 @@ export const authService = {
       }
 
       console.log('Profile found:', profile);
-      return profile;
+      
+      if (!profile) return null;
+
+      return {
+        name: profile.name,
+        role: profile.role,
+        department: profile.department,
+        jwtRole: profile.jwt_role || null
+      };
     } catch (error) {
       console.warn('Profile query failed:', error);
       return null;
+    }
+  },
+
+  // Update JWT custom claims (simplified version)
+  async updateJWTClaims(role: 'hr_admin' | 'super_admin'): Promise<void> {
+    try {
+      // For now, we'll use Supabase's built-in user metadata
+      // In a production setup, you'd use a database function or auth hook
+      const { error } = await supabase.auth.updateUser({
+        data: { role: role }
+      });
+      
+      if (error) {
+        console.warn('Could not update JWT claims:', error);
+      } else {
+        console.log('JWT claims updated with role:', role);
+      }
+    } catch (error) {
+      console.warn('Failed to update JWT claims:', error);
     }
   },
 
@@ -131,7 +171,8 @@ export const authService = {
         email: session.user.email!,
         name: profile?.name || session.user.user_metadata?.name || 'Test User',
         role: profile?.role || 'Manager',
-        department: profile?.department || 'Test Department'
+        department: profile?.department || 'Test Department',
+        jwtRole: profile?.jwtRole || session.user.user_metadata?.role || null
       };
 
       console.log('Final user object:', user);
@@ -157,7 +198,8 @@ export const authService = {
             email: session.user.email!,
             name: profile?.name || session.user.user_metadata?.name || 'Test User',
             role: profile?.role || 'Manager',
-            department: profile?.department || 'Test Department'
+            department: profile?.department || 'Test Department',
+            jwtRole: profile?.jwtRole || session.user.user_metadata?.role || null
           };
           
           callback(user);
