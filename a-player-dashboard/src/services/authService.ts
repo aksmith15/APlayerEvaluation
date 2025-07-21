@@ -235,7 +235,7 @@ export const refreshAuthToken = async (): Promise<boolean> => {
       return false;
     }
     
-    console.log('✅ Token refreshed successfully');
+    console.log('✅ Token refreshed successfully:', refreshData?.session?.access_token ? 'New token received' : 'No new token');
     
     // Test the token immediately with a simple query
     const { data: testData, error: testError } = await supabase
@@ -261,7 +261,7 @@ export const refreshAuthToken = async (): Promise<boolean> => {
       return false;
     }
     
-    console.log('✅ Notes access working!');
+    console.log('✅ Notes access working!', notesTestData ? `Found ${notesTestData.length} records` : 'No records found');
     return true;
     
   } catch (error) {

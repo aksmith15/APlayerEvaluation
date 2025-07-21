@@ -722,6 +722,8 @@ export const uploadProfilePicture = async (
       throw error;
     }
 
+    console.log('Upload successful:', data?.path);
+
     // Get public URL for the uploaded file
     const { data: { publicUrl } } = supabase.storage
       .from('profile-pictures')

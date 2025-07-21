@@ -58,7 +58,9 @@ describe('Authentication Flow Integration', () => {
       const mockManagerUser = {
         id: 'manager-123',
         email: 'manager@company.com',
-        role: 'Manager'
+        name: 'Test Manager',
+        role: 'Manager',
+        department: 'Management'
       }
       
       mockAuthService.getCurrentUser.mockResolvedValue(mockManagerUser)
@@ -96,7 +98,9 @@ describe('Authentication Flow Integration', () => {
       const mockUser = {
         id: 'manager-123',
         email: 'manager@company.com',
-        role: 'Manager'
+        name: 'Test Manager',
+        role: 'Manager',
+        department: 'Management'
       }
       
       mockAuthService.signIn.mockResolvedValue(mockUser)
@@ -176,7 +180,9 @@ describe('Authentication Flow Integration', () => {
       const mockUser = {
         id: 'manager-123',
         email: 'manager@company.com',
-        role: 'Manager'
+        name: 'Test Manager',
+        role: 'Manager',
+        department: 'Management'
       }
       
       mockAuthService.getCurrentUser.mockResolvedValue(mockUser)
@@ -195,7 +201,9 @@ describe('Authentication Flow Integration', () => {
       const mockUser = {
         id: 'manager-123',
         email: 'manager@company.com',
-        role: 'Manager'
+        name: 'Test Manager',
+        role: 'Manager',
+        department: 'Management'
       }
       
       mockAuthService.getCurrentUser.mockResolvedValue(mockUser)
@@ -219,7 +227,9 @@ describe('Authentication Flow Integration', () => {
       const mockUser = {
         id: 'manager-123',
         email: 'manager@company.com',
-        role: 'Manager'
+        name: 'Test Manager',
+        role: 'Manager',
+        department: 'Management'
       }
       
       // Start authenticated
@@ -249,7 +259,9 @@ describe('Authentication Flow Integration', () => {
       const mockUser = {
         id: 'manager-123',
         email: 'manager@company.com',
-        role: 'Manager'
+        name: 'Test Manager',
+        role: 'Manager',
+        department: 'Management'
       }
       
       mockAuthService.getCurrentUser.mockResolvedValue(mockUser)

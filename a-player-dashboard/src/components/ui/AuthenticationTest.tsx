@@ -54,6 +54,9 @@ export const AuthenticationTest: React.FC = () => {
         .single();
       
       console.log('User in people table:', peopleData);
+      if (peopleError) {
+        console.log('People table error:', peopleError);
+      }
       
       // Test 2.5: Check JWT token contents
       console.log('JWT Token Details:', {

@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import type { Person } from '../../types/database';
 import { uploadProfilePicture, updateEmployeeProfilePicture, deleteEmployeeProfilePicture } from '../../services/dataFetching';
-import { supabase } from '../../services/supabase';
 import { LoadingSpinner } from './LoadingSpinner';
 
 interface EmployeeProfileProps {
