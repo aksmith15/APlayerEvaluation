@@ -213,3 +213,59 @@ export const authService = {
     });
   }
 }; 
+
+// Force refresh JWT token and ensure proper transmission
+export const refreshAuthToken = async (): Promise<boolean> => {
+  try {
+    console.log('🔄 Forcing JWT token refresh...');
+    
+    // Get current session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError || !session) {
+      console.log('❌ No valid session found');
+      return false;
+    }
+    
+    // Force refresh the session
+    const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+    
+    if (refreshError) {
+      console.error('❌ Token refresh failed:', refreshError);
+      return false;
+    }
+    
+    console.log('✅ Token refreshed successfully');
+    
+    // Test the token immediately with a simple query
+    const { data: testData, error: testError } = await supabase
+      .from('people')
+      .select('id, email')
+      .limit(1);
+    
+    if (testError) {
+      console.error('❌ Token test failed:', testError);
+      return false;
+    }
+    
+    console.log('✅ Token test successful:', testData);
+    
+    // Now test employee_quarter_notes specifically
+    const { data: notesTestData, error: notesTestError } = await supabase
+      .from('employee_quarter_notes')
+      .select('*')
+      .limit(1);
+    
+    if (notesTestError) {
+      console.error('❌ Notes access still failing:', notesTestError);
+      return false;
+    }
+    
+    console.log('✅ Notes access working!');
+    return true;
+    
+  } catch (error) {
+    console.error('❌ Refresh auth token error:', error);
+    return false;
+  }
+}; 

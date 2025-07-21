@@ -592,4 +592,210 @@ export const checkExistingAnalysis = async (
     console.error('Error checking for existing analysis:', error);
     return null;
   }
+};
+
+// =============================================================================
+// EMPLOYEE QUARTER NOTES SERVICES - Stage 5.6
+// =============================================================================
+
+// Fetch notes for a specific employee and quarter
+export const fetchEmployeeQuarterNotes = async (
+  employeeId: string, 
+  quarterId: string
+): Promise<string> => {
+  try {
+    console.log(`Fetching notes for employee: ${employeeId}, quarter: ${quarterId}`);
+    
+    const { data, error } = await supabase
+      .from('employee_quarter_notes')
+      .select('notes')
+      .eq('employee_id', employeeId)
+      .eq('quarter_id', quarterId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No notes found - return empty string
+        console.log(`No notes found for employee: ${employeeId}, quarter: ${quarterId}`);
+        return '';
+      }
+      throw error;
+    }
+
+    return data?.notes || '';
+  } catch (error) {
+    console.error('Error fetching employee quarter notes:', error);
+    throw error;
+  }
+};
+
+// Update or create notes for a specific employee and quarter
+export const updateEmployeeQuarterNotes = async (
+  employeeId: string, 
+  quarterId: string, 
+  notes: string,
+  currentUserId: string
+): Promise<void> => {
+  try {
+    console.log(`Updating notes for employee: ${employeeId}, quarter: ${quarterId}`);
+    console.log(`Notes length: ${notes.length}, User ID: ${currentUserId}`);
+    
+    // ALWAYS get the current user's people table ID (not JWT user ID)
+    const { data: currentUser } = await supabase.auth.getUser();
+    const userEmail = currentUser?.user?.email;
+    
+    if (!userEmail) {
+      throw new Error('No user email found');
+    }
+    
+    // Look up the people table ID for the current user
+    const { data: userProfile, error: profileError } = await supabase
+      .from('people')
+      .select('id')
+      .eq('email', userEmail)
+      .single();
+    
+    if (profileError || !userProfile?.id) {
+      throw new Error(`Could not find people record for email: ${userEmail}`);
+    }
+    
+    const createdByUserId = userProfile.id; // Use people table ID, not JWT user ID
+    
+    const noteData = {
+      employee_id: employeeId,
+      quarter_id: quarterId,
+      notes: notes,
+      created_by: createdByUserId,
+      updated_at: new Date().toISOString()
+    };
+    
+    console.log('Note data to upsert:', noteData);
+    
+    const { error } = await supabase
+      .from('employee_quarter_notes')
+      .upsert(noteData, {
+        onConflict: 'employee_id,quarter_id'
+      });
+
+    if (error) {
+      console.error('Notes save error:', error);
+      throw error;
+    }
+
+    console.log(`Successfully updated notes for employee: ${employeeId}, quarter: ${quarterId}`);
+  } catch (error) {
+    console.error('Error updating employee quarter notes:', error);
+    throw error;
+  }
+};
+
+// =============================================================================
+// PROFILE PICTURE SERVICES - Stage 5.6
+// =============================================================================
+
+// Upload profile picture to Supabase Storage
+export const uploadProfilePicture = async (
+  file: File, 
+  employeeId: string
+): Promise<string> => {
+  try {
+    console.log(`Uploading profile picture for employee: ${employeeId}`);
+    console.log(`File details:`, { name: file.name, size: file.size, type: file.type });
+    
+    // Generate unique filename with timestamp
+    const timestamp = Date.now();
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${employeeId}-${timestamp}.${fileExt}`;
+    
+    console.log(`Generated filename: ${fileName}`);
+    
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('profile-pictures')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) {
+      console.error('Storage upload error:', error);
+      throw error;
+    }
+
+    // Get public URL for the uploaded file
+    const { data: { publicUrl } } = supabase.storage
+      .from('profile-pictures')
+      .getPublicUrl(fileName);
+
+    console.log(`Successfully uploaded profile picture: ${publicUrl}`);
+    return publicUrl;
+  } catch (error) {
+    console.error('Error uploading profile picture:', error);
+    throw error;
+  }
+};
+
+// Update employee profile picture URL in database
+export const updateEmployeeProfilePicture = async (
+  employeeId: string, 
+  profilePictureUrl: string
+): Promise<void> => {
+  try {
+    console.log(`Updating profile picture URL for employee: ${employeeId}`);
+    console.log(`New profile picture URL: ${profilePictureUrl}`);
+    
+    const { error } = await supabase
+      .from('people')
+      .update({ profile_picture_url: profilePictureUrl })
+      .eq('id', employeeId);
+
+    if (error) {
+      console.error('Profile picture update error:', error);
+      throw error;
+    }
+
+    console.log(`Successfully updated profile picture URL for employee: ${employeeId}`);
+  } catch (error) {
+    console.error('Error updating employee profile picture:', error);
+    throw error;
+  }
+};
+
+// Delete profile picture from storage and database
+export const deleteEmployeeProfilePicture = async (
+  employeeId: string,
+  currentProfileUrl?: string
+): Promise<void> => {
+  try {
+    console.log(`Deleting profile picture for employee: ${employeeId}`);
+    
+    // Extract filename from URL if provided
+    if (currentProfileUrl) {
+      const urlParts = currentProfileUrl.split('/');
+      const fileName = urlParts[urlParts.length - 1];
+      
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from('profile-pictures')
+        .remove([fileName]);
+      
+      if (storageError) {
+        console.warn('Error deleting from storage:', storageError);
+        // Continue with database update even if storage delete fails
+      }
+    }
+    
+    // Remove URL from database
+    const { error } = await supabase
+      .from('people')
+      .update({ profile_picture_url: null })
+      .eq('id', employeeId);
+
+    if (error) throw error;
+
+    console.log(`Successfully deleted profile picture for employee: ${employeeId}`);
+  } catch (error) {
+    console.error('Error deleting employee profile picture:', error);
+    throw error;
+  }
 }; 

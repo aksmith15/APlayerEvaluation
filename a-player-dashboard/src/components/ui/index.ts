@@ -15,4 +15,7 @@ export { DownloadAnalyticsButton } from './DownloadAnalyticsButton';
 export { SkeletonLoader, EmployeeCardSkeleton, ChartSkeleton } from './SkeletonLoader';
 export { EmptyState, NoEmployeesFound, NoEvaluationData } from './EmptyState';
 export { Breadcrumb, useBreadcrumbs } from './Breadcrumb';
-export { KeyboardShortcuts } from './KeyboardShortcuts'; 
+export { KeyboardShortcuts } from './KeyboardShortcuts';
+export { EmployeeProfile } from './EmployeeProfile';
+export { QuarterlyNotes } from './QuarterlyNotes';
+export { AuthenticationTest } from './AuthenticationTest'; 

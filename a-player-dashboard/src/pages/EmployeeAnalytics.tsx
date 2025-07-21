@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { fetchEmployeeData, fetchQuarters, fetchEvaluationScores, fetchQuarterlyTrendData, fetchHistoricalEvaluationScores, fetchAvailableQuarters, generateAIMetaAnalysis, pollAnalysisCompletion, checkExistingAnalysis } from '../services/dataFetching';
 import { subscribeToEmployeeEvaluations, subscribeToQuarterlyScores, subscribeToEvaluationCycles, realtimeManager } from '../services/realtimeService';
-import { LoadingSpinner, ErrorMessage, Card, RadarChart, ClusteredBarChart, HistoricalClusteredBarChart, TrendLineChart, ChartSkeleton, NoEvaluationData, Breadcrumb, useBreadcrumbs, KeyboardShortcuts, PDFViewer, DownloadAnalyticsButton } from '../components/ui';
+import { LoadingSpinner, ErrorMessage, Card, RadarChart, ClusteredBarChart, HistoricalClusteredBarChart, TrendLineChart, ChartSkeleton, NoEvaluationData, Breadcrumb, useBreadcrumbs, KeyboardShortcuts, PDFViewer, DownloadAnalyticsButton, EmployeeProfile, QuarterlyNotes } from '../components/ui';
 import { useNavigation, useKeyboardNavigation } from '../contexts/NavigationContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useChartHeight } from '../utils/useResponsive';
 import { ROUTES } from '../constants/config';
 import type { Person, WeightedEvaluationScore } from '../types/database';
@@ -16,6 +17,7 @@ export const EmployeeAnalytics: React.FC = () => {
   const employeeId = searchParams.get('employeeId');
   const { navigateToEmployeeSelection, updateNavigationState } = useNavigation();
   const { generateBreadcrumbs } = useBreadcrumbs();
+  const { user } = useAuth();
   
   // Enable keyboard navigation shortcuts
   useKeyboardNavigation();
@@ -57,6 +59,20 @@ export const EmployeeAnalytics: React.FC = () => {
   // Real-time update state
   const [realtimeConnected, setRealtimeConnected] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null);
+
+  // Helper functions for user permissions and profile management
+  const isUserEditable = () => {
+    return user?.jwtRole === 'hr_admin' || user?.jwtRole === 'super_admin';
+  };
+
+  const handleProfilePictureUpdate = (newUrl: string | null) => {
+    if (employee) {
+      setEmployee({
+        ...employee,
+        profile_picture_url: newUrl || undefined
+      });
+    }
+  };
 
   useEffect(() => {
     if (!employeeId) {
@@ -588,34 +604,30 @@ export const EmployeeAnalytics: React.FC = () => {
 
       {/* Main Content */}
       <main id="analytics-main-content" className="max-w-7xl mx-auto px-6 py-8 analytics-layout">
-        {/* Employee Profile Section */}
-        <div className="mb-8 page-break-avoid employee-profile">
-          <Card className="page-break-avoid">
-            <h2 className="text-xl font-semibold text-secondary-800 mb-4">Employee Profile</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-              <div className="space-y-1 sm:col-span-2 lg:col-span-1">
-                <h3 className="text-xl lg:text-2xl font-bold text-secondary-800 break-words">{employee.name}</h3>
-                <span className="text-base lg:text-lg text-primary-600 font-medium">{employee.role}</span>
-              </div>
-              <div className="space-y-1">
-                <span className="text-sm font-medium text-secondary-700">Department</span>
-                <p className="text-secondary-600 break-words">{employee.department}</p>
-              </div>
-              <div className="space-y-1">
-                <span className="text-sm font-medium text-secondary-700">Email</span>
-                <p className="text-secondary-500 text-sm break-all">{employee.email}</p>
-              </div>
-              {employee.hire_date && (
-                <div className="space-y-1">
-                  <span className="text-sm font-medium text-secondary-700">Hire Date</span>
-                  <p className="text-secondary-500 text-sm">
-                    {new Date(employee.hire_date).toLocaleDateString()}
-                  </p>
-                </div>
-              )}
-            </div>
-          </Card>
+
+        {/* Enhanced Employee Profile Section with Profile Picture */}
+        <div className="page-break-avoid employee-profile">
+          <EmployeeProfile
+            employee={employee}
+            onProfilePictureUpdate={handleProfilePictureUpdate}
+            isEditable={isUserEditable()}
+            currentUserId={user?.id}
+          />
         </div>
+
+        {/* Quarterly Notes Section */}
+        {selectedQuarterInfo && (
+          <div className="page-break-avoid quarterly-notes">
+            <QuarterlyNotes
+              employeeId={employee.id}
+              quarterId={selectedQuarter}
+              quarterName={selectedQuarterInfo.name}
+              currentUserId={user?.id}
+              isEditable={isUserEditable()}
+              className="mb-6"
+            />
+          </div>
+        )}
 
         {/* Performance Overview (Radar Chart) - Full Width */}
         <div className="mb-8 page-break-avoid analytics-section">

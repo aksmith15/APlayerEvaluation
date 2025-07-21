@@ -93,20 +93,20 @@ export const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-secondary-50">
-      <div className="w-full max-w-md">
-        <div className="card">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-secondary-800 mb-2">
+      <div className="w-full max-w-sm">
+        <div className="card p-6">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-secondary-800 mb-1">
               {APP_CONFIG.TITLE}
             </h1>
-            <p className="text-secondary-600">
+            <p className="text-sm text-secondary-600">
               Manager Authentication
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-secondary-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-secondary-700 mb-1">
                 Email Address
               </label>
               <input
@@ -115,7 +115,13 @@ export const Login: React.FC = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="input-field"
+                className="w-full px-3 py-2 rounded-lg border border-secondary-300 
+                          transition-all duration-200 ease-out
+                          focus:outline-none focus:ring-2 focus:ring-primary-500 
+                          focus:border-primary-500 focus:shadow-sm
+                          placeholder:text-secondary-400
+                          disabled:bg-secondary-50 disabled:cursor-not-allowed
+                          hover:border-secondary-400 hover:shadow-sm"
                 placeholder="Enter your email"
                 required
                 disabled={loading}
@@ -123,7 +129,7 @@ export const Login: React.FC = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-secondary-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-secondary-700 mb-1">
                 Password
               </label>
               <input
@@ -132,7 +138,13 @@ export const Login: React.FC = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className="input-field"
+                className="w-full px-3 py-2 rounded-lg border border-secondary-300 
+                          transition-all duration-200 ease-out
+                          focus:outline-none focus:ring-2 focus:ring-primary-500 
+                          focus:border-primary-500 focus:shadow-sm
+                          placeholder:text-secondary-400
+                          disabled:bg-secondary-50 disabled:cursor-not-allowed
+                          hover:border-secondary-400 hover:shadow-sm"
                 placeholder="Enter your password"
                 required
                 disabled={loading}
@@ -140,21 +152,25 @@ export const Login: React.FC = () => {
             </div>
 
             {displayError && (
-              <ErrorMessage message={displayError} />
+              <div className="mt-3">
+                <ErrorMessage message={displayError} />
+              </div>
             )}
 
-            <Button
-              type="submit"
-              loading={loading}
-              className="w-full"
-              disabled={loading || !formData.email.trim() || !formData.password.trim()}
-            >
-              Sign In
-            </Button>
+            <div className="mt-5">
+              <Button
+                type="submit"
+                loading={loading}
+                className="w-full"
+                disabled={loading || !formData.email.trim() || !formData.password.trim()}
+              >
+                Sign In
+              </Button>
+            </div>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-secondary-500">
+          <div className="mt-4 text-center">
+            <p className="text-xs text-secondary-500">
               {APP_CONFIG.DESCRIPTION}
             </p>
           </div>

@@ -44,7 +44,18 @@ export interface Person {
   manager_notes?: string;
   department: string;
   hire_date: string;
+  profile_picture_url?: string; // Profile picture stored in Supabase Storage
   created_at: string;
+}
+
+export interface EmployeeQuarterNotes {
+  id: string;
+  employee_id: string;
+  quarter_id: string;
+  notes: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface QuarterOption {
