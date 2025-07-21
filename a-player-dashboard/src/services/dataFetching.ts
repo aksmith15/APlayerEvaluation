@@ -269,22 +269,28 @@ export const fetchHistoricalEvaluationScores = async (
 
     // Apply quarter range filter if provided
     if (startQuarterId && endQuarterId) {
-      // First get the date range for the quarters
-      const { data: quarterData, error: quarterError } = await supabase
-        .from('evaluation_cycles')
-        .select('start_date, end_date')
-        .in('id', [startQuarterId, endQuarterId]);
-      
-      if (quarterError) throw quarterError;
-      
-      if (quarterData && quarterData.length >= 2) {
-        const dates = quarterData.map(q => [q.start_date, q.end_date]).flat().sort();
-        const startDate = dates[0];
-        const endDate = dates[dates.length - 1];
+      // Use quarter_id directly instead of date ranges to ensure exact filtering
+      if (startQuarterId === endQuarterId) {
+        // Same quarter selected - filter by exact quarter_id
+        query = query.eq('quarter_id', startQuarterId);
+      } else {
+        // Different quarters - get date range for filtering
+        const { data: quarterData, error: quarterError } = await supabase
+          .from('evaluation_cycles')
+          .select('start_date, end_date')
+          .in('id', [startQuarterId, endQuarterId]);
         
-        query = query
-          .gte('quarter_start_date', startDate)
-          .lte('quarter_end_date', endDate);
+        if (quarterError) throw quarterError;
+        
+        if (quarterData && quarterData.length >= 1) {
+          const dates = quarterData.map(q => [q.start_date, q.end_date]).flat().sort();
+          const startDate = dates[0];
+          const endDate = dates[dates.length - 1];
+          
+          query = query
+            .gte('quarter_start_date', startDate)
+            .lte('quarter_end_date', endDate);
+        }
       }
     }
 
@@ -308,11 +314,9 @@ export const fetchHistoricalEvaluationScores = async (
         };
       }
       
-      // Create quarter short name (e.g., "Q1 2024")
-      const quarterDate = new Date(score.quarter_start_date);
-      const year = quarterDate.getFullYear();
-      const quarter = Math.ceil((quarterDate.getMonth() + 1) / 3);
-      const quarterShortName = `Q${quarter} ${year}`;
+      // Use actual quarter name from database instead of calculating from date
+      // Extract short name from quarter_name (e.g., "Q2 2025" from "Q2 2025 Performance Review")
+      const quarterShortName = score.quarter_name.match(/Q\d+ \d{4}/)?.[0] || score.quarter_name;
       
       groupedByAttribute[score.attribute_name].quarters.push({
         quarterId: score.quarter_id,
