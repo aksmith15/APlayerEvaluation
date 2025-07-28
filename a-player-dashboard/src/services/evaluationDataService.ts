@@ -4,7 +4,6 @@
  */
 
 import { supabase } from './supabase';
-import { getCurrentQuarter } from '../utils/quarterUtils';
 
 export interface QuarterDataStatus {
   quarterId: string;
@@ -23,9 +22,6 @@ export const checkCurrentQuarterDataAvailability = async (
   employeeId: string
 ): Promise<QuarterDataStatus | null> => {
   try {
-    // Get current quarter info
-    const _currentQuarter = getCurrentQuarter();
-    
     // Find the quarter record in database that matches current quarter
     const { data: quarterData, error: quarterError } = await supabase
       .from('evaluation_cycles')

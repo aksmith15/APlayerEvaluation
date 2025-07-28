@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigation } from '../contexts/NavigationContext';
 import { 
   Card,
   Button,
@@ -47,7 +46,6 @@ interface AssignmentFilters {
 
 const MyAssignments: React.FC = () => {
   const { user } = useAuth();
-  const _navigation = useNavigation();
   const navigate = useNavigate();
 
   // State management

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigation } from '../contexts/NavigationContext';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
@@ -95,7 +94,6 @@ interface AssignmentFilters {
 
 const AssignmentManagement: React.FC = () => {
   const { user } = useAuth();
-  const _navigation = useNavigation();
 
   // State management
   const [assignments, setAssignments] = useState<EvaluationAssignmentWithDetails[]>([]);
