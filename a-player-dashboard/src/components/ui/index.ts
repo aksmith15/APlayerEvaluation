@@ -26,4 +26,8 @@ export { AssignmentCreationForm } from './AssignmentCreationForm';
 export { AssignmentStatusTable } from './AssignmentStatusTable';
 export { EvaluationSurvey } from './EvaluationSurvey';
 export { AssignmentDebugger } from './AssignmentDebugger';
-export { CoverageDashboard } from './CoverageDashboard'; 
+export { CoverageDashboard } from './CoverageDashboard';
+
+// A-Player Grading System Components
+export { AttributeWeightsManager } from './AttributeWeightsManager';
+export { LetterGrade, LetterGradeWithLabel, GradeComparison } from './LetterGrade'; 

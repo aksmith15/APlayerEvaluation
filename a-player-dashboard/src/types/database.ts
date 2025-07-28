@@ -1,5 +1,7 @@
 // Database entity types matching Supabase schema
 
+import type { LetterGrade } from '../utils/calculations';
+
 export interface WeightedEvaluationScore {
   evaluatee_id: string;
   evaluatee_name: string;
@@ -12,6 +14,11 @@ export interface WeightedEvaluationScore {
   peer_score: number;
   self_score: number;
   weighted_final_score: number;
+  // A-Player Letter Grading System
+  weighted_final_grade?: LetterGrade;
+  manager_grade?: LetterGrade;
+  peer_grade?: LetterGrade;
+  self_grade?: LetterGrade;
   has_manager_eval: boolean;
   has_peer_eval: boolean;
   has_self_eval: boolean;
@@ -110,6 +117,8 @@ export interface QuarterlyTrendData {
   total_weight: number;
   attributes_count: number;
   final_quarter_score: number;
+  // A-Player Letter Grading System
+  final_quarter_grade?: LetterGrade;
   completion_percentage: number;
   peer_count: number;
   manager_count: number;
@@ -300,4 +309,61 @@ export interface EnhancedSurveySession {
   start_time: string;
   last_activity: string;
   is_complete: boolean;
+}
+
+// ===================================================================
+// CUSTOMIZABLE ATTRIBUTE WEIGHTING SYSTEM TYPES
+// ===================================================================
+
+// Attribute weight configuration for company-specific priorities
+export interface AttributeWeight {
+  id: string;
+  attribute_name: string;
+  weight: number; // Weight multiplier (e.g., 1.0 = normal, 2.0 = double importance)
+  description?: string;
+  environment: 'production' | 'development' | 'testing';
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Interface for updating attribute weights
+export interface AttributeWeightUpdate {
+  attribute_name: string;
+  weight: number;
+  description?: string;
+}
+
+// Interface for weight distribution analytics
+export interface WeightDistribution {
+  attribute_name: string;
+  weight: number;
+  normalized_percentage: number; // Percentage of total weight
+  description?: string;
+}
+
+// Enhanced WeightedEvaluationScore with custom weights
+export interface WeightedEvaluationScoreWithCustomWeights extends WeightedEvaluationScore {
+  base_weighted_score: number; // Original calculation
+  attribute_weight: number; // Custom weight multiplier
+  custom_weighted_score: number; // Score with custom weighting
+  base_weighted_grade: LetterGrade; // Grade without custom weights
+  custom_weighted_grade: LetterGrade; // Grade with custom weights
+}
+
+// Enhanced QuarterlyTrendData with custom weights
+export interface QuarterlyTrendDataWithCustomWeights extends QuarterlyTrendData {
+  avg_base_weighted_score: number; // Original calculation
+  final_quarter_score_custom_weighted: number; // Score with custom weighting
+  final_quarter_grade_custom_weighted: LetterGrade; // Grade with custom weights
+}
+
+// Weight preset configurations for different company types
+export interface WeightPreset {
+  id: string;
+  name: string;
+  description: string;
+  company_type: string; // e.g., 'Technology', 'Sales', 'Manufacturing', 'Healthcare'
+  weights: Record<string, number>; // attribute_name -> weight mapping
+  created_at: string;
 } 

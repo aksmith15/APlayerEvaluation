@@ -101,26 +101,26 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
       {
         id: 'reliability_observed',
         attribute_name: 'Reliability',
-        question_text: 'In your experience with this person, which of these have you observed? (Check all that apply)',
+        question_text: 'In your experience with this person, which reliability behaviors have you observed? (Select all that apply)',
         question_type: 'multi_select',
         is_required: true,
         options: [
-          'Completes work accurately but often needs deadline extensions',
+          'Consistently delivers ahead of deadlines without supervision',
+          'Generally meets commitments with occasional minor delays',
           'Others actively seek them out for critical or time-sensitive work',
-          'Frequently misses deadlines or fails to follow through on commitments',
+          'Completes work accurately but often needs deadline extensions',
           'Requires regular check-ins or follow-up to ensure completion',
-          'Generally meets commitments with occasional minor delays or reminders needed',
-          'Consistently delivers ahead of deadlines and takes ownership without supervision'
+          'Frequently misses deadlines or fails to follow through on commitments'
         ],
         order: 1
       },
       {
         id: 'reliability_example',
         attribute_name: 'Reliability',
-        question_text: 'Any specific example that stands out? (Optional - brief description)',
+        question_text: 'Describe one recent situation that best represents their reliability level:',
         question_type: 'text',
-        is_required: false,
-        placeholder: 'Type NA if you can\'t recall...',
+        is_required: true,
+        placeholder: 'Describe a specific recent situation...',
         order: 2
       }
     ],
@@ -129,80 +129,59 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '9-10',
         questions: [
           {
-            id: 'reliability_traits_high',
+            id: 'reliability_excellence_systems',
             attribute_name: 'Reliability',
-            question_text: 'What reliability traits have you observed consistently over the last 30 days? (Multi-select)',
-            question_type: 'multi_select',
+            question_text: 'What organizational systems or habits do you think contribute most to their reliability?',
+            question_type: 'single_select',
             is_required: true,
             options: [
-              'Always early or on time',
-              'Never needs follow-up or reminders',
-              'Takes ownership for critical deadlines without supervision',
-              'Recognized by others as dependable person',
-              'Communicates proactively when blocked',
-              'None of the above'
+              'Uses detailed planning and scheduling systems',
+              'Has personal tracking methods for commitments', 
+              'Builds in buffer time for unexpected issues',
+              'Creates personal accountability checkpoints',
+              'Uses reminder systems consistently',
+              'I haven\'t observed their specific systems'
             ],
             order: 1
           },
           {
-            id: 'reliability_high_pressure',
+            id: 'reliability_pressure_performance',
             attribute_name: 'Reliability',
-            question_text: 'Have they performed reliably in high-pressure or high-stakes situations recently?',
+            question_text: 'How does their reliability change under high pressure or stress?',
             question_type: 'single_select',
             is_required: true,
-            options: ['Yes', 'No', 'Not sure'],
+            options: [
+              'Becomes even more reliable and organized',
+              'Maintains same level of reliability',
+              'Slight decrease but still very reliable', 
+              'Noticeable decrease under pressure',
+              'Haven\'t observed them under pressure'
+            ],
             order: 2
           },
           {
-            id: 'reliability_high_pressure_describe',
+            id: 'reliability_teaching_others',
             attribute_name: 'Reliability',
-            question_text: 'Briefly describe the situation.',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'reliability_high_pressure',
-                answer_value: ['Yes', 'No']
-              }
-            },
+            question_text: 'Do they actively help other people become more reliable?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Yes, regularly coaches others on reliability',
+              'Yes, occasionally when asked for advice',
+              'Others learn by observing their example',
+              'No, they focus on their own work',
+              'I haven\'t observed this'
+            ],
             order: 3
           },
           {
-            id: 'reliability_critical_task',
+            id: 'reliability_excellence_example',
             attribute_name: 'Reliability',
-            question_text: 'Would you assign them a critical task with no follow-up?',
-            question_type: 'single_select',
-            is_required: true,
-            options: ['Yes, absolutely', 'Yes, but with some reservations', 'No'],
+            question_text: 'Describe one specific situation that best demonstrates why you rated their reliability this high:',
+            question_type: 'text',
+            is_required: false,
+            placeholder: 'Focus on what made their reliability exceptional in this situation...',
             order: 4
-          },
-          {
-            id: 'reliability_critical_how',
-            attribute_name: 'Reliability',
-            question_text: 'Briefly describe how this person was reliable in this situation.',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'reliability_critical_task',
-                answer_value: ['Yes, absolutely']
-              }
-            },
-            order: 5
-          },
-          {
-            id: 'reliability_concerns',
-            attribute_name: 'Reliability',
-            question_text: 'What concerns would you have?',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'reliability_critical_task',
-                answer_value: ['Yes, but with some reservations', 'No']
-              }
-            },
-            order: 6
           }
         ]
       },
@@ -210,80 +189,76 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '6-8',
         questions: [
           {
-            id: 'reliability_patterns_mid',
+            id: 'reliability_success_situations',
             attribute_name: 'Reliability',
-            question_text: 'What reliability patterns best describe them? (Multi-select)',
+            question_text: 'In what types of situations is this person MOST reliable?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Usually on time but occasionally needs reminders',
-              'Keeps most commitments but misses small details',
-              'Relies on others to track progress',
-              'Performs reliably only when actively managed',
-              'None of the above'
+              'Familiar, routine tasks',
+              'Individual work without dependencies',
+              'Short-term, clear deadlines',
+              'Work they\'re passionate about',
+              'Low-pressure, predictable environments',
+              'When expectations are explicitly detailed'
             ],
             order: 1
           },
           {
-            id: 'reliability_missed_deadline',
+            id: 'reliability_struggle_situations',
             attribute_name: 'Reliability',
-            question_text: 'Have you seen this person miss a deadline in the past month?',
-            question_type: 'single_select',
+            question_text: 'In what types of situations is this person LEAST reliable?',
+            question_type: 'multi_select',
             is_required: true,
-            options: ['Yes', 'No', 'Not sure'],
+            options: [
+              'Complex, unfamiliar tasks',
+              'Collaborative work with multiple dependencies',
+              'Long-term projects without milestones',
+              'Work outside their interests',
+              'High-pressure, changing environments',
+              'When expectations are unclear or assumed'
+            ],
             order: 2
           },
           {
-            id: 'reliability_miss_frequency',
+            id: 'reliability_workload_impact',
             attribute_name: 'Reliability',
-            question_text: 'How often do you think this happens?',
-            question_type: 'single_select',
-            is_required: false,
-            options: ['Often', 'Sometimes', 'Rarely', 'Never'],
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'reliability_missed_deadline',
-                answer_value: ['Yes']
-              }
-            },
-            order: 3
-          },
-          {
-            id: 'reliability_inconsistency_cause',
-            attribute_name: 'Reliability',
-            question_text: 'What do you think contributes most to their inconsistency?',
+            question_text: 'How does their workload level affect their reliability?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Workload/capacity issues',
-              'Unclear priorities or expectations',
-              'Skill gaps',
-              'Communication challenges',
-              'Other (describe)'
+              'Reliable regardless of workload',
+              'Reliable when workload is manageable',
+              'Becomes unreliable when overwhelmed',
+              'Actually more reliable when busy',
+              'Workload doesn\'t seem to be the factor'
+            ],
+            order: 3
+          },
+          {
+            id: 'reliability_primary_motivation',
+            attribute_name: 'Reliability',
+            question_text: 'What seems to motivate their reliable behavior most?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Personal standards and pride',
+              'Not wanting to disappoint others',
+              'Clear consequences or accountability',
+              'Genuine interest in the work',
+              'External oversight or check-ins',
+              'Unclear what motivates them'
             ],
             order: 4
           },
           {
-            id: 'reliability_inconsistency_other',
+            id: 'reliability_development_insight',
             attribute_name: 'Reliability',
-            question_text: 'Please describe the other factor contributing to inconsistency:',
+            question_text: 'What specific change or support would help them become more consistently reliable?',
             question_type: 'text',
             is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'reliability_inconsistency_cause',
-                answer_value: ['Other (describe)']
-              }
-            },
+            placeholder: 'Be specific about what you think would make the biggest difference...',
             order: 5
-          },
-          {
-            id: 'reliability_most_reliable',
-            attribute_name: 'Reliability',
-            question_text: 'In what situations is this person most reliable?',
-            question_type: 'text',
-            is_required: false,
-            order: 6
           }
         ]
       },
@@ -291,81 +266,66 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '1-5',
         questions: [
           {
-            id: 'reliability_issues_low',
+            id: 'reliability_primary_cause',
             attribute_name: 'Reliability',
-            question_text: 'What issues have you observed? (Multi-select)',
-            question_type: 'multi_select',
+            question_text: 'What do you think is the main cause of their reliability issues?',
+            question_type: 'single_select',
             is_required: true,
             options: [
-              'Regularly misses deadlines',
-              'Doesn\'t inform others when blocked',
-              'Needs frequent reminders or monitoring',
-              'Drops responsibilities without explanation',
-              'Others compensate for their gaps',
-              'Other (please describe)'
+              'Lack of organizational skills',
+              'Overwhelming workload',
+              'Unclear expectations',
+              'Personal life interference',
+              'Poor time estimation abilities',
+              'Avoidance of difficult tasks',
+              'Mismatch between role and abilities'
             ],
             order: 1
           },
           {
-            id: 'reliability_issues_other',
+            id: 'reliability_pattern_duration',
             attribute_name: 'Reliability',
-            question_text: 'Please describe the other reliability issues:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'reliability_issues_low',
-                answer_value: ['Other (please describe)']
-              }
-            },
-            order: 2
-          },
-          {
-            id: 'reliability_frequency',
-            attribute_name: 'Reliability',
-            question_text: 'How frequent are these behaviors?',
-            question_type: 'single_select',
-            is_required: true,
-            options: ['Multiple times a week', 'Weekly', 'Occasionally', 'Once or twice', 'Isolated incident'],
-            order: 3
-          },
-          {
-            id: 'reliability_improvement',
-            attribute_name: 'Reliability',
-            question_text: 'In your opinion, what would most help this person improve their reliability?',
+            question_text: 'How long have you observed these reliability issues?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Clearer expectations and deadlines',
-              'More frequent check-ins or support',
-              'Different role or responsibilities',
-              'Skill development in [specific area]',
-              'I\'m not sure they can improve in this role',
-              'Other (describe)'
+              'Since I started working with them',
+              'Developed over the past year',
+              'Started after a specific change or event',
+              'Recent issue (last few months)',
+              'Comes and goes unpredictably'
+            ],
+            order: 2
+          },
+          {
+            id: 'reliability_intervention_attempts',
+            attribute_name: 'Reliability',
+            question_text: 'Have direct conversations about reliability been attempted with this person?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Yes, multiple formal conversations',
+              'Yes, one or two discussions',
+              'Informal mentions but no formal discussion',
+              'No direct conversations yet',
+              'I\'m not sure what conversations have occurred'
+            ],
+            order: 3
+          },
+          {
+            id: 'reliability_improvement_likelihood',
+            attribute_name: 'Reliability',
+            question_text: 'How likely do you think significant improvement is for this person?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Very likely with proper support',
+              'Possible but would require significant effort',
+              'Unlikely but minor improvements possible',
+              'Very unlikely in their current role',
+              'Uncertain - depends on factors outside work'
             ],
             order: 4
-          },
-          {
-            id: 'reliability_improvement_other',
-            attribute_name: 'Reliability',
-            question_text: 'Please describe the other improvement approach:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'reliability_improvement',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 5
-          },
-          {
-            id: 'reliability_team_impact',
-            attribute_name: 'Reliability',
-            question_text: 'How has this person\'s reliability affected the team or deliverables?',
-            question_type: 'text',
-            is_required: false,
-            order: 6
           }
         ]
       }
@@ -385,26 +345,26 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
       {
         id: 'accountability_observed',
         attribute_name: 'Accountability for Action',
-        question_text: 'In your experience with this person, which of these have you observed? (Check all that apply)',
+        question_text: 'When accountability was required, what have you observed? (Select all that apply)',
         question_type: 'multi_select',
         is_required: true,
         options: [
-          'Takes full ownership of mistakes and immediately works to correct them',
-          'Generally accepts responsibility but may need gentle prompting occasionally',
-          'Acknowledges errors only when directly confronted about them',
-          'Consistently makes excuses or blames external factors for problems',
-          'Proactively takes accountability for team outcomes, both positive and negative',
-          'Admits mistakes but rarely follows through with corrective action'
+          'Immediately owned the outcome and took action',
+          'Accepted responsibility when prompted but needed guidance',
+          'Made excuses or blamed circumstances beyond their control',
+          'Avoided taking ownership even when clearly responsible',
+          'Proactively took accountability for team/shared outcomes',
+          'Acknowledged mistakes but follow-through was inconsistent'
         ],
         order: 1
       },
       {
         id: 'accountability_example',
         attribute_name: 'Accountability for Action',
-        question_text: 'Any specific example that stands out? (Optional - brief description)',
+        question_text: 'Think of the most recent time this person faced a mistake or failure. How did they handle it?',
         question_type: 'text',
-        is_required: false,
-        placeholder: 'Brief description of a specific example...',
+        is_required: true,
+        placeholder: 'Describe how they handled a recent mistake or failure...',
         order: 2
       }
     ],
@@ -413,66 +373,58 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '9-10',
         questions: [
           {
-            id: 'accountability_traits_high',
+            id: 'accountability_ownership_scope',
             attribute_name: 'Accountability for Action',
-            question_text: 'In the last 30 days, which of the following have you observed? (Multi-select)',
-            question_type: 'multi_select',
+            question_text: 'What level of ownership do they typically take?',
+            question_type: 'single_select',
             is_required: true,
             options: [
-              'Consistently owns outcomes without being prompted',
-              'Accepts responsibility for shared/team issues',
-              'Publicly admits mistakes and outlines corrections',
-              'Proactively corrects issues before being asked',
-              'Trusted by others to "own" high-visibility work',
-              'None of the above'
+              'Takes ownership for individual work and team outcomes',
+              'Primarily individual work, occasionally team issues',
+              'Only individual work when directly responsible',
+              'Minimal ownership even for individual work',
+              'Varies significantly by situation'
             ],
             order: 1
           },
           {
-            id: 'accountability_team_ownership',
+            id: 'accountability_mistake_response',
             attribute_name: 'Accountability for Action',
-            question_text: 'Have you seen this person take accountability for team or shared outcomes (not just their individual mistakes)?',
+            question_text: 'When they make a mistake, what do they typically do first?',
             question_type: 'single_select',
             is_required: true,
-            options: ['Yes', 'No', 'Not sure'],
+            options: [
+              'Immediately acknowledge and propose solutions',
+              'Acknowledge when asked and work to fix it',
+              'Focus on fixing it without explicitly acknowledging',
+              'Wait to see if anyone notices',
+              'Look for external factors that contributed'
+            ],
             order: 2
           },
           {
-            id: 'accountability_team_describe',
+            id: 'accountability_high_stakes_behavior',
             attribute_name: 'Accountability for Action',
-            question_text: 'Briefly describe how this person took accountability.',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'accountability_team_ownership',
-                answer_value: ['Yes']
-              }
-            },
+            question_text: 'How do they handle accountability in high-stakes situations?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Steps up and takes visible ownership',
+              'Takes ownership but prefers to work behind the scenes',
+              'Participates in solutions but avoids being the face of accountability',
+              'Tends to step back and let others take the lead',
+              'Haven\'t observed them in high-stakes situations'
+            ],
             order: 3
           },
           {
-            id: 'accountability_project_trust',
+            id: 'accountability_excellence_example',
             attribute_name: 'Accountability for Action',
-            question_text: 'Would you assign them to lead a project with executive-level visibility and accountability risk?',
-            question_type: 'single_select',
-            is_required: true,
-            options: ['Yes, confidently', 'Yes, but with some reservations', 'No'],
-            order: 4
-          },
-          {
-            id: 'accountability_concerns',
-            attribute_name: 'Accountability for Action',
-            question_text: 'What concerns do you have?',
+            question_text: 'Describe a specific situation where their accountability stood out as exceptional:',
             question_type: 'text',
             is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'accountability_project_trust',
-                answer_value: ['Yes, but with some reservations', 'No']
-              }
-            },
-            order: 5
+            placeholder: 'Focus on what made their approach to accountability impressive...',
+            order: 4
           }
         ]
       },
@@ -480,65 +432,75 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '6-8',
         questions: [
           {
-            id: 'accountability_behavior_mid',
+            id: 'accountability_comfort_situations',
             attribute_name: 'Accountability for Action',
-            question_text: 'When taking accountability is required, how do they typically behave? (Multi-select)',
+            question_text: 'In what situations do they take accountability most readily?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Takes ownership but needs time to process before admitting mistakes',
-              'Accountable for individual work but hesitates on team-level issues',
-              'Admits errors readily but follow-through varies in quality/speed',
-              'Strong accountability in familiar areas, weaker in new/complex situations',
-              'Accepts feedback about accountability gaps and works to improve',
-              'Generally reliable but occasionally gets defensive initially'
+              'Individual mistakes with clear solutions',
+              'Team issues where they played a clear role',
+              'When the stakes are relatively low',
+              'When they have strong relationships with those affected',
+              'When they feel confident about how to fix it',
+              'When prompted by others'
             ],
             order: 1
           },
           {
-            id: 'accountability_barriers',
+            id: 'accountability_avoidance_situations',
             attribute_name: 'Accountability for Action',
-            question_text: 'What do you think prevents this person from taking fuller accountability?',
-            question_type: 'single_select',
+            question_text: 'In what situations do they avoid or delay taking accountability?',
+            question_type: 'multi_select',
             is_required: true,
             options: [
-              'Fear of consequences/judgment',
-              'Lack of clarity on expectations',
-              'Defensive personality trait',
-              'Insufficient support when mistakes happen',
-              'Workload/stress factors',
-              'Other (describe)'
+              'Complex situations with multiple contributing factors',
+              'High-visibility mistakes with senior leadership involved',
+              'Team failures where individual responsibility is unclear',
+              'When they disagree with the criticism or feedback',
+              'When the solution or path forward is unclear',
+              'When emotions are running high'
             ],
             order: 2
           },
           {
-            id: 'accountability_barriers_other',
+            id: 'accountability_primary_hesitation',
             attribute_name: 'Accountability for Action',
-            question_text: 'Please describe the other factor:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'accountability_barriers',
-                answer_value: ['Other (describe)']
-              }
-            },
+            question_text: 'What seems to be their primary hesitation with taking accountability?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Fear of negative consequences or judgment',
+              'Uncertainty about their actual role or responsibility',
+              'Tendency to focus on solutions rather than ownership',
+              'Discomfort with being in the spotlight',
+              'Preference to understand the full situation first',
+              'Not sure what drives their hesitation'
+            ],
             order: 3
           },
           {
-            id: 'accountability_support',
+            id: 'accountability_follow_through_quality',
             attribute_name: 'Accountability for Action',
-            question_text: 'What support would help them improve?',
-            question_type: 'text',
-            is_required: false,
+            question_text: 'When they do take accountability, how is their follow-through?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Excellent - creates and executes clear action plans',
+              'Good - follows through but may need some guidance',
+              'Inconsistent - sometimes strong, sometimes weak',
+              'Weak - acknowledges but struggles with follow-through',
+              'Haven\'t observed enough follow-through to assess'
+            ],
             order: 4
           },
           {
-            id: 'accountability_situations',
+            id: 'accountability_development_focus',
             attribute_name: 'Accountability for Action',
-            question_text: 'Describe situations where this person shows strongest vs. weakest accountability patterns.',
+            question_text: 'What would most help them take accountability more consistently?',
             question_type: 'text',
             is_required: false,
+            placeholder: 'Think about what support, training, or environment changes would help...',
             order: 5
           }
         ]
@@ -547,50 +509,59 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '1-5',
         questions: [
           {
-            id: 'accountability_breakdowns',
+            id: 'accountability_avoidance_patterns',
             attribute_name: 'Accountability for Action',
-            question_text: 'What accountability breakdowns have you personally observed? (Multi-select)',
-            question_type: 'multi_select',
+            question_text: 'What accountability avoidance patterns do you observe most?',
+            question_type: 'single_select',
             is_required: true,
             options: [
-              'Regularly blames others or avoids fault',
-              'Needs external pressure to follow through',
-              'Deflects, omits, or reframes facts to dodge accountability',
-              'Undermines team trust by not "owning" mistakes',
-              'Doesn\'t follow through, even after reminders',
-              'Other (please describe)'
+              'Blames external circumstances or other people',
+              'Acknowledges issues but doesn\'t take personal ownership',
+              'Avoids or delays addressing mistakes until forced to',
+              'Becomes defensive when accountability is expected',
+              'Simply doesn\'t follow through on commitments to improve',
+              'Makes excuses or minimizes the impact of issues'
             ],
             order: 1
           },
           {
-            id: 'accountability_breakdowns_other',
+            id: 'accountability_pattern_consistency',
             attribute_name: 'Accountability for Action',
-            question_text: 'Please describe the other accountability breakdowns:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'accountability_breakdowns',
-                answer_value: ['Other (please describe)']
-              }
-            },
+            question_text: 'How consistent are these accountability issues?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Very consistent - occurs in most situations requiring accountability',
+              'Frequent - happens more often than not',
+              'Occasional - depends on the situation or stakes involved',
+              'Rare but memorable when it happens'
+            ],
             order: 2
           },
           {
-            id: 'accountability_frequency',
+            id: 'accountability_root_cause_assessment',
             attribute_name: 'Accountability for Action',
-            question_text: 'How often do these issues happen?',
+            question_text: 'What do you think is the root cause of their accountability struggles?',
             question_type: 'single_select',
             is_required: true,
-            options: ['Multiple times per month', 'Monthly', 'Occasionally', 'One-time or rare', 'Unsure'],
+            options: [
+              'Fear of consequences or negative judgment',
+              'Lack of understanding about what accountability means',
+              'Defensive personality trait or ego protection',
+              'Overwhelmed and using avoidance as a coping mechanism',
+              'Past negative experiences with taking accountability',
+              'Fundamental discomfort with responsibility',
+              'Unclear - could be multiple factors'
+            ],
             order: 3
           },
           {
-            id: 'accountability_impact',
+            id: 'accountability_impact_analysis',
             attribute_name: 'Accountability for Action',
-            question_text: 'What was the impact of this person\'s lack of accountability on the team, outcomes, or trust?',
+            question_text: 'Describe the most significant impact their lack of accountability has had on the team or work:',
             question_type: 'text',
             is_required: false,
+            placeholder: 'Focus on specific consequences and how it affected others or outcomes...',
             order: 4
           }
         ]
@@ -611,27 +582,32 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
       {
         id: 'quality_observed',
         attribute_name: 'Quality of Work',
-        question_text: 'In your experience with this person\'s work output, which of these have you observed? (Check all that apply)',
+        question_text: 'What patterns have you observed in their work output? (Select all that apply)',
         question_type: 'multi_select',
         is_required: true,
         options: [
-          'Delivers exceptional work that exceeds standards and serves as a model for others',
-          'Produces consistently solid work with minimal revisions needed',
-          'Completes adequate work but occasionally misses minor details or requirements',
-          'Frequently submits work requiring significant corrections or rework',
-          'Others regularly reference their output as the gold standard',
-          'Takes care to understand requirements but execution sometimes falls short',
-          'Meets requirements accurately but rarely adds insights or improvements'
+          'Consistently exceeds quality standards with minimal oversight',
+          'Produces solid work but occasionally requires minor revisions',
+          'Output is adequate but often needs clarification or corrections',
+          'Work frequently requires significant rework or has notable errors',
+          'Sets the quality benchmark that others reference',
+          'Quality varies significantly depending on the project'
         ],
         order: 1
       },
       {
         id: 'quality_example',
         attribute_name: 'Quality of Work',
-        question_text: 'Any specific example that stands out? (Optional - brief description)',
-        question_type: 'text',
-        is_required: false,
-        placeholder: 'Brief description of a specific example...',
+        question_text: 'When you receive their work, what\'s your typical first reaction?',
+        question_type: 'single_select',
+        is_required: true,
+        options: [
+          'Ready to use immediately',
+          'Quick review needed, then good to go',
+          'Requires moderate editing or clarification',
+          'Needs substantial revision before it\'s usable',
+          'Varies greatly by project'
+        ],
         order: 2
       }
     ],
@@ -640,66 +616,58 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '9-10',
         questions: [
           {
-            id: 'quality_output_high',
+            id: 'quality_excellence_behaviors',
             attribute_name: 'Quality of Work',
-            question_text: 'What best describes this person\'s output in the last 30 days? (Multi-select)',
+            question_text: 'What makes their work quality exceptional? (Select all that apply)',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Nearly always error-free or self-corrected before delivery',
-              'Exceeds expectations in structure, clarity, or finish',
-              'Requires little to no review or rework',
-              'Sets a quality benchmark for peers',
-              'Improves team deliverables through feedback, tools, or standards',
-              'None of the above'
+              'Nearly always accurate and error-free on first submission',
+              'Exceeds expectations in thoroughness and completeness',
+              'Anticipates potential issues and addresses them proactively',
+              'Sets quality standards that others reference',
+              'Consistently professional and well-executed work',
+              'Delivers work that requires minimal or no corrections'
             ],
             order: 1
           },
           {
-            id: 'quality_revisions_needed',
+            id: 'quality_under_pressure',
             attribute_name: 'Quality of Work',
-            question_text: 'How often do their deliverables need clarification, revisions, or corrections?',
+            question_text: 'How does their quality hold up under pressure or tight deadlines?',
             question_type: 'single_select',
             is_required: true,
-            options: ['Never', 'Rarely', 'Occasionally', 'Often', 'Not sure'],
+            options: [
+              'Quality remains consistently high even under pressure',
+              'Minor decrease but still exceeds most standards',
+              'Noticeable decrease but still acceptable',
+              'Haven\'t observed them under significant pressure'
+            ],
             order: 2
           },
           {
-            id: 'quality_revision_types',
+            id: 'quality_helps_others_improve',
             attribute_name: 'Quality of Work',
-            question_text: 'What types of revisions are needed?',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'quality_revisions_needed',
-                answer_value: ['Occasionally', 'Often']
-              }
-            },
+            question_text: 'How do they help elevate quality standards for others?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Actively mentors others and provides quality feedback',
+              'Creates standards or best practices for the team',
+              'Serves as a quality resource when others need help',
+              'Sets a good example but doesn\'t actively teach',
+              'Haven\'t observed them helping others with quality'
+            ],
             order: 3
           },
           {
-            id: 'quality_helps_others',
+            id: 'quality_excellence_example',
             attribute_name: 'Quality of Work',
-            question_text: 'Have they helped others improve their work quality (e.g., through coaching, feedback, standards)?',
-            question_type: 'single_select',
-            is_required: true,
-            options: ['Yes', 'No', 'Not sure'],
-            order: 4
-          },
-          {
-            id: 'quality_helps_describe',
-            attribute_name: 'Quality of Work',
-            question_text: 'Briefly describe how or when.',
+            question_text: 'Describe a recent example that best demonstrates their exceptional work quality:',
             question_type: 'text',
             is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'quality_helps_others',
-                answer_value: ['Yes']
-              }
-            },
-            order: 5
+            placeholder: 'Focus on what made the quality exceptional and its impact...',
+            order: 4
           }
         ]
       },
@@ -707,103 +675,76 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '6-8',
         questions: [
           {
-            id: 'quality_issues_mid',
+            id: 'quality_strong_situations',
             attribute_name: 'Quality of Work',
-            question_text: 'What quality issues or inconsistencies have you observed recently? (Multi-select)',
+            question_text: 'In what situations does this person produce their highest quality work?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Work is generally good, but inconsistent',
-              'Lacks clarity, formatting, or polish',
-              'Often requires clarification from others',
-              'Has a pattern of minor but recurring errors',
-              'Meets expectations, but rarely exceeds them',
-              'None of the above'
+              'Familiar or routine tasks',
+              'Complex problem-solving projects',
+              'Individual work with clear requirements',
+              'Team projects with collaboration',
+              'Customer-facing or high-visibility work',
+              'When given adequate time to complete'
             ],
             order: 1
           },
           {
-            id: 'quality_best_work_type',
+            id: 'quality_inconsistent_situations',
             attribute_name: 'Quality of Work',
-            question_text: 'In what types of work does this person produce their highest quality?',
+            question_text: 'In what situations does their quality become less consistent?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Familiar/routine tasks',
-              'Creative/strategic work',
-              'Collaborative projects',
-              'Independent work',
-              'Technical/analytical tasks',
-              'Client-facing deliverables'
+              'Unfamiliar or complex tasks',
+              'Rushed deadlines or high pressure',
+              'Ambiguous or unclear requirements',
+              'When juggling multiple priorities',
+              'Customer or external stakeholder work',
+              'Haven\'t observed quality inconsistencies'
             ],
             order: 2
           },
           {
-            id: 'quality_inconsistency_causes',
+            id: 'quality_improvement_barrier',
             attribute_name: 'Quality of Work',
-            question_text: 'What do you think most contributes to their quality inconsistencies?',
+            question_text: 'What seems to be the main barrier to more consistent quality?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Rushing due to workload/deadlines',
-              'Insufficient understanding of requirements',
-              'Lack of review/checking processes',
-              'Missing tools or resources',
-              'Unclear quality standards',
-              'Other (describe)'
+              'Time pressure and competing priorities',
+              'Lack of clear quality standards or examples',
+              'Missing skills or training in certain areas',
+              'Overwhelm with workload volume',
+              'Limited access to tools or resources',
+              'Not sure what the main barrier is'
             ],
             order: 3
           },
           {
-            id: 'quality_inconsistency_other',
+            id: 'quality_high_stakes_confidence',
             attribute_name: 'Quality of Work',
-            question_text: 'Please describe the other factor:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'quality_inconsistency_causes',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 4
-          },
-          {
-            id: 'quality_feedback',
-            attribute_name: 'Quality of Work',
-            question_text: 'What feedback have you given (or would you give) to help improve their quality of work?',
-            question_type: 'text',
-            is_required: false,
-            order: 5
-          },
-          {
-            id: 'quality_visibility_confidence',
-            attribute_name: 'Quality of Work',
-            question_text: 'If given a high-visibility project (visible to senior leadership or clients), how confident would you be in their output quality?',
+            question_text: 'How confident would you be assigning them a high-stakes deliverable (visible to leadership or customers)?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Very confident',
-              'Mostly confident',
-              'Somewhat concerned',
-              'Not confident',
-              'Would not assign them such a project'
+              'Very confident - would be my first choice',
+              'Confident with normal oversight',
+              'Would need extra review and support',
+              'Would prefer someone else for high-stakes work',
+              'Haven\'t seen enough to judge'
             ],
-            order: 6
+            order: 4
           },
           {
-            id: 'quality_concern_type',
+            id: 'quality_development_focus',
             attribute_name: 'Quality of Work',
-            question_text: 'Is it accuracy, polish, consistency, or something else?',
+            question_text: 'What would most help this person achieve more consistent quality in their work?',
             question_type: 'text',
             is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'quality_visibility_confidence',
-                answer_value: ['Somewhat concerned', 'Not confident', 'Would not assign them such a project']
-              }
-            },
-            order: 7
+            placeholder: 'Consider skills, processes, resources, or environmental changes...',
+            order: 5
           }
         ]
       },
@@ -811,115 +752,61 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '1-5',
         questions: [
           {
-            id: 'quality_concerns_low',
+            id: 'quality_specific_issues',
             attribute_name: 'Quality of Work',
-            question_text: 'What specific concerns about work quality have you observed? (Multi-select)',
+            question_text: 'What specific quality problems occur most frequently?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Frequent errors that impact delivery',
-              'Poor attention to detail',
-              'Incomplete or careless work submissions',
-              'Substandard clarity or formatting',
-              'Quality issues caused confusion or rework for others',
-              'Other (please explain)'
+              'Errors or inaccuracies in work',
+              'Poor organization or structure',
+              'Missing key information or requirements',
+              'Unclear or confusing work output',
+              'Sloppy or careless execution',
+              'Work that doesn\'t meet basic specifications',
+              'Creates problems for others who use the work'
             ],
             order: 1
           },
           {
-            id: 'quality_concerns_other',
+            id: 'quality_primary_cause',
             attribute_name: 'Quality of Work',
-            question_text: 'Please explain the other quality concerns:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'quality_concerns_low',
-                answer_value: ['Other (please explain)']
-              }
-            },
-            order: 2
-          },
-          {
-            id: 'quality_duration',
-            attribute_name: 'Quality of Work',
-            question_text: 'How long have these quality issues been occurring?',
+            question_text: 'What appears to be the primary cause of quality issues?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Recent development (last 1-3 months)',
-              'Ongoing issue (3-6 months)',
-              'Long-standing pattern (6+ months)',
-              'Not sure'
+              'Lacks necessary skills or knowledge',
+              'Rushes through work without adequate checking',
+              'Doesn\'t understand quality expectations',
+              'Overwhelmed by workload demands',
+              'Seems to lack attention to detail',
+              'Not sure what causes the quality issues'
+            ],
+            order: 2
+          },
+          {
+            id: 'quality_impact_severity',
+            attribute_name: 'Quality of Work',
+            question_text: 'How severely do quality issues impact team productivity or outcomes?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Creates significant delays or rework for others',
+              'Requires regular cleanup but manageable',
+              'Impacts some deliverables but not critical',
+              'Minor impact - mostly affects their own work',
+              'Too early to assess full impact'
             ],
             order: 3
           },
           {
-            id: 'quality_improvement_support',
+            id: 'quality_improvement_potential',
             attribute_name: 'Quality of Work',
-            question_text: 'What type of support do you think would most help this person improve their work quality?',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'More detailed requirements/specifications',
-              'Additional training or skill development',
-              'Better review processes or checkpoints',
-              'Different types of assignments',
-              'More time for quality checks',
-              'I don\'t think they can improve significantly',
-              'Other (describe)'
-            ],
+            question_text: 'What would most likely help this person improve their work quality?',
+            question_type: 'text',
+            is_required: false,
+            placeholder: 'Consider specific training, processes, support, or changes that might help...',
             order: 4
-          },
-          {
-            id: 'quality_improvement_other',
-            attribute_name: 'Quality of Work',
-            question_text: 'Please describe the other improvement approach:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'quality_improvement_support',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 5
-          },
-          {
-            id: 'quality_feedback_given',
-            attribute_name: 'Quality of Work',
-            question_text: 'Have you given feedback on these issues before?',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'Yes, and they improved',
-              'Yes, but little or no improvement',
-              'No, not yet',
-              'Not sure'
-            ],
-            order: 6
-          },
-          {
-            id: 'quality_team_impact',
-            attribute_name: 'Quality of Work',
-            question_text: 'How has this person\'s work quality affected the team or deliverables?',
-            question_type: 'text',
-            is_required: false,
-            order: 7
-          },
-          {
-            id: 'quality_score_basis',
-            attribute_name: 'Quality of Work',
-            question_text: 'Was your score shaped more by one standout project or consistent patterns?',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'One standout project',
-              'Mostly consistent performance',
-              'A mix of both',
-              'Not sure'
-            ],
-            order: 8
           }
         ]
       }
@@ -939,27 +826,26 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
       {
         id: 'initiative_observed',
         attribute_name: 'Taking Initiative',
-        question_text: 'In your experience with this person, which of these have you observed? (Check all that apply)',
+        question_text: 'How often do you see them act without being asked? (Select what you\'ve observed)',
         question_type: 'multi_select',
         is_required: true,
         options: [
-          'Proactively identifies and solves problems before they escalate',
-          'Generally takes action when needed but may wait for some guidance on complex issues',
-          'Requires clear direction and detailed instructions to move forward',
-          'Consistently avoids responsibility beyond their basic job requirements',
-          'Regularly brings innovative ideas and volunteers for challenging projects',
-          'Recognizes opportunities for improvement but rarely acts without approval',
-          'Takes initiative in some areas but hesitates when stakes are higher or visibility increases'
+          'Regularly jumps in to solve problems before being assigned',
+          'Occasionally takes initiative when they see clear opportunities',
+          'Usually waits for direction but will act when specifically encouraged',
+          'Rarely acts without explicit instruction or assignment',
+          'Actively avoids taking on additional responsibilities',
+          'Takes initiative in familiar areas but hesitates in new situations'
         ],
         order: 1
       },
       {
         id: 'initiative_example',
         attribute_name: 'Taking Initiative',
-        question_text: 'Any specific example that stands out? (Optional - brief description)',
+        question_text: 'What\'s the most significant thing they\'ve initiated recently (without being asked)?',
         question_type: 'text',
-        is_required: false,
-        placeholder: 'Brief description of a specific example...',
+        is_required: true,
+        placeholder: 'Describe something specific they initiated recently...',
         order: 2
       }
     ],
@@ -968,45 +854,58 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '9-10',
         questions: [
           {
-            id: 'initiative_examples_high',
+            id: 'initiative_proactive_behaviors',
             attribute_name: 'Taking Initiative',
-            question_text: 'Which of the following examples of initiative has this person demonstrated recently (last 30 days)? (Multi-select)',
+            question_text: 'What types of proactive behaviors do you observe most frequently?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Stepped up on a task or project without being asked',
-              'Proposed improvements or created something new proactively',
-              'Solved a problem before it escalated',
-              'Acted to support teammates without being directed',
-              'Took ownership in an area outside their normal scope',
-              'None of the above'
+              'Identifies and solves problems before they escalate',
+              'Takes on additional responsibilities without being asked',
+              'Proposes improvements to processes or workflows',
+              'Steps up to help teammates or other departments',
+              'Anticipates needs and prepares solutions in advance',
+              'Takes ownership of gaps or unclear responsibilities'
             ],
             order: 1
           },
           {
-            id: 'initiative_frequency',
+            id: 'initiative_leadership_influence',
             attribute_name: 'Taking Initiative',
-            question_text: 'Frequency of initiative (give your best answer)',
+            question_text: 'How does their initiative influence others?',
             question_type: 'single_select',
             is_required: true,
-            options: ['Weekly', 'Monthly', 'Rarely', 'Not sure'],
+            options: [
+              'Inspires others to be more proactive',
+              'Others look to them when initiative is needed',
+              'Sets a good example but doesn\'t actively encourage others',
+              'Focuses on their own initiatives',
+              'Haven\'t observed their influence on others'
+            ],
             order: 2
           },
           {
-            id: 'initiative_impact_level',
+            id: 'initiative_scope_comfort',
             attribute_name: 'Taking Initiative',
-            question_text: 'Impact level of most recent action',
+            question_text: 'What scope of initiative are they most comfortable taking?',
             question_type: 'single_select',
             is_required: true,
-            options: ['Minor', 'Moderate', 'Major'],
+            options: [
+              'Takes initiative on team-wide or organizational issues',
+              'Comfortable with department-level improvements',
+              'Primarily focuses on their immediate work area',
+              'Takes initiative mainly on individual tasks',
+              'Scope varies significantly by situation'
+            ],
             order: 3
           },
           {
-            id: 'initiative_examples_describe',
+            id: 'initiative_excellence_example',
             attribute_name: 'Taking Initiative',
-            question_text: 'Provide 1–2 examples of impactful initiative this person has taken recently.',
+            question_text: 'Describe their most impactful recent initiative and what made it exceptional:',
             question_type: 'text',
             is_required: false,
+            placeholder: 'Focus on what they initiated, why it mattered, and the results...',
             order: 4
           }
         ]
@@ -1015,126 +914,76 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '6-8',
         questions: [
           {
-            id: 'initiative_situations_mid',
+            id: 'initiative_comfortable_areas',
             attribute_name: 'Taking Initiative',
-            question_text: 'In what situations do they tend to take initiative? (Multi-select)',
+            question_text: 'In what areas do they most readily take initiative?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Primarily takes initiative only in familiar tasks',
-              'After others hesitate or delay',
-              'When they\'re passionate about the topic',
-              'Rarely acts without direct prompting',
-              'Occasionally in ambiguous situations',
-              'None of the above'
+              'Within their core expertise and responsibilities',
+              'When they see clear problems that need solving',
+              'In collaborative or team-support situations',
+              'When they have strong relationships with those involved',
+              'In low-risk or familiar situations',
+              'When explicitly encouraged by others'
             ],
             order: 1
           },
           {
-            id: 'initiative_prevention',
+            id: 'initiative_hesitation_areas',
             attribute_name: 'Taking Initiative',
-            question_text: 'What do you think prevents this person from taking more initiative?',
+            question_text: 'In what areas do they hesitate to take initiative?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Unclear boundaries or authority',
-              'Fear of overstepping or making mistakes',
-              'Lack of confidence in their ideas',
-              'Too focused on existing workload',
-              'Waiting for explicit permission/encouragement',
-              'Limited visibility into broader needs/opportunities',
-              'Other (describe)'
+              'Cross-departmental or unfamiliar areas',
+              'High-visibility or high-stakes situations',
+              'When roles and authority are unclear',
+              'Complex problems without obvious solutions',
+              'When it might step on others\' responsibilities',
+              'Don\'t observe hesitation - they\'re generally proactive'
             ],
             order: 2
           },
           {
-            id: 'initiative_prevention_other',
+            id: 'initiative_primary_barrier',
             attribute_name: 'Taking Initiative',
-            question_text: 'Please describe the other factor:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'initiative_prevention',
-                answer_value: ['Other (describe)']
-              }
-            },
+            question_text: 'What seems to be their primary barrier to taking more initiative?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Uncertainty about boundaries or authority',
+              'Fear of making mistakes or overstepping',
+              'Lack of confidence in their ideas or solutions',
+              'Already fully occupied with current responsibilities',
+              'Preference to wait for clear direction',
+              'Not sure what holds them back'
+            ],
             order: 3
           },
           {
-            id: 'initiative_success_conditions',
+            id: 'initiative_support_effectiveness',
             attribute_name: 'Taking Initiative',
-            question_text: 'When they DO take initiative, what conditions make them most successful?',
-            question_type: 'multi_select',
+            question_text: 'When they do take initiative, how effective are they typically?',
+            question_type: 'single_select',
             is_required: true,
             options: [
-              'Clear problem definition',
-              'Working with familiar team members',
-              'Lower-stakes situations',
-              'Areas of personal expertise',
-              'When given explicit encouragement',
-              'Other (describe)'
+              'Very effective - consistently gets good results',
+              'Generally effective but may need some guidance',
+              'Mixed results - sometimes successful, sometimes not',
+              'Well-intentioned but often needs redirection',
+              'Haven\'t observed enough outcomes to assess'
             ],
             order: 4
           },
           {
-            id: 'initiative_success_other',
+            id: 'initiative_development_focus',
             attribute_name: 'Taking Initiative',
-            question_text: 'Please describe the other success condition:',
+            question_text: 'What would most help this person take initiative more consistently?',
             question_type: 'text',
             is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'initiative_success_conditions',
-                answer_value: ['Other (describe)']
-              }
-            },
+            placeholder: 'Consider confidence building, authority clarification, skill development, or environmental changes...',
             order: 5
-          },
-          {
-            id: 'initiative_consistency',
-            attribute_name: 'Taking Initiative',
-            question_text: 'How consistent is their initiative across different types of work?',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'Consistently proactive across roles',
-              'Somewhat consistent — depends on scope or context',
-              'Infrequent unless directly responsible',
-              'Not sure'
-            ],
-            order: 6
-          },
-          {
-            id: 'initiative_important_change',
-            attribute_name: 'Taking Initiative',
-            question_text: 'What\'s the most important change that would increase their initiative?',
-            question_type: 'multi_select',
-            is_required: true,
-            options: [
-              'More confidence in decision-making',
-              'Clearer understanding of when initiative is expected',
-              'Better problem identification skills',
-              'Greater authority/permission to act',
-              'More recognition when they do take initiative',
-              'Different types of opportunities',
-              'Other (describe)'
-            ],
-            order: 7
-          },
-          {
-            id: 'initiative_change_other',
-            attribute_name: 'Taking Initiative',
-            question_text: 'Please describe the other change needed:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'initiative_important_change',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 8
           }
         ]
       },
@@ -1142,95 +991,60 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '1-5',
         questions: [
           {
-            id: 'initiative_issues_low',
+            id: 'initiative_avoidance_patterns',
             attribute_name: 'Taking Initiative',
-            question_text: 'What issues have you observed related to initiative? (Multi-select)',
+            question_text: 'What patterns do you observe regarding their lack of initiative?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Avoids acting unless explicitly told',
-              'Doesn\'t step up when gaps appear',
-              'Misses opportunities to contribute beyond the minimum',
-              'Avoids ambiguity or risk',
-              'Ignores or delays emerging issues',
-              'Other (please describe)'
+              'Waits for explicit direction even when action is clearly needed',
+              'Sees problems but doesn\'t act to address them',
+              'Avoids taking on anything beyond minimum requirements',
+              'Misses opportunities to contribute or help others',
+              'Defers to others even when they could take the lead',
+              'Seems paralyzed by uncertainty or risk'
             ],
             order: 1
           },
           {
-            id: 'initiative_issues_other',
+            id: 'initiative_root_cause',
             attribute_name: 'Taking Initiative',
-            question_text: 'Please describe the other initiative issues:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'initiative_issues_low',
-                answer_value: ['Other (please describe)']
-              }
-            },
-            order: 2
-          },
-          {
-            id: 'initiative_lack_primary_cause',
-            attribute_name: 'Taking Initiative',
-            question_text: 'Do you think this person\'s lack of initiative is primarily due to:',
+            question_text: 'What appears to be the root cause of their lack of initiative?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Not recognizing opportunities (awareness issue)',
-              'Recognizing but not knowing how to act (skill issue)',
-              'Knowing what to do but avoiding risk/responsibility (motivation issue)',
-              'Unclear expectations about when initiative is appropriate',
-              'Overwhelmed with current responsibilities',
-              'Other (describe)'
+              'Lacks confidence in their abilities or judgment',
+              'Doesn\'t recognize opportunities where initiative is needed',
+              'Understands the need but avoids responsibility or risk',
+              'Overwhelmed with current workload',
+              'Cultural or personality preference for following direction',
+              'Unclear about when initiative is expected or appropriate'
+            ],
+            order: 2
+          },
+          {
+            id: 'initiative_team_impact',
+            attribute_name: 'Taking Initiative',
+            question_text: 'How does their lack of initiative affect team dynamics or outcomes?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Creates gaps that others must fill',
+              'Slows progress when leadership is needed',
+              'Minimal impact - others naturally step up',
+              'Puts extra burden on more proactive team members',
+              'Too early to assess the full impact'
             ],
             order: 3
           },
           {
-            id: 'initiative_cause_other',
+            id: 'initiative_improvement_potential',
             attribute_name: 'Taking Initiative',
-            question_text: 'Please describe the other primary cause:',
+            question_text: 'What would most likely help this person become more proactive?',
             question_type: 'text',
             is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'initiative_lack_primary_cause',
-                answer_value: ['Other (describe)']
-              }
-            },
+            placeholder: 'Consider confidence building, skill development, clearer expectations, or role adjustments...',
             order: 4
-          },
-          {
-            id: 'initiative_behavior_frequency',
-            attribute_name: 'Taking Initiative',
-            question_text: 'How frequently do these behaviors occur?',
-            question_type: 'single_select',
-            is_required: true,
-            options: ['Weekly or more', 'Occasionally', 'Rare or one-time', 'Not sure'],
-            order: 5
-          },
-          {
-            id: 'initiative_improvement_likelihood',
-            attribute_name: 'Taking Initiative',
-            question_text: 'If this person received coaching on initiative, how likely do you think improvement would be?',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'Very likely - they have the foundation',
-              'Possible with significant support and clear expectations',
-              'Unlikely - seems to be a fundamental preference/trait',
-              'Not sure'
-            ],
-            order: 6
-          },
-          {
-            id: 'initiative_confidence_change',
-            attribute_name: 'Taking Initiative',
-            question_text: 'What would need to change for you to feel confident in this person\'s proactive contributions?',
-            question_type: 'text',
-            is_required: false,
-            order: 7
           }
         ]
       }
@@ -1250,27 +1064,26 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
       {
         id: 'adaptability_observed',
         attribute_name: 'Adaptability',
-        question_text: 'In your experience with this person during changes or uncertainty, which of these have you observed? (Check all that apply)',
+        question_text: 'When plans change unexpectedly, what do you typically observe? (Select all that apply)',
         question_type: 'multi_select',
         is_required: true,
         options: [
-          'Thrives during change and helps guide others through transitions smoothly',
-          'Adjusts well to most changes with only brief periods of adjustment',
-          'Adapts eventually but needs time and support during transitions',
-          'Becomes notably stressed or resistant when faced with unexpected changes',
-          'Maintains high performance and composure even during major organizational shifts',
-          'Handles routine changes adequately but struggles with significant or frequent disruptions',
-          'Shows strong adaptability in technical/process changes but struggles with interpersonal or cultural shifts'
+          'Smoothly adjusts and helps others navigate the change',
+          'Takes some time to adapt but gets there without drama',
+          'Shows visible stress or resistance but eventually complies',
+          'Becomes notably disruptive or negative during transitions',
+          'Actually performs better when things are uncertain',
+          'Struggles significantly and impacts team momentum'
         ],
         order: 1
       },
       {
         id: 'adaptability_example',
         attribute_name: 'Adaptability',
-        question_text: 'Any specific example that stands out? (Optional - brief description) Type NA if you can\'t recall',
+        question_text: 'Describe their reaction to the most recent significant change that affected them:',
         question_type: 'text',
-        is_required: false,
-        placeholder: 'Type NA if you can\'t recall...',
+        is_required: true,
+        placeholder: 'Describe how they handled a recent significant change...',
         order: 2
       }
     ],
@@ -1279,88 +1092,59 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '9-10',
         questions: [
           {
-            id: 'adaptability_examples_high',
+            id: 'adaptability_change_response',
             attribute_name: 'Adaptability',
-            question_text: 'Which of the following examples of adaptability has this person shown recently? (Multi-select)',
+            question_text: 'How do they typically respond when significant changes occur?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Stayed calm and productive during unexpected changes',
-              'Shifted gears between tasks, teams, or tools without friction',
-              'Helped others adapt to a new plan or environment',
-              'Found creative solutions under pressure or uncertainty',
-              'Handled unclear direction or goals with minimal guidance',
-              'None of the above'
+              'Embraces change and helps others navigate it',
+              'Adapts quickly and maintains productivity',
+              'Stays calm and works through challenges methodically',
+              'Finds creative solutions during transitions',
+              'Takes charge when others struggle with change',
+              'Thrives in uncertain or ambiguous situations'
             ],
             order: 1
           },
           {
-            id: 'adaptability_helps_others',
+            id: 'adaptability_recovery_speed',
             attribute_name: 'Adaptability',
-            question_text: 'When others struggle with change, how does this person typically respond?',
+            question_text: 'When disrupted by unexpected changes, how quickly do they return to full effectiveness?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Actively helps and coaches others through transitions',
-              'Available for support when asked but doesn\'t proactively help',
-              'Focuses on their own adaptation first',
-              'Sometimes impatient with others who struggle to adapt',
-              'Not sure'
+              'Immediately - often performs better than before',
+              'Within a day or two with minimal impact',
+              'Takes about a week to fully adjust',
+              'Longer adjustment periods but gets there',
+              'Haven\'t observed them through major changes'
             ],
             order: 2
           },
           {
-            id: 'adaptability_incomplete_requirements',
+            id: 'adaptability_helps_others',
             attribute_name: 'Adaptability',
-            question_text: 'How well do they perform when given incomplete or changing requirements?',
+            question_text: 'How do they help others during periods of change?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Thrives with minimal direction - fills gaps effectively',
-              'Performs well but seeks clarification when needed',
-              'Generally good but prefers more structure',
-              'Needs significant guidance in ambiguous situations',
-              'Not sure'
+              'Actively coaches and supports others through transitions',
+              'Available for help when others ask',
+              'Leads by example but focuses on their own adaptation',
+              'Sometimes impatient with others who struggle to adapt',
+              'Haven\'t observed them helping others with change'
             ],
             order: 3
           },
           {
-            id: 'adaptability_major_change_recovery',
+            id: 'adaptability_excellence_example',
             attribute_name: 'Adaptability',
-            question_text: 'When a major change disrupts their work, how quickly do they return to full productivity?',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'Immediately - often more productive than before',
-              'Within a few days with minimal impact',
-              'Takes 1-2 weeks to fully adjust',
-              'Longer adjustment periods',
-              'Not sure'
-            ],
-            order: 4
-          },
-          {
-            id: 'adaptability_priority_changes',
-            attribute_name: 'Adaptability',
-            question_text: 'How do they typically respond to shifting priorities or last-minute changes?',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'Embrace it and re-prioritize effectively',
-              'Struggle initially, but adapt',
-              'Quickly re-prioritizes even without clarity',
-              'Resist or push back',
-              'Not sure'
-            ],
-            order: 5
-          },
-          {
-            id: 'adaptability_examples_describe',
-            attribute_name: 'Adaptability',
-            question_text: 'Provide 1–2 examples of this person handling change or ambiguity effectively.',
+            question_text: 'Describe a recent example that best demonstrates their exceptional adaptability:',
             question_type: 'text',
             is_required: false,
-            order: 6
+            placeholder: 'Focus on the change they faced, how they handled it, and the positive outcome...',
+            order: 4
           }
         ]
       },
@@ -1368,59 +1152,75 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '6-8',
         questions: [
           {
-            id: 'adaptability_challenging_changes',
+            id: 'adaptability_comfortable_changes',
             attribute_name: 'Adaptability',
-            question_text: 'What types of changes seem to challenge this person most? (Multi-select)',
+            question_text: 'What types of changes do they handle most comfortably?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Technical change',
-              'Strategic change',
-              'Team change',
-              'Process change',
-              'Cultural change',
-              'Not sure'
+              'Gradual or planned changes with advance notice',
+              'Technical or process improvements',
+              'Team or organizational structure changes',
+              'Priority or deadline adjustments',
+              'New tools or methods',
+              'Customer or project requirement changes'
             ],
             order: 1
           },
           {
-            id: 'adaptability_energizing_changes',
+            id: 'adaptability_challenging_changes',
             attribute_name: 'Adaptability',
-            question_text: 'What types of changes seem to energize this person? (Multi-select)',
+            question_text: 'What types of changes create the most difficulty for them?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Technical change',
-              'Strategic change',
-              'Team change',
-              'Process change',
-              'Cultural change',
-              'Not sure'
+              'Sudden or unexpected changes with no warning',
+              'Changes that affect their core responsibilities',
+              'Ambiguous changes without clear direction',
+              'Changes imposed from outside their department',
+              'Multiple simultaneous changes',
+              'Haven\'t observed them struggling with any changes'
             ],
             order: 2
           },
           {
-            id: 'adaptability_communication_during_change',
+            id: 'adaptability_adjustment_pattern',
             attribute_name: 'Adaptability',
-            question_text: 'How effectively do they communicate during periods of change or uncertainty?',
+            question_text: 'What is their typical adjustment pattern when facing change?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Transparent about concerns and needs',
-              'Generally communicates well but may need prompting',
-              'Tends to keep concerns to themselves',
-              'Communication becomes unclear or negative',
-              'Not sure'
+              'Adapts quickly with minimal visible stress',
+              'Initial resistance but comes around within a reasonable time',
+              'Takes time to process but eventually adapts well',
+              'Adapts but with ongoing complaints or negativity',
+              'Struggles significantly throughout the transition'
             ],
             order: 3
           },
           {
-            id: 'adaptability_coaching_support',
+            id: 'adaptability_communication_style',
             attribute_name: 'Adaptability',
-            question_text: 'What coaching or support would make them more adaptable in tough conditions?',
+            question_text: 'How do they communicate during periods of change or uncertainty?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Stays positive and communicates openly about challenges',
+              'Generally constructive but may express some concerns',
+              'Tends to keep concerns to themselves',
+              'Communication becomes negative or disruptive',
+              'Haven\'t observed their communication during change'
+            ],
+            order: 4
+          },
+          {
+            id: 'adaptability_development_focus',
+            attribute_name: 'Adaptability',
+            question_text: 'What would most help this person adapt more effectively to change?',
             question_type: 'text',
             is_required: false,
-            order: 4
+            placeholder: 'Consider preparation methods, support systems, communication, or mindset changes...',
+            order: 5
           }
         ]
       },
@@ -1428,98 +1228,60 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '1-5',
         questions: [
           {
-            id: 'adaptability_concerns_low',
+            id: 'adaptability_resistance_behaviors',
             attribute_name: 'Adaptability',
-            question_text: 'What concerns have you observed around adaptability? (Multi-select)',
+            question_text: 'What resistance behaviors do you observe when changes occur?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Reacts poorly to last-minute or ambiguous requests',
-              'Struggles to change gears or routines',
-              'Pushes back on new processes, roles, or expectations',
-              'Causes delay or disruption when plans shift',
-              'Disengages during uncertainty',
-              'Other (please describe)'
+              'Openly complains or criticizes the changes',
+              'Becomes withdrawn or disengaged',
+              'Continues old methods despite new requirements',
+              'Creates tension or negativity in the team',
+              'Requires extensive convincing or support',
+              'Slows down or reduces productivity significantly'
             ],
             order: 1
           },
           {
-            id: 'adaptability_concerns_other',
+            id: 'adaptability_primary_struggle',
             attribute_name: 'Adaptability',
-            question_text: 'Please describe the other adaptability concerns:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'adaptability_concerns_low',
-                answer_value: ['Other (please describe)']
-              }
-            },
+            question_text: 'What appears to be their primary struggle with change?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Fear of failure or making mistakes in new situations',
+              'Strong attachment to familiar methods and routines',
+              'Difficulty processing or understanding new requirements',
+              'Stress response that impairs their performance',
+              'Resistance to authority or imposed changes',
+              'Overwhelmed by the pace or scope of changes'
+            ],
             order: 2
           },
           {
-            id: 'adaptability_behavior_frequency',
+            id: 'adaptability_team_impact',
             attribute_name: 'Adaptability',
-            question_text: 'How frequently do these behaviors occur?',
+            question_text: 'How does their resistance to change affect team dynamics or productivity?',
             question_type: 'single_select',
             is_required: true,
-            options: ['Weekly or more', 'Occasionally', 'Rare or one-time', 'Not sure'],
+            options: [
+              'Significantly disrupts team progress and morale',
+              'Creates extra work for others who must compensate',
+              'Slows implementation but doesn\'t derail efforts',
+              'Minimal impact - team works around their resistance',
+              'Too early to assess the full impact'
+            ],
             order: 3
           },
           {
-            id: 'adaptability_difficult_changes',
+            id: 'adaptability_improvement_potential',
             attribute_name: 'Adaptability',
-            question_text: 'Which types of changes cause the most difficulty for this person?',
-            question_type: 'multi_select',
-            is_required: true,
-            options: [
-              'Technology or process changes',
-              'Organizational structure or reporting changes',
-              'Priority or deadline changes',
-              'Team composition or role changes',
-              'Strategic direction changes',
-              'All types of changes equally',
-              'Other (describe)'
-            ],
+            question_text: 'What would most likely help this person become more adaptable?',
+            question_type: 'text',
+            is_required: false,
+            placeholder: 'Consider gradual exposure, support systems, training, or role adjustments...',
             order: 4
-          },
-          {
-            id: 'adaptability_difficult_other',
-            attribute_name: 'Adaptability',
-            question_text: 'Please describe the other difficult change types:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'adaptability_difficult_changes',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 5
-          },
-          {
-            id: 'adaptability_improvement_possibility',
-            attribute_name: 'Adaptability',
-            question_text: 'Based on your observations, do you think this person could improve their adaptability with:',
-            question_type: 'multi_select',
-            is_required: true,
-            options: [
-              'Clear communication about why changes are needed',
-              'More time and support during transitions',
-              'Training on change management skills',
-              'Different types of changes (gradual vs. sudden)',
-              'It seems to be a fundamental trait - unlikely to change significantly',
-              'Not sure'
-            ],
-            order: 6
-          },
-          {
-            id: 'adaptability_rigidity_impact',
-            attribute_name: 'Adaptability',
-            question_text: 'How has this rigidity or resistance affected their output or the team?',
-            question_type: 'text',
-            is_required: false,
-            order: 7
           }
         ]
       }
@@ -1539,26 +1301,26 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
       {
         id: 'problem_solving_observed',
         attribute_name: 'Problem Solving Ability',
-        question_text: 'In your experience with this person when facing challenges, which of these have you observed? (Check all that apply)',
+        question_text: 'When facing a challenging problem, what\'s their typical approach? (Select what you\'ve observed)',
         question_type: 'multi_select',
         is_required: true,
         options: [
-          'Consistently finds creative solutions to complex problems and helps others through challenges',
-          'Generally works through problems methodically with occasional need for guidance',
-          'Handles routine problems well but struggles when issues become complex or unclear',
-          'Frequently avoids difficult problems or gives up when facing obstacles',
-          'Others seek them out specifically for their problem-solving expertise and insight',
-          'Attempts to solve problems but often needs significant support to reach effective solutions'
+          'Digs in independently and usually finds effective solutions',
+          'Works through it methodically with occasional guidance',
+          'Tries basic approaches but escalates complex issues',
+          'Avoids difficult problems or gives up quickly',
+          'Others specifically seek them out for tough challenges',
+          'Needs significant support to reach workable solutions'
         ],
         order: 1
       },
       {
         id: 'problem_solving_example',
         attribute_name: 'Problem Solving Ability',
-        question_text: 'Any specific example that stands out? (Optional - brief description)',
+        question_text: 'Think of the last complex problem they encountered. What happened?',
         question_type: 'text',
-        is_required: false,
-        placeholder: 'Brief description of a specific example...',
+        is_required: true,
+        placeholder: 'Describe how they handled a recent complex problem...',
         order: 2
       }
     ],
@@ -1567,50 +1329,59 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '9-10',
         questions: [
           {
-            id: 'problem_solving_behaviors_high',
+            id: 'problem_solving_approach_excellence',
             attribute_name: 'Problem Solving Ability',
-            question_text: 'Which of these problem-solving behaviors have you seen in the last 30 days? (Multi-select)',
+            question_text: 'What makes their problem-solving approach exceptional? (Select all that apply)',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Solved a complex issue without needing detailed guidance',
-              'Tackled a challenge creatively or from multiple angles',
-              'Found the root cause of a recurring issue',
-              'Took initiative to fix something before it escalated',
-              'Helped others improve their problem-solving approach',
-              'None of the above'
+              'Quickly identifies root causes rather than just symptoms',
+              'Develops creative solutions others hadn\'t considered',
+              'Remains calm and systematic under pressure',
+              'Anticipates and prevents problems before they occur',
+              'Effectively involves others when collaboration is needed',
+              'Finds solutions that address multiple issues at once'
             ],
             order: 1
           },
           {
-            id: 'problem_solving_unexpected_response',
+            id: 'problem_solving_complexity_handling',
             attribute_name: 'Problem Solving Ability',
-            question_text: 'When problems arise unexpectedly, how do they usually respond?',
+            question_text: 'How do they handle complex problems with multiple variables?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Stay calm and quickly assess options',
-              'Default to proven solutions',
-              'Wait for direction',
-              'Tend to escalate instead of solving',
-              'Not sure'
+              'Breaks them down systematically and solves them effectively',
+              'Seeks input from others but drives the solution process',
+              'Generally handles complexity well with some guidance',
+              'Prefers to escalate very complex problems',
+              'Haven\'t observed them with highly complex problems'
             ],
             order: 2
           },
           {
-            id: 'problem_solving_others_bring_problems',
+            id: 'problem_solving_others_seek_help',
             attribute_name: 'Problem Solving Ability',
-            question_text: 'When others bring complex problems to this person, what typically happens?',
+            question_text: 'How often do others come to them for help with difficult problems?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'They help others think through solutions effectively',
-              'They solve it themselves but teach the approach',
-              'They collaborate well to find joint solutions',
-              'Others mostly just want them to fix it',
+              'Regularly - they\'re known as a go-to problem solver',
+              'Occasionally for problems in their area of expertise',
+              'Rarely - others usually look elsewhere first',
+              'Haven\'t observed others seeking their help',
               'Not sure'
             ],
             order: 3
+          },
+          {
+            id: 'problem_solving_excellence_example',
+            attribute_name: 'Problem Solving Ability',
+            question_text: 'Describe their most impressive recent problem-solving success:',
+            question_type: 'text',
+            is_required: false,
+            placeholder: 'Focus on the problem, their approach, and why it was particularly effective...',
+            order: 4
           }
         ]
       },
@@ -1618,88 +1389,75 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '6-8',
         questions: [
           {
-            id: 'problem_solving_performance_mid',
+            id: 'problem_solving_success_types',
             attribute_name: 'Problem Solving Ability',
-            question_text: 'How does this person typically perform when solving problems? (Multi-select)',
+            question_text: 'What types of problems do they solve most effectively?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Proactively addresses technical or process-related challenges',
-              'Responds well under pressure when issues are clear',
-              'Can resolve interpersonal or team issues constructively',
-              'Occasionally avoids ambiguous or sensitive problems',
-              'Jumps into action quickly but misses deeper analysis',
-              'Offers solutions but needs guidance to implement',
-              'Often reluctant to engage with high-stakes or complex issues',
-              'None of the above'
+              'Technical or equipment-related issues',
+              'Process or workflow problems',
+              'People or communication challenges',
+              'Resource or scheduling conflicts',
+              'Customer or external stakeholder issues',
+              'Routine problems within their expertise'
             ],
             order: 1
           },
           {
-            id: 'problem_solving_struggle_response',
+            id: 'problem_solving_struggle_types',
             attribute_name: 'Problem Solving Ability',
-            question_text: 'When they struggle with problem solving, what usually happens?',
-            question_type: 'single_select',
+            question_text: 'What types of problems do they find most challenging?',
+            question_type: 'multi_select',
             is_required: true,
             options: [
-              'They recognize the struggle and seek appropriate help',
-              'They persist but may take longer than optimal',
-              'They avoid the problem or delay addressing it',
-              'They try the same approach repeatedly',
-              'Other (describe)'
+              'Complex problems with multiple causes',
+              'Issues outside their area of expertise',
+              'Problems requiring quick decisions under pressure',
+              'Interpersonal conflicts or sensitive situations',
+              'Problems with unclear or incomplete information',
+              'Haven\'t observed them struggling with any problem types'
             ],
             order: 2
           },
           {
-            id: 'problem_solving_struggle_other',
+            id: 'problem_solving_approach_pattern',
             attribute_name: 'Problem Solving Ability',
-            question_text: 'Please describe the other response:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'problem_solving_struggle_response',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 3
-          },
-          {
-            id: 'problem_solving_unfamiliar_first_step',
-            attribute_name: 'Problem Solving Ability',
-            question_text: 'When faced with unfamiliar problems, what do they typically do first?',
+            question_text: 'What is their typical approach when facing an unfamiliar problem?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Try to solve it themselves',
-              'Ask for clarification or guidance',
-              'Delay action until others step in',
-              'Escalate the issue',
-              'Varies significantly case-by-case'
+              'Digs in independently and figures it out',
+              'Gathers information and seeks appropriate guidance',
+              'Tries basic solutions first, then escalates if needed',
+              'Tends to escalate quickly rather than attempting solutions',
+              'Approach varies significantly depending on the situation'
+            ],
+            order: 3
+          },
+          {
+            id: 'problem_solving_effectiveness_consistency',
+            attribute_name: 'Problem Solving Ability',
+            question_text: 'How consistent is their problem-solving effectiveness?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Very consistent - reliable problem solver',
+              'Generally consistent with occasional struggles',
+              'Inconsistent - sometimes effective, sometimes not',
+              'Consistently struggles but tries',
+              'Haven\'t observed enough to assess consistency'
             ],
             order: 4
           },
           {
-            id: 'problem_solving_varies_case',
+            id: 'problem_solving_development_focus',
             attribute_name: 'Problem Solving Ability',
-            question_text: 'Please describe a recent case where they adapted or struggled.',
+            question_text: 'What would most help this person become a more effective problem solver?',
             question_type: 'text',
             is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'problem_solving_unfamiliar_first_step',
-                answer_value: ['Varies significantly case-by-case']
-              }
-            },
+            placeholder: 'Consider analytical skills, confidence building, resources, or experience...',
             order: 5
-          },
-          {
-            id: 'problem_solving_coaching_needed',
-            attribute_name: 'Problem Solving Ability',
-            question_text: 'What coaching or experience would help this person improve their problem-solving confidence or outcomes?',
-            question_type: 'text',
-            is_required: false,
-            order: 6
           }
         ]
       },
@@ -1707,112 +1465,60 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '1-5',
         questions: [
           {
-            id: 'problem_solving_gaps_low',
+            id: 'problem_solving_avoidance_patterns',
             attribute_name: 'Problem Solving Ability',
-            question_text: 'What specific problem-solving gaps have you observed? (Multi-select)',
+            question_text: 'What problem-solving avoidance patterns do you observe?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Misses obvious problems or reacts too late',
-              'Relies on others to diagnose or fix issues',
-              'Repeats ineffective solutions',
-              'Avoids responsibility when problems arise',
-              'Fails to learn from past mistakes',
-              'Other (please describe)'
+              'Immediately escalates problems rather than attempting solutions',
+              'Avoids problems entirely and hopes others will handle them',
+              'Makes problems worse through poor decisions or inaction',
+              'Gives up quickly when initial attempts don\'t work',
+              'Blames problems on others or external circumstances',
+              'Becomes overwhelmed and shuts down when problems arise'
             ],
             order: 1
           },
           {
-            id: 'problem_solving_gaps_other',
+            id: 'problem_solving_primary_limitation',
             attribute_name: 'Problem Solving Ability',
-            question_text: 'Please describe the other problem-solving gaps:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'problem_solving_gaps_low',
-                answer_value: ['Other (please describe)']
-              }
-            },
+            question_text: 'What appears to be their primary limitation in problem solving?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Lacks analytical skills or logical thinking ability',
+              'Avoids responsibility and accountability for solutions',
+              'Gets overwhelmed and can\'t think through options clearly',
+              'Doesn\'t have enough experience or knowledge',
+              'Freezes up under pressure or when stakes are high',
+              'Not sure what their primary limitation is'
+            ],
             order: 2
           },
           {
-            id: 'problem_solving_gap_frequency',
+            id: 'problem_solving_team_impact',
             attribute_name: 'Problem Solving Ability',
-            question_text: 'How frequently does this problem-solving gap occur?',
+            question_text: 'How do their problem-solving limitations affect the team or work outcomes?',
             question_type: 'single_select',
             is_required: true,
-            options: ['Weekly or more', 'Occasionally', 'Rare or one-time', 'Not sure'],
+            options: [
+              'Creates significant burden on others to solve problems',
+              'Causes delays when problems aren\'t addressed promptly',
+              'Minor impact - others naturally handle problem-solving',
+              'Sometimes makes situations worse before they get better',
+              'Too early to assess the full impact'
+            ],
             order: 3
           },
           {
-            id: 'problem_solving_avoids_most',
+            id: 'problem_solving_improvement_potential',
             attribute_name: 'Problem Solving Ability',
-            question_text: 'What type of problems does this person avoid most?',
-            question_type: 'multi_select',
-            is_required: true,
-            options: [
-              'Complex analytical problems',
-              'Interpersonal conflicts or sensitive issues',
-              'Problems requiring quick decisions',
-              'Issues outside their comfort zone',
-              'Problems with unclear solutions',
-              'Any problems that might involve criticism',
-              'Other (describe)'
-            ],
+            question_text: 'What would most likely help this person develop better problem-solving abilities?',
+            question_type: 'text',
+            is_required: false,
+            placeholder: 'Consider training, mentoring, experience, confidence building, or role adjustments...',
             order: 4
-          },
-          {
-            id: 'problem_solving_avoids_other',
-            attribute_name: 'Problem Solving Ability',
-            question_text: 'Please describe the other types of problems they avoid:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'problem_solving_avoids_most',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 5
-          },
-          {
-            id: 'problem_solving_struggles_primary',
-            attribute_name: 'Problem Solving Ability',
-            question_text: 'Do you think this person\'s problem-solving struggles are primarily:',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'Knowledge/skill gaps that could be addressed with training',
-              'Analysis paralysis or lack of confidence',
-              'Avoidance of responsibility or accountability',
-              'Overwhelmed by current workload',
-              'Fundamental reasoning difficulties',
-              'Other (describe)'
-            ],
-            order: 6
-          },
-          {
-            id: 'problem_solving_primary_other',
-            attribute_name: 'Problem Solving Ability',
-            question_text: 'Please describe the other primary struggle:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'problem_solving_struggles_primary',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 7
-          },
-          {
-            id: 'problem_solving_impact',
-            attribute_name: 'Problem Solving Ability',
-            question_text: 'What\'s the impact of this behavior on project flow, decision-making, or team confidence?',
-            question_type: 'text',
-            is_required: false,
-            order: 8
           }
         ]
       }
@@ -1832,26 +1538,33 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
       {
         id: 'teamwork_observed',
         attribute_name: 'Teamwork',
-        question_text: 'In your experience with this person in team settings, which of these have you observed? (Check all that apply)',
+        question_text: 'How do they typically contribute to team success? (Select all that apply)',
         question_type: 'multi_select',
         is_required: true,
         options: [
-          'Actively strengthens team dynamics and goes above and beyond to support colleagues',
-          'Collaborates well with most people and contributes positively to team goals',
-          'Works adequately in teams but tends to focus primarily on their own responsibilities',
-          'Creates tension or conflict that negatively impacts team productivity and morale',
-          'Others specifically request to work with them because of their collaborative skills',
-          'Participates in team activities but requires encouragement to fully engage or contribute'
+          'Actively supports teammates and strengthens group dynamics',
+          'Collaborates well and delivers their part reliably',
+          'Focuses mainly on individual work with minimal team engagement',
+          'Creates tension or conflicts that impact team effectiveness',
+          'Others specifically request to work with them',
+          'Participates when required but doesn\'t add extra value'
         ],
         order: 1
       },
       {
         id: 'teamwork_example',
         attribute_name: 'Teamwork',
-        question_text: 'Any specific example that stands out? (Optional - brief description)',
-        question_type: 'text',
-        is_required: false,
-        placeholder: 'Brief description of a specific example...',
+        question_text: 'In team settings, what role do they naturally play?',
+        question_type: 'single_select',
+        is_required: true,
+        options: [
+          'The person others look to for guidance and support',
+          'A reliable contributor who delivers what\'s expected',
+          'Someone who works better individually than in groups',
+          'A source of energy and positivity for the team',
+          'Often creates friction or slows progress',
+          'Varies significantly depending on the team composition'
+        ],
         order: 2
       }
     ],
@@ -1860,57 +1573,58 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '9-10',
         questions: [
           {
-            id: 'teamwork_exceptional_behaviors',
+            id: 'teamwork_contribution_style',
             attribute_name: 'Teamwork',
-            question_text: 'In the past 30 days, how has this person shown exceptional teamwork? (Multi-select)',
+            question_text: 'What makes their teamwork contributions exceptional? (Select all that apply)',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Proactively supported a teammate with their workload or a blocker',
-              'Resolved or defused conflict with maturity',
-              'Took on an unglamorous task for the team\'s success',
-              'Helped others improve or grow through feedback or collaboration',
-              'Elevated the group by improving communication, clarity, or cohesion',
-              'None of the above'
+              'Actively supports and helps teammates succeed',
+              'Builds trust and improves team communication',
+              'Steps up to handle difficult team situations',
+              'Brings out the best in other team members',
+              'Takes on unglamorous tasks for team success',
+              'Creates a positive and collaborative team environment'
             ],
             order: 1
           },
           {
-            id: 'teamwork_conflict_handling',
+            id: 'teamwork_conflict_resolution',
             attribute_name: 'Teamwork',
-            question_text: 'How does this person handle team conflict or disagreements?',
+            question_text: 'How do they handle team conflicts or disagreements?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Addresses issues directly and constructively',
+              'Actively works to resolve conflicts constructively',
               'Helps mediate and find common ground',
-              'Stays neutral but supports resolution',
-              'Prevents conflicts through proactive communication',
-              'Not sure - haven\'t observed conflict situations'
+              'Stays positive but doesn\'t directly intervene',
+              'Focuses on preventing conflicts through good communication',
+              'Haven\'t observed them during team conflicts'
             ],
             order: 2
           },
           {
-            id: 'teamwork_team_description',
+            id: 'teamwork_leadership_natural',
             attribute_name: 'Teamwork',
-            question_text: 'How would others on the team describe this person\'s collaborative style?',
+            question_text: 'How do others respond when they take on team leadership or coordination?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Highly dependable and team-oriented',
-              'Positive but not always available',
-              'Quiet contributor',
-              'Selective collaborator (only with certain teammates)',
-              'Not sure'
+              'Others readily follow and support their leadership',
+              'Generally positive response with good collaboration',
+              'Mixed response depending on the situation',
+              'They rarely take on formal team leadership roles',
+              'Haven\'t observed them in team leadership situations'
             ],
             order: 3
           },
           {
-            id: 'teamwork_strengthened_examples',
+            id: 'teamwork_excellence_example',
             attribute_name: 'Teamwork',
-            question_text: 'Share 1–2 recent examples of how this person strengthened a team effort.',
+            question_text: 'Describe a recent example that best demonstrates their exceptional teamwork:',
             question_type: 'text',
             is_required: false,
+            placeholder: 'Focus on what they did, how it helped the team, and the positive results...',
             order: 4
           }
         ]
@@ -1919,111 +1633,76 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '6-8',
         questions: [
           {
-            id: 'teamwork_behavior_patterns',
+            id: 'teamwork_strong_situations',
             attribute_name: 'Teamwork',
-            question_text: 'Which of these describe their team behavior? (Multi-select)',
+            question_text: 'In what team situations do they contribute most effectively?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Works well in familiar teams but avoids broader collaboration',
-              'Helpful when asked but not proactive',
-              'Contributes but rarely takes initiative to unify the group',
-              'Avoids difficult team dynamics or personalities',
-              'Shows strong teamwork in some projects, but inconsistently',
-              'None of the above'
+              'Small, familiar teams with established relationships',
+              'Project-based teams with clear goals',
+              'Teams where they have relevant expertise',
+              'Collaborative problem-solving situations',
+              'Teams with strong leadership from others',
+              'Cross-functional teams with diverse perspectives'
             ],
             order: 1
           },
           {
-            id: 'teamwork_best_situations',
+            id: 'teamwork_challenging_situations',
             attribute_name: 'Teamwork',
-            question_text: 'In what team situations does this person perform best?',
+            question_text: 'In what team situations do they struggle or contribute less effectively?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Small, familiar teams',
-              'Cross-functional or diverse teams',
-              'Project-based temporary teams',
-              'Ongoing operational teams',
-              'High-pressure deadline situations',
-              'Low-stakes, routine collaboration',
-              'Other (describe)'
+              'Large teams with many personalities',
+              'Teams with unclear roles or goals',
+              'High-conflict or tense team environments',
+              'When they\'re expected to take the lead',
+              'Teams with tight deadlines and pressure',
+              'Haven\'t observed them struggling in team situations'
             ],
             order: 2
           },
           {
-            id: 'teamwork_best_other',
+            id: 'teamwork_collaboration_style',
             attribute_name: 'Teamwork',
-            question_text: 'Please describe the other team situation:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'teamwork_best_situations',
-                answer_value: ['Other (describe)']
-              }
-            },
+            question_text: 'What best describes their typical collaboration style?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Proactive contributor who engages actively',
+              'Reliable team player who does their part well',
+              'Supportive follower who works best with clear direction',
+              'Independent worker who collaborates when necessary',
+              'Style varies significantly depending on the team'
+            ],
             order: 3
           },
           {
-            id: 'teamwork_effectiveness_barriers',
+            id: 'teamwork_improvement_barrier',
             attribute_name: 'Teamwork',
-            question_text: 'What prevents this person from being a more effective team member?',
-            question_type: 'multi_select',
+            question_text: 'What seems to be the main barrier to more effective teamwork?',
+            question_type: 'single_select',
             is_required: true,
             options: [
               'Lack of confidence in group settings',
-              'Tendency to avoid conflict or difficult conversations',
-              'Focus on individual work over team goals',
-              'Communication style doesn\'t always resonate',
-              'Reluctance to take on team leadership roles',
-              'Workload prevents full team engagement',
-              'Other (describe)'
+              'Preference for individual work over collaboration',
+              'Communication style that doesn\'t always connect',
+              'Difficulty navigating different personalities',
+              'Overwhelmed by current individual responsibilities',
+              'Not sure what the main barrier is'
             ],
             order: 4
           },
           {
-            id: 'teamwork_barriers_other',
+            id: 'teamwork_development_focus',
             attribute_name: 'Teamwork',
-            question_text: 'Please describe the other barrier:',
+            question_text: 'What would most help this person become a more effective team member?',
             question_type: 'text',
             is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'teamwork_effectiveness_barriers',
-                answer_value: ['Other (describe)']
-              }
-            },
+            placeholder: 'Consider communication skills, confidence building, role clarity, or experience...',
             order: 5
-          },
-          {
-            id: 'teamwork_cross_functional_confidence',
-            attribute_name: 'Teamwork',
-            question_text: 'How would you feel assigning this person to lead or support a cross-functional team project?',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'Very confident',
-              'Somewhat confident',
-              'Not confident',
-              'Wouldn\'t assign them to that role',
-              'Not sure'
-            ],
-            order: 6
-          },
-          {
-            id: 'teamwork_assignment_concerns',
-            attribute_name: 'Teamwork',
-            question_text: 'Explain what would need to change.',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'teamwork_cross_functional_confidence',
-                answer_value: ['Not confident', 'Wouldn\'t assign them to that role']
-              }
-            },
-            order: 7
           }
         ]
       },
@@ -2031,113 +1710,60 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '1-5',
         questions: [
           {
-            id: 'teamwork_concerns_low',
+            id: 'teamwork_problematic_behaviors',
             attribute_name: 'Teamwork',
-            question_text: 'What teamwork concerns have you directly observed? (Multi-select)',
+            question_text: 'What problematic teamwork behaviors do you observe most frequently?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Avoids group collaboration or team tasks',
-              'Frequently clashes with teammates or resists feedback',
-              'Undermines team morale or cohesion',
-              'Doesn\'t communicate or coordinate in shared work',
-              'Has caused avoidable conflict or delays',
-              'Other (please describe)'
+              'Avoids collaboration or team responsibilities',
+              'Creates conflict or tension with teammates',
+              'Doesn\'t communicate effectively with the team',
+              'Focuses only on individual work and ignores team needs',
+              'Becomes defensive or difficult during team discussions',
+              'Undermines team decisions or group morale'
             ],
             order: 1
           },
           {
-            id: 'teamwork_concerns_other',
+            id: 'teamwork_primary_issue',
             attribute_name: 'Teamwork',
-            question_text: 'Please describe the other teamwork concerns:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'teamwork_concerns_low',
-                answer_value: ['Other (please describe)']
-              }
-            },
+            question_text: 'What appears to be the root cause of their teamwork difficulties?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Poor communication or interpersonal skills',
+              'Ego or competitiveness that interferes with collaboration',
+              'Anxiety or discomfort in group settings',
+              'Strong preference for working independently',
+              'Past negative experiences affecting current team behavior',
+              'Not sure what causes their teamwork difficulties'
+            ],
             order: 2
           },
           {
-            id: 'teamwork_problem_situations',
+            id: 'teamwork_team_impact',
             attribute_name: 'Teamwork',
-            question_text: 'What type of team situations create the most problems for this person?',
-            question_type: 'multi_select',
+            question_text: 'How do their teamwork issues affect overall team performance?',
+            question_type: 'single_select',
             is_required: true,
             options: [
-              'High-pressure or deadline situations',
-              'Cross-functional teams with diverse perspectives',
-              'Teams with strong personalities or leaders',
-              'Ambiguous roles or unclear team goals',
-              'Any situation requiring compromise or consensus',
-              'Conflict resolution or difficult conversations',
-              'Other (describe)'
+              'Significantly disrupts team effectiveness and morale',
+              'Creates extra work for others to compensate',
+              'Causes occasional friction but team manages',
+              'Minimal impact - team works around the issues',
+              'Too early to assess the full impact'
             ],
             order: 3
           },
           {
-            id: 'teamwork_problem_other',
+            id: 'teamwork_improvement_potential',
             attribute_name: 'Teamwork',
-            question_text: 'Please describe the other problematic situations:',
+            question_text: 'What would most likely help this person become a better team member?',
             question_type: 'text',
             is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'teamwork_problem_situations',
-                answer_value: ['Other (describe)']
-              }
-            },
+            placeholder: 'Consider skills training, team environment changes, coaching, or role adjustments...',
             order: 4
-          },
-          {
-            id: 'teamwork_issues_primary_cause',
-            attribute_name: 'Teamwork',
-            question_text: 'Do you think this person\'s teamwork issues are primarily:',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'Communication or interpersonal skill gaps',
-              'Unwillingness to collaborate or share responsibility',
-              'Conflict avoidance that creates bigger problems',
-              'Ego or competitiveness that undermines cooperation',
-              'Overwhelmed by individual responsibilities',
-              'Past negative team experiences affecting current behavior',
-              'Other (describe)'
-            ],
-            order: 5
-          },
-          {
-            id: 'teamwork_cause_other',
-            attribute_name: 'Teamwork',
-            question_text: 'Please describe the other primary cause:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'teamwork_issues_primary_cause',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 6
-          },
-          {
-            id: 'teamwork_behavior_frequency',
-            attribute_name: 'Teamwork',
-            question_text: 'How often do these behaviors occur?',
-            question_type: 'single_select',
-            is_required: true,
-            options: ['Weekly or more', 'Occasionally', 'Rare or one-time', 'Not sure'],
-            order: 7
-          },
-          {
-            id: 'teamwork_performance_impact',
-            attribute_name: 'Teamwork',
-            question_text: 'How have these behaviors affected the team\'s performance or dynamics?',
-            question_type: 'text',
-            is_required: false,
-            order: 8
           }
         ]
       }
@@ -2157,26 +1783,26 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
       {
         id: 'continuous_improvement_observed',
         attribute_name: 'Continuous Improvement',
-        question_text: 'In your experience with this person\'s approach to growth and learning, which of these have you observed? (Check all that apply)',
+        question_text: 'How do they respond to feedback and development opportunities? (Select what you\'ve observed)',
         question_type: 'multi_select',
         is_required: true,
         options: [
-          'Proactively seeks growth opportunities and consistently applies feedback to achieve measurable improvements',
-          'Generally receptive to feedback and shows steady improvement over time',
-          'Shows some interest in learning but inconsistent in applying feedback or making changes',
-          'Resists feedback and tends to stick with familiar methods despite better alternatives available',
-          'Others look to them as a model for professional development and continuous learning',
-          'Acknowledges the value of improvement but rarely takes concrete steps to develop new skills'
+          'Actively seeks feedback and consistently applies it',
+          'Receptive when feedback is offered and usually acts on it',
+          'Accepts feedback politely but application is inconsistent',
+          'Becomes defensive or resistant when given constructive input',
+          'Others view them as a model for growth and learning',
+          'Acknowledges development needs but rarely takes action'
         ],
         order: 1
       },
       {
         id: 'continuous_improvement_example',
         attribute_name: 'Continuous Improvement',
-        question_text: 'Any specific example that stands out? (Optional - brief description)',
+        question_text: 'What\'s the best example of them actually changing or improving based on feedback?',
         question_type: 'text',
-        is_required: false,
-        placeholder: 'Brief description of a specific example...',
+        is_required: true,
+        placeholder: 'Describe a specific example of improvement based on feedback...',
         order: 2
       }
     ],
@@ -2185,89 +1811,59 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '9-10',
         questions: [
           {
-            id: 'continuous_improvement_mindset_high',
+            id: 'continuous_improvement_behaviors',
             attribute_name: 'Continuous Improvement',
-            question_text: 'In the past 30–60 days, how have they demonstrated a growth mindset? (Multi-select)',
+            question_text: 'What growth behaviors do you observe most consistently? (Select all that apply)',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Asked for feedback without being prompted',
-              'Integrated feedback and changed their approach',
-              'Improved a personal workflow or system',
-              'Initiated changes to improve team or org efficiency',
-              'Shared lessons learned or coached others to improve',
-              'None of the above'
+              'Proactively seeks feedback without being prompted',
+              'Regularly reflects on and improves their own methods',
+              'Implements suggestions and shows visible improvement',
+              'Identifies and addresses their own development needs',
+              'Coaches and develops others around them',
+              'Drives improvements that benefit the whole team'
             ],
             order: 1
           },
           {
-            id: 'continuous_improvement_helps_others',
+            id: 'continuous_improvement_feedback_seeking',
             attribute_name: 'Continuous Improvement',
-            question_text: 'How does this person help others grow and improve?',
-            question_type: 'multi_select',
+            question_text: 'How do they approach feedback and development opportunities?',
+            question_type: 'single_select',
             is_required: true,
             options: [
-              'Actively mentors and shares knowledge',
-              'Creates learning opportunities for teammates',
-              'Provides constructive feedback regularly',
-              'Models growth behaviors for others',
-              'Advocates for team development resources',
-              'Not sure - limited observation of this'
+              'Actively seeks out feedback and learning opportunities',
+              'Very receptive when feedback is offered',
+              'Generally open but doesn\'t proactively seek input',
+              'Accepts feedback but application can be slow',
+              'Haven\'t observed their approach to feedback'
             ],
             order: 2
           },
           {
-            id: 'continuous_improvement_effectiveness',
+            id: 'continuous_improvement_influence_others',
             attribute_name: 'Continuous Improvement',
-            question_text: 'What makes this person particularly effective at continuous improvement?',
-            question_type: 'multi_select',
+            question_text: 'How do they influence the growth mindset of others?',
+            question_type: 'single_select',
             is_required: true,
             options: [
-              'Strong self-awareness and reflection skills',
-              'Systems thinking - sees broader improvement opportunities',
-              'Excellent at learning from failures and setbacks',
-              'Creates accountability structures for themselves',
-              'Naturally curious and experimental mindset',
-              'Other (describe)'
+              'Actively mentors and encourages others to grow',
+              'Sets a strong example that others follow',
+              'Shares knowledge when asked but doesn\'t push',
+              'Focuses primarily on their own development',
+              'Haven\'t observed them influencing others\' growth'
             ],
             order: 3
           },
           {
-            id: 'continuous_improvement_effectiveness_other',
+            id: 'continuous_improvement_excellence_example',
             attribute_name: 'Continuous Improvement',
-            question_text: 'Please describe what else makes them effective:',
+            question_text: 'Describe a recent example that best demonstrates their commitment to continuous improvement:',
             question_type: 'text',
             is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'continuous_improvement_effectiveness',
-                answer_value: ['Other (describe)']
-              }
-            },
+            placeholder: 'Focus on what they improved, how they approached it, and the results...',
             order: 4
-          },
-          {
-            id: 'continuous_improvement_criticism_response',
-            attribute_name: 'Continuous Improvement',
-            question_text: 'How do they typically respond to constructive criticism?',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'Grateful and adaptive',
-              'Accepts but applies slowly',
-              'Defends or deflects',
-              'Avoids feedback',
-              'Not sure'
-            ],
-            order: 5
-          },
-          {
-            id: 'continuous_improvement_recent_example',
-            attribute_name: 'Continuous Improvement',
-            question_text: 'Share a recent example where their commitment to improvement led to a noticeable change or result.',
-            question_type: 'text',
-            is_required: false,
-            order: 6
           }
         ]
       },
@@ -2275,91 +1871,76 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '6-8',
         questions: [
           {
-            id: 'continuous_improvement_pursuit_mid',
+            id: 'continuous_improvement_receptive_areas',
             attribute_name: 'Continuous Improvement',
-            question_text: 'How does this person typically pursue growth opportunities? (Multi-select)',
+            question_text: 'In what areas are they most receptive to feedback and improvement?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Applies feedback when it\'s direct and detailed',
-              'Open to improvement but not proactive',
-              'Tries new things but reverts to old habits',
-              'Avoids uncomfortable feedback topics',
-              'Improves in some areas, but stays stagnant in others',
-              'None of the above'
+              'Technical skills and job-specific competencies',
+              'Process efficiency and work methods',
+              'Communication and interpersonal skills',
+              'Leadership and team collaboration',
+              'Problem-solving and decision-making',
+              'Generally receptive across all areas'
             ],
             order: 1
           },
           {
-            id: 'continuous_improvement_motivation',
+            id: 'continuous_improvement_resistance_areas',
             attribute_name: 'Continuous Improvement',
-            question_text: 'What seems to motivate this person\'s improvement efforts most?',
+            question_text: 'In what areas do they show resistance or slower improvement?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Recognition and career advancement',
-              'Personal satisfaction and mastery',
-              'Team success and collaboration',
-              'External pressure or requirements',
-              'Specific feedback or coaching',
-              'Problem-solving and challenge-solving',
-              'Other (describe)'
+              'Interpersonal or soft skills feedback',
+              'Changes to established work methods',
+              'Leadership or authority-related development',
+              'Feedback about attitude or mindset',
+              'Skills outside their primary expertise',
+              'Don\'t observe resistance in any particular areas'
             ],
             order: 2
           },
           {
-            id: 'continuous_improvement_motivation_other',
+            id: 'continuous_improvement_motivation_driver',
             attribute_name: 'Continuous Improvement',
-            question_text: 'Please describe the other motivation:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'continuous_improvement_motivation',
-                answer_value: ['Other (describe)']
-              }
-            },
+            question_text: 'What seems to motivate their improvement efforts most?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Personal satisfaction and mastery',
+              'Recognition and career advancement',
+              'Team success and helping others',
+              'External expectations or requirements',
+              'Problem-solving and overcoming challenges',
+              'Not sure what motivates their improvement'
+            ],
             order: 3
           },
           {
-            id: 'continuous_improvement_learning_style',
+            id: 'continuous_improvement_consistency',
             attribute_name: 'Continuous Improvement',
-            question_text: 'How does this person learn most effectively?',
-            question_type: 'multi_select',
+            question_text: 'How consistent are they in following through on improvement efforts?',
+            question_type: 'single_select',
             is_required: true,
             options: [
-              'Through direct instruction and training',
-              'By observing others and modeling behaviors',
-              'Through hands-on practice and experimentation',
-              'Via reading, research, and self-study',
-              'Through collaborative discussion and feedback',
-              'Mixed approach depending on the skill',
-              'Not sure'
+              'Very consistent - reliably implements changes',
+              'Generally consistent with occasional lapses',
+              'Inconsistent - starts strong but doesn\'t always sustain',
+              'Good intentions but poor follow-through',
+              'Haven\'t observed enough improvement efforts to assess'
             ],
             order: 4
           },
           {
-            id: 'continuous_improvement_growth_tone',
+            id: 'continuous_improvement_development_focus',
             attribute_name: 'Continuous Improvement',
-            question_text: 'Would you describe them as someone who sets the tone for growth on their team?',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'Absolutely',
-              'In some ways',
-              'Not really',
-              'No',
-              'Not sure'
-            ],
-            order: 5
-          },
-          {
-            id: 'continuous_improvement_tone_why',
-            attribute_name: 'Continuous Improvement',
-            question_text: 'Why do you think that?',
+            question_text: 'What would most help this person become more consistent in their growth and improvement?',
             question_type: 'text',
             is_required: false,
-            order: 6
+            placeholder: 'Consider motivation, accountability, resources, or environmental changes...',
+            order: 5
           }
         ]
       },
@@ -2367,135 +1948,60 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '1-5',
         questions: [
           {
-            id: 'continuous_improvement_resistance_low',
+            id: 'continuous_improvement_resistance_behaviors',
             attribute_name: 'Continuous Improvement',
-            question_text: 'What behaviors led you to rate their improvement mindset this low? (Multi-select)',
+            question_text: 'What resistance to improvement do you observe most frequently?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Rejects feedback or becomes defensive',
-              'Rarely acts on coaching',
-              'Avoids trying new methods',
-              'Dismisses learning opportunities or team debriefs',
-              'Stagnates despite support or resources',
-              'Other (please describe)'
+              'Rejects or dismisses feedback and suggestions',
+              'Accepts feedback but never acts on it',
+              'Becomes defensive when improvement is discussed',
+              'Claims to be too busy for development activities',
+              'Believes current methods are always sufficient',
+              'Avoids situations where they might receive feedback'
             ],
             order: 1
           },
           {
-            id: 'continuous_improvement_resistance_other',
+            id: 'continuous_improvement_root_cause',
             attribute_name: 'Continuous Improvement',
-            question_text: 'Please describe the other resistance behaviors:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'continuous_improvement_resistance_low',
-                answer_value: ['Other (please describe)']
-              }
-            },
-            order: 2
-          },
-          {
-            id: 'continuous_improvement_resistance_type',
-            attribute_name: 'Continuous Improvement',
-            question_text: 'What type of improvement resistance do you observe most?',
-            question_type: 'multi_select',
-            is_required: true,
-            options: [
-              'Defensive reactions to any feedback',
-              'Acknowledges feedback but never acts on it',
-              'Claims to be too busy for development activities',
-              'Believes current methods are always best',
-              'Fears change will make them look incompetent',
-              'Shows improvement only under direct pressure',
-              'Other (describe)'
-            ],
-            order: 3
-          },
-          {
-            id: 'continuous_improvement_type_other',
-            attribute_name: 'Continuous Improvement',
-            question_text: 'Please describe the other resistance type:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'continuous_improvement_resistance_type',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 4
-          },
-          {
-            id: 'continuous_improvement_resistance_primary',
-            attribute_name: 'Continuous Improvement',
-            question_text: 'Do you think this person\'s resistance to growth is primarily:',
+            question_text: 'What appears to be the root cause of their resistance to improvement?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Lack of confidence or fear of failure',
-              'Fixed mindset - believes abilities can\'t change',
+              'Fear of change or failure',
+              'Fixed mindset - believes abilities can\'t be developed',
+              'Past negative experiences with feedback or development',
               'Overwhelmed by current responsibilities',
-              'Past negative experiences with feedback',
-              'Unclear about expectations or how to improve',
-              'Fundamental personality trait',
-              'Other (describe)'
+              'Lack of understanding about why improvement matters',
+              'Not sure what causes their resistance'
             ],
-            order: 5
-          },
-          {
-            id: 'continuous_improvement_primary_other',
-            attribute_name: 'Continuous Improvement',
-            question_text: 'Please describe the other primary cause:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'continuous_improvement_resistance_primary',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 6
-          },
-          {
-            id: 'continuous_improvement_support_needed',
-            attribute_name: 'Continuous Improvement',
-            question_text: 'What type of support might help this person become more open to growth?',
-            question_type: 'multi_select',
-            is_required: true,
-            options: [
-              'More private, supportive feedback delivery',
-              'Clearer connection between improvement and career goals',
-              'Smaller, less threatening development steps',
-              'Different feedback sources (peers vs. managers)',
-              'More time and resources for development',
-              'I don\'t think significant change is likely',
-              'Other (describe)'
-            ],
-            order: 7
-          },
-          {
-            id: 'continuous_improvement_support_other',
-            attribute_name: 'Continuous Improvement',
-            question_text: 'Please describe the other support needed:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'continuous_improvement_support_needed',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 8
+            order: 2
           },
           {
             id: 'continuous_improvement_team_impact',
             attribute_name: 'Continuous Improvement',
-            question_text: 'What has been the impact of their resistance to growth on others or the team?',
+            question_text: 'How does their resistance to improvement affect the team or work environment?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Discourages others from pursuing growth and development',
+              'Creates stagnation in processes and methods',
+              'Requires others to work around outdated approaches',
+              'Minimal impact - others pursue improvement independently',
+              'Too early to assess the full impact'
+            ],
+            order: 3
+          },
+          {
+            id: 'continuous_improvement_potential',
+            attribute_name: 'Continuous Improvement',
+            question_text: 'What would most likely help this person become more open to growth and improvement?',
             question_type: 'text',
             is_required: false,
-            order: 9
+            placeholder: 'Consider different feedback approaches, incentives, support, or environmental changes...',
+            order: 4
           }
         ]
       }
@@ -2515,26 +2021,32 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
       {
         id: 'communication_observed',
         attribute_name: 'Communication Skills',
-        question_text: 'In your experience with this person\'s communication, which of these have you observed? (Check all that apply)',
+        question_text: 'How clear and effective is their communication? (Select what you\'ve observed)',
         question_type: 'multi_select',
         is_required: true,
         options: [
-          'Communicates with exceptional clarity and others frequently praise their ability to explain complex topics',
-          'Generally communicates effectively with occasional minor misunderstandings or delays',
-          'Gets their point across adequately but sometimes lacks clarity or important details',
-          'Frequently creates confusion through unclear messaging or poor listening habits',
-          'Others specifically seek them out for important communications because of their skill',
-          'Attempts to communicate well but often needs follow-up questions to clarify their meaning'
+          'Exceptionally clear - others often praise their communication',
+          'Generally gets the message across with minor occasional confusion',
+          'Adequate communication but sometimes lacks clarity or detail',
+          'Frequently creates misunderstandings or requires clarification',
+          'Others specifically seek them out for important communications',
+          'Often needs follow-up questions to clarify their meaning'
         ],
         order: 1
       },
       {
         id: 'communication_example',
         attribute_name: 'Communication Skills',
-        question_text: 'Any specific example that stands out? (Optional - brief description)',
-        question_type: 'text',
-        is_required: false,
-        placeholder: 'Brief description of a specific example...',
+        question_text: 'When they communicate important information, what\'s your confidence level that everyone will understand correctly?',
+        question_type: 'single_select',
+        is_required: true,
+        options: [
+          'Very high - they\'re consistently clear',
+          'Generally good with occasional miscommunication',
+          'Mixed - depends on the topic and audience',
+          'Often requires follow-up for clarity',
+          'Low - frequently creates confusion'
+        ],
         order: 2
       }
     ],
@@ -2543,102 +2055,58 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '9-10',
         questions: [
           {
-            id: 'communication_strengths_high',
+            id: 'communication_excellence_qualities',
             attribute_name: 'Communication Skills',
-            question_text: 'What communication strengths have you directly observed in the last 30 days? (Multi-select)',
+            question_text: 'What makes their communication exceptionally effective? (Select all that apply)',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Delivers clear, concise updates without rambling',
-              'Adjusts tone and depth depending on audience',
-              'Uses written formats (email, documentation) clearly and professionally',
-              'Listens actively and integrates others\' input',
-              'Resolves misunderstandings calmly and constructively',
-              'None of the above'
+              'Always clear, concise, and easy to understand',
+              'Adapts communication style to different audiences effectively',
+              'Excellent listener who truly understands others',
+              'Handles difficult conversations with skill and tact',
+              'Builds trust and rapport quickly through communication',
+              'Others seek them out for important or sensitive communications'
             ],
             order: 1
           },
           {
-            id: 'communication_under_pressure',
+            id: 'communication_pressure_performance',
             attribute_name: 'Communication Skills',
-            question_text: 'How effective are they at communicating under pressure (e.g., live updates, urgent changes, critical meetings)?',
+            question_text: 'How effective is their communication under pressure or in critical situations?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Always composed and clear',
-              'Usually strong, but sometimes flustered',
-              'Inconsistent or reactive under pressure',
-              'Not sure'
+              'Remains exceptionally clear and composed under pressure',
+              'Generally strong with minor decrease under stress',
+              'Maintains effectiveness but may become more direct',
+              'Haven\'t observed them in high-pressure communication situations'
             ],
             order: 2
           },
           {
-            id: 'communication_difficult_sensitive',
+            id: 'communication_influence_others',
             attribute_name: 'Communication Skills',
-            question_text: 'How does this person handle difficult or sensitive communications?',
-            question_type: 'multi_select',
+            question_text: 'How do they use communication to influence and help others?',
+            question_type: 'single_select',
             is_required: true,
             options: [
-              'Addresses issues directly while maintaining relationships',
-              'Finds diplomatic ways to deliver challenging messages',
-              'Prepares thoroughly for difficult conversations',
-              'Sometimes avoids tough conversations but handles them well when necessary',
-              'Not sure - haven\'t observed sensitive situations'
+              'Actively coaches others to improve their communication',
+              'Sets communication standards that others follow',
+              'Facilitates better communication between team members',
+              'Leads by example but doesn\'t actively teach others',
+              'Haven\'t observed them helping others communicate better'
             ],
             order: 3
           },
           {
-            id: 'communication_particularly_effective',
+            id: 'communication_excellence_example',
             attribute_name: 'Communication Skills',
-            question_text: 'What makes this person particularly effective at communication?',
-            question_type: 'multi_select',
-            is_required: true,
-            options: [
-              'Exceptional listening skills and empathy',
-              'Natural ability to simplify complex information',
-              'Strong written communication and documentation',
-              'Builds trust quickly through transparent communication',
-              'Adapts style seamlessly to different audiences',
-              'Other (describe)'
-            ],
+            question_text: 'Describe a recent example that best demonstrates their exceptional communication skills:',
+            question_type: 'text',
+            is_required: false,
+            placeholder: 'Focus on the situation, their approach, and the positive outcome...',
             order: 4
-          },
-          {
-            id: 'communication_effective_other',
-            attribute_name: 'Communication Skills',
-            question_text: 'Please describe what else makes them effective:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'communication_particularly_effective',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 5
-          },
-          {
-            id: 'communication_others_response',
-            attribute_name: 'Communication Skills',
-            question_text: 'How do others typically respond to their communication?',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'Frequently ask them to lead important communications',
-              'Generally very positive and engaged',
-              'Mixed - effective but sometimes intimidating',
-              'Good but can be overwhelming with detail',
-              'Not sure'
-            ],
-            order: 6
-          },
-          {
-            id: 'communication_team_outcome',
-            attribute_name: 'Communication Skills',
-            question_text: 'Give an example of a time their communication improved a team outcome.',
-            question_type: 'text',
-            is_required: false,
-            order: 7
           }
         ]
       },
@@ -2646,132 +2114,76 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '6-8',
         questions: [
           {
-            id: 'communication_areas_weaker',
+            id: 'communication_strong_situations',
             attribute_name: 'Communication Skills',
-            question_text: 'What areas of communication could be stronger? (Multi-select)',
+            question_text: 'In what communication situations are they most effective?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'They give too much detail or unclear structure',
-              'They don\'t adapt well across different audiences',
-              'Passive listener or prone to interruptions',
-              'Struggles with written clarity',
-              'Avoids giving difficult or corrective feedback',
-              'None of the above'
+              'One-on-one or small group conversations',
+              'Written communication and documentation',
+              'Familiar topics within their expertise',
+              'Informal, low-pressure situations',
+              'Planned presentations or formal communications',
+              'Team meetings and group discussions'
             ],
             order: 1
           },
           {
-            id: 'communication_challenges_cause',
+            id: 'communication_challenging_situations',
             attribute_name: 'Communication Skills',
-            question_text: 'What seems to cause their communication challenges most?',
+            question_text: 'In what communication situations do they struggle most?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Nervousness or lack of confidence in certain situations',
-              'Too much detail or difficulty prioritizing key points',
-              'Assumption that others have the same context/knowledge',
-              'Limited experience with formal or high-stakes communication',
-              'Tends to rush through explanations',
-              'Other (describe)'
+              'Large groups or formal presentations',
+              'Difficult or sensitive conversations',
+              'Cross-functional or external communications',
+              'High-pressure or time-sensitive communications',
+              'Written documentation and detailed explanations',
+              'Haven\'t observed them struggling in any situations'
             ],
             order: 2
           },
           {
-            id: 'communication_challenges_other',
+            id: 'communication_primary_gap',
             attribute_name: 'Communication Skills',
-            question_text: 'Please describe the other challenge:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'communication_challenges_cause',
-                answer_value: ['Other (describe)']
-              }
-            },
+            question_text: 'What seems to be their primary communication limitation?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Lacks confidence in certain communication settings',
+              'Provides too much or too little detail',
+              'Difficulty reading audience and adjusting approach',
+              'Struggles with unclear or incomplete explanations',
+              'Tends to avoid difficult or confrontational discussions',
+              'Not sure what their primary limitation is'
+            ],
             order: 3
           },
           {
-            id: 'communication_effective_conditions',
+            id: 'communication_high_stakes_confidence',
             attribute_name: 'Communication Skills',
-            question_text: 'When they do communicate effectively, what conditions are present?',
-            question_type: 'multi_select',
+            question_text: 'How confident would you be having them communicate on behalf of the team to leadership or customers?',
+            question_type: 'single_select',
             is_required: true,
             options: [
-              'Familiar audience and comfortable environment',
-              'Written format with time to prepare and edit',
-              'One-on-one or small group settings',
-              'Topics within their area of expertise',
-              'Low-pressure, informal situations',
-              'Other (describe)'
+              'Very confident - would be my first choice',
+              'Confident with some preparation or support',
+              'Would need significant coaching or oversight',
+              'Would prefer someone else for high-stakes communication',
+              'Haven\'t seen enough to judge'
             ],
             order: 4
           },
           {
-            id: 'communication_conditions_other',
+            id: 'communication_development_focus',
             attribute_name: 'Communication Skills',
-            question_text: 'Please describe the other effective conditions:',
+            question_text: 'What would most help this person become a more effective communicator?',
             question_type: 'text',
             is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'communication_effective_conditions',
-                answer_value: ['Other (describe)']
-              }
-            },
+            placeholder: 'Consider confidence building, skill training, practice opportunities, or feedback...',
             order: 5
-          },
-          {
-            id: 'communication_development_help',
-            attribute_name: 'Communication Skills',
-            question_text: 'What type of communication development would help them most?',
-            question_type: 'multi_select',
-            is_required: true,
-            options: [
-              'Practice with presentation and public speaking',
-              'Training on writing clarity and structure',
-              'Coaching on active listening skills',
-              'Experience with difficult conversation management',
-              'Feedback on adapting style to different audiences',
-              'Other (describe)'
-            ],
-            order: 6
-          },
-          {
-            id: 'communication_development_other',
-            attribute_name: 'Communication Skills',
-            question_text: 'Please describe the other development need:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'communication_development_help',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 7
-          },
-          {
-            id: 'communication_cross_functional_trust',
-            attribute_name: 'Communication Skills',
-            question_text: 'Would you trust them to deliver a message to a cross-functional or senior group on behalf of the team?',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'Yes, confidently',
-              'Maybe, depending on the topic',
-              'No, not at this time',
-              'Not sure'
-            ],
-            order: 8
-          },
-          {
-            id: 'communication_trust_why',
-            attribute_name: 'Communication Skills',
-            question_text: 'Why do you think that?',
-            question_type: 'text',
-            is_required: false,
-            order: 9
           }
         ]
       },
@@ -2779,110 +2191,60 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '1-5',
         questions: [
           {
-            id: 'communication_breakdowns_low',
+            id: 'communication_frequent_problems',
             attribute_name: 'Communication Skills',
-            question_text: 'What communication breakdowns have you witnessed recently? (Multi-select)',
+            question_text: 'What communication problems occur most frequently?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Causes confusion with vague or disorganized messaging',
-              'Fails to document or follow up in writing',
-              'Struggles to listen or overtalks others',
-              'Reacts defensively to feedback',
-              'Creates friction by misinterpreting tone or context',
-              'Other (please describe)'
+              'Messages are unclear or confusing to others',
+              'Fails to communicate important information',
+              'Poor listening skills or interrupts others frequently',
+              'Becomes defensive or confrontational in discussions',
+              'Avoids necessary but difficult conversations',
+              'Creates misunderstandings that require cleanup'
             ],
             order: 1
           },
           {
-            id: 'communication_breakdowns_other',
+            id: 'communication_root_cause',
             attribute_name: 'Communication Skills',
-            question_text: 'Please describe the other communication breakdowns:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'communication_breakdowns_low',
-                answer_value: ['Other (please describe)']
-              }
-            },
-            order: 2
-          },
-          {
-            id: 'communication_issues_type',
-            attribute_name: 'Communication Skills',
-            question_text: 'What type of communication issues occur most frequently?',
+            question_text: 'What appears to be the root cause of their communication difficulties?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Verbal communication problems (unclear speaking, poor listening)',
-              'Written communication problems (confusing emails, poor documentation)',
-              'Interpersonal communication (defensive reactions, misreading social cues)',
-              'Formal communication (presentations, meetings with leadership)',
-              'Cross-functional communication (different teams, external partners)',
-              'All types equally problematic'
+              'Lacks basic communication skills or training',
+              'Anxiety or low confidence in communication situations',
+              'Poor listening skills and self-awareness',
+              'Overwhelmed and rushes through communications',
+              'Interpersonal skills or emotional intelligence gaps',
+              'Not sure what causes their communication problems'
+            ],
+            order: 2
+          },
+          {
+            id: 'communication_team_impact',
+            attribute_name: 'Communication Skills',
+            question_text: 'How do their communication issues affect team effectiveness or relationships?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Creates significant confusion and requires frequent clarification',
+              'Causes occasional misunderstandings but manageable',
+              'Others have learned to work around their communication style',
+              'Damages trust or relationships with team members',
+              'Too early to assess the full impact'
             ],
             order: 3
           },
           {
-            id: 'communication_issues_stem',
+            id: 'communication_improvement_potential',
             attribute_name: 'Communication Skills',
-            question_text: 'Do you think this person\'s communication issues stem primarily from:',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'Lack of skills or training',
-              'Anxiety or confidence issues',
-              'Cultural or language barriers',
-              'Overwhelming workload affecting communication quality',
-              'Personality traits or interpersonal challenges',
-              'Limited awareness of their communication impact',
-              'Other (describe)'
-            ],
-            order: 4
-          },
-          {
-            id: 'communication_stem_other',
-            attribute_name: 'Communication Skills',
-            question_text: 'Please describe the other primary cause:',
+            question_text: 'What would most likely help this person improve their communication effectiveness?',
             question_type: 'text',
             is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'communication_issues_stem',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 5
-          },
-          {
-            id: 'communication_improvement_realistic',
-            attribute_name: 'Communication Skills',
-            question_text: 'What level of improvement do you think is realistic for this person?',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'Significant improvement possible with focused development',
-              'Moderate improvement likely with ongoing support',
-              'Minor improvement in specific areas only',
-              'Unlikely to improve substantially',
-              'Not sure'
-            ],
-            order: 6
-          },
-          {
-            id: 'communication_impact_trust',
-            attribute_name: 'Communication Skills',
-            question_text: 'Has this impacted trust, delivery, or morale within the team or with external partners?',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'Yes, multiple times',
-              'Occasionally',
-              'Rare/one-off',
-              'Not sure'
-            ],
-            order: 7
+            placeholder: 'Consider skills training, practice, feedback, confidence building, or coaching...',
+            order: 4
           }
         ]
       }
@@ -2902,26 +2264,32 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
       {
         id: 'leadership_observed',
         attribute_name: 'Leadership',
-        question_text: 'In your experience with this person in leadership situations (formal or informal), which of these have you observed? (Check all that apply)',
+        question_text: 'When leadership is needed, what do you observe? (Select all that apply)',
         question_type: 'multi_select',
         is_required: true,
         options: [
-          'Naturally inspires others and consistently demonstrates exceptional leadership that people want to follow',
-          'Shows solid leadership qualities and others often turn to them for guidance and direction',
-          'Displays some leadership potential but inconsistent in taking charge when situations require it',
-          'Avoids leadership responsibilities and struggles when others look to them for direction',
-          'Others actively seek their leadership on important projects because of their proven track record',
-          'Attempts to lead when asked but often needs significant support to be effective in leadership roles'
+          'Naturally steps up and others willingly follow',
+          'Shows good leadership skills when formally assigned the role',
+          'Has leadership potential but inconsistent in stepping forward',
+          'Avoids leadership responsibilities when possible',
+          'Others actively seek their leadership on important work',
+          'Tries to lead but often needs significant support to be effective'
         ],
         order: 1
       },
       {
         id: 'leadership_example',
         attribute_name: 'Leadership',
-        question_text: 'Any specific example that stands out? (Optional - brief description)',
-        question_type: 'text',
-        is_required: false,
-        placeholder: 'Brief description of a specific example...',
+        question_text: 'If you had to choose someone to lead a critical project, where would this person rank among your options?',
+        question_type: 'single_select',
+        is_required: true,
+        options: [
+          'First choice - I\'d specifically request them',
+          'Strong consideration - among my top picks',
+          'Possible choice depending on the project type',
+          'Would not be in my initial consideration',
+          'Would actively prefer someone else'
+        ],
         order: 2
       }
     ],
@@ -2930,94 +2298,59 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '9-10',
         questions: [
           {
-            id: 'leadership_demonstration_high',
+            id: 'leadership_influence_behaviors',
             attribute_name: 'Leadership',
-            question_text: 'In the last 30–60 days, how has this person demonstrated leadership? (Multi-select)',
+            question_text: 'How do they demonstrate leadership influence, regardless of formal authority? (Select all that apply)',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Sets a strong example of professionalism and accountability',
-              'Inspires others through communication and action',
-              'Coaches or uplifts others during challenges',
-              'Makes tough decisions with clarity and fairness',
-              'Anticipates problems and mobilizes solutions',
-              'None of the above'
+              'Others naturally seek their guidance and advice',
+              'Sets a strong example that others follow',
+              'Takes initiative to guide team decisions or direction',
+              'Builds trust and motivates others effectively',
+              'Speaks up and influences outcomes in group settings',
+              'Helps resolve conflicts and brings people together'
             ],
             order: 1
           },
           {
-            id: 'leadership_void_choice',
+            id: 'leadership_trust_level',
             attribute_name: 'Leadership',
-            question_text: 'If a sudden leadership void opened on your team, would this person be a natural choice to step in?',
+            question_text: 'When important decisions or guidance are needed, how do others respond to them?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Yes, without hesitation',
-              'Possibly, depending on the situation',
-              'No',
-              'Not sure'
+              'Others actively seek their input and follow their lead',
+              'Generally trusted and respected when they speak up',
+              'Contributes good ideas but others may take the lead',
+              'Has influence mainly within their area of expertise',
+              'Haven\'t observed others looking to them for leadership'
             ],
             order: 2
           },
           {
-            id: 'leadership_void_why',
+            id: 'leadership_natural_situations',
             attribute_name: 'Leadership',
-            question_text: 'What would they need to earn that confidence?',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'leadership_void_choice',
-                answer_value: ['Possibly, depending on the situation', 'No']
-              }
-            },
+            question_text: 'In what situations does their natural leadership emerge most clearly?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Crisis or problem-solving situations',
+              'When expertise or experience is needed',
+              'During team conflicts or difficult discussions',
+              'When coordinating group efforts or projects',
+              'Haven\'t observed clear leadership emergence'
+            ],
             order: 3
           },
           {
-            id: 'leadership_develops_others',
+            id: 'leadership_excellence_example',
             attribute_name: 'Leadership',
-            question_text: 'How does this person develop leadership in others?',
-            question_type: 'multi_select',
-            is_required: true,
-            options: [
-              'Actively mentors and coaches emerging leaders',
-              'Creates opportunities for others to lead and grow',
-              'Provides constructive feedback on leadership skills',
-              'Models leadership behaviors for others to follow',
-              'Advocates for others\' leadership advancement',
-              'Not sure - limited observation of this'
-            ],
-            order: 4
-          },
-          {
-            id: 'leadership_particularly_effective',
-            attribute_name: 'Leadership',
-            question_text: 'What makes this person particularly effective as a leader?',
-            question_type: 'multi_select',
-            is_required: true,
-            options: [
-              'Exceptional emotional intelligence and people skills',
-              'Strong strategic thinking and vision-setting ability',
-              'Natural ability to build trust and psychological safety',
-              'Excellent decision-making under pressure',
-              'Inspiring communication and influence skills',
-              'Other (describe)'
-            ],
-            order: 5
-          },
-          {
-            id: 'leadership_effective_other',
-            attribute_name: 'Leadership',
-            question_text: 'Please describe what else makes them effective:',
+            question_text: 'Describe a recent example that best demonstrates their leadership influence:',
             question_type: 'text',
             is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'leadership_particularly_effective',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 6
+            placeholder: 'Focus on how they influenced, guided, or motivated others and the positive results...',
+            order: 4
           }
         ]
       },
@@ -3025,87 +2358,76 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '6-8',
         questions: [
           {
-            id: 'leadership_behaviors_mid',
+            id: 'leadership_influence_areas',
             attribute_name: 'Leadership',
-            question_text: 'Which of the following statements best describe this person\'s leadership behaviors? (Multi-select)',
+            question_text: 'In what areas do they show the most leadership influence?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Demonstrates leadership confidence when guiding peers',
-              'Demonstrates leadership confidence across teams and levels',
-              'Hesitates or holds back in cross-team or high-visibility settings',
-              'Frequently offers emotional or tactical support to teammates',
-              'Often suggests direction or ideas in meetings',
-              'Struggles to rally others or gain buy-in around their ideas',
-              'Acts as a consistent role model for values and behavior',
-              'Is respected but not often chosen to lead initiatives',
-              'Demonstrates influence in their area of expertise',
-              'Has limited leadership influence outside their domain',
-              'None of the above'
+              'Within their area of technical expertise',
+              'When mentoring or training others',
+              'During collaborative problem-solving',
+              'In safety or quality-focused situations',
+              'When coordinating work between team members',
+              'During challenging or stressful situations'
             ],
             order: 1
           },
           {
-            id: 'leadership_best_contexts',
+            id: 'leadership_hesitation_areas',
             attribute_name: 'Leadership',
-            question_text: 'In what leadership contexts does this person perform best?',
+            question_text: 'In what areas do they hesitate to show leadership or influence?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Leading peers in familiar areas of expertise',
-              'Supporting others through coaching and guidance',
-              'Leading small teams or project groups',
-              'Informal leadership in collaborative settings',
-              'Crisis or problem-solving leadership',
-              'Strategic or visionary leadership',
-              'Other (describe)'
+              'Outside their area of expertise or comfort zone',
+              'With senior or more experienced team members',
+              'In highly visible or high-stakes situations',
+              'During interpersonal conflicts or sensitive issues',
+              'When formal authority or decision-making is required',
+              'Don\'t observe hesitation - they step up when needed'
             ],
             order: 2
           },
           {
-            id: 'leadership_contexts_other',
+            id: 'leadership_style_effectiveness',
             attribute_name: 'Leadership',
-            question_text: 'Please describe the other leadership context:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'leadership_best_contexts',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 3
-          },
-          {
-            id: 'leadership_others_response',
-            attribute_name: 'Leadership',
-            question_text: 'How do others typically respond to this person\'s leadership attempts?',
+            question_text: 'How would you describe their leadership approach when they do step up?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Very positive - others readily follow their lead',
-              'Generally supportive but may need more direction',
-              'Mixed - depends on the situation or team dynamics',
-              'Sometimes resistant or questioning of their authority',
-              'Limited attempts at leadership to observe'
+              'Collaborative - brings people together to find solutions',
+              'Direct - provides clear guidance and direction',
+              'Supportive - helps others succeed and develop',
+              'Leading by example - shows rather than tells',
+              'Varies depending on the situation and people involved'
+            ],
+            order: 3
+          },
+          {
+            id: 'leadership_development_barrier',
+            attribute_name: 'Leadership',
+            question_text: 'What seems to be the main barrier to more consistent leadership influence?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Lack of confidence in leadership abilities',
+              'Prefers to focus on individual work rather than leading others',
+              'Uncertainty about when leadership is appropriate or expected',
+              'Limited experience in leadership situations',
+              'Reluctance to take responsibility for others\' outcomes',
+              'Not sure what holds them back'
             ],
             order: 4
           },
           {
-            id: 'leadership_behavior_strengthen',
+            id: 'leadership_development_focus',
             attribute_name: 'Leadership',
-            question_text: 'What leadership behavior, if strengthened, would unlock their next level?',
+            question_text: 'What would most help this person develop stronger leadership influence?',
             question_type: 'text',
             is_required: false,
+            placeholder: 'Consider confidence building, experience opportunities, skills development, or clearer expectations...',
             order: 5
-          },
-          {
-            id: 'leadership_strengthen_why',
-            attribute_name: 'Leadership',
-            question_text: 'Why do you think that?',
-            question_type: 'text',
-            is_required: false,
-            order: 6
           }
         ]
       },
@@ -3113,150 +2435,60 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '1-5',
         questions: [
           {
-            id: 'leadership_gaps_low',
+            id: 'leadership_influence_problems',
             attribute_name: 'Leadership',
-            question_text: 'What leadership gaps or concerns have you seen? (Multi-select)',
+            question_text: 'What problems do you observe with their leadership or influence attempts?',
             question_type: 'multi_select',
             is_required: true,
             options: [
-              'Avoids responsibility or tough calls',
-              'Undermines team morale or clarity',
-              'Doesn\'t guide or coach others when needed',
-              'Makes reactive or inconsistent decisions',
-              'Lacks presence or credibility in key settings',
-              'Other (please describe)'
+              'Avoids stepping up when guidance or direction is needed',
+              'Others don\'t trust or follow their guidance',
+              'Creates confusion or conflict when trying to lead',
+              'Lacks credibility or respect from team members',
+              'Makes poor decisions that affect others negatively',
+              'Undermines or conflicts with other leaders'
             ],
             order: 1
           },
           {
-            id: 'leadership_gaps_other',
+            id: 'leadership_primary_limitation',
             attribute_name: 'Leadership',
-            question_text: 'Please describe the other leadership gaps:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'leadership_gaps_low',
-                answer_value: ['Other (please describe)']
-              }
-            },
-            order: 2
-          },
-          {
-            id: 'leadership_challenges_frequent',
-            attribute_name: 'Leadership',
-            question_text: 'What type of leadership challenges occur most frequently with this person?',
+            question_text: 'What appears to be their primary limitation in leadership or influence?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Avoids taking charge when leadership is needed',
-              'Makes poor decisions that negatively impact others',
-              'Creates conflict or undermines team dynamics',
-              'Lacks credibility or respect from teammates',
-              'Tries to lead but lacks necessary skills',
-              'Actively resists or undermines other leaders',
-              'Other (describe)'
+              'Lacks confidence to guide or influence others',
+              'Poor interpersonal skills that prevent effective influence',
+              'Avoids responsibility for group outcomes or decisions',
+              'Doesn\'t understand how to motivate or guide others',
+              'Gets overwhelmed when others look to them for direction',
+              'Not sure what their primary limitation is'
+            ],
+            order: 2
+          },
+          {
+            id: 'leadership_team_impact',
+            attribute_name: 'Leadership',
+            question_text: 'How do their leadership limitations affect team effectiveness?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Creates leadership gaps that others must constantly fill',
+              'Sometimes makes group situations more difficult',
+              'Minimal impact - others naturally provide direction',
+              'Causes delays when decisive guidance is needed',
+              'Too early to assess the full impact'
             ],
             order: 3
           },
           {
-            id: 'leadership_challenges_other',
+            id: 'leadership_improvement_potential',
             attribute_name: 'Leadership',
-            question_text: 'Please describe the other leadership challenge:',
+            question_text: 'What would most likely help this person develop basic leadership or influence capabilities?',
             question_type: 'text',
             is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'leadership_challenges_frequent',
-                answer_value: ['Other (describe)']
-              }
-            },
+            placeholder: 'Consider confidence building, mentoring, gradual responsibility, or interpersonal skills...',
             order: 4
-          },
-          {
-            id: 'leadership_struggles_primary',
-            attribute_name: 'Leadership',
-            question_text: 'Do you think this person\'s leadership struggles are primarily due to:',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'Lack of leadership skills or training',
-              'Low confidence or fear of responsibility',
-              'Personality traits that conflict with leadership',
-              'Overwhelmed by current role responsibilities',
-              'Limited understanding of what leadership requires',
-              'Fundamental unsuitability for leadership roles',
-              'Other (describe)'
-            ],
-            order: 5
-          },
-          {
-            id: 'leadership_primary_other',
-            attribute_name: 'Leadership',
-            question_text: 'Please describe the other primary cause:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'leadership_struggles_primary',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 6
-          },
-          {
-            id: 'leadership_improvement_needed',
-            attribute_name: 'Leadership',
-            question_text: 'What would need to change for this person to be more effective in leadership situations?',
-            question_type: 'multi_select',
-            is_required: true,
-            options: [
-              'Leadership skills development and training',
-              'Gradual increase in leadership responsibilities',
-              'Better understanding of leadership expectations',
-              'Different types of leadership opportunities',
-              'Significant mindset or behavioral changes',
-              'I don\'t think they\'re suited for leadership roles',
-              'Other (describe)'
-            ],
-            order: 7
-          },
-          {
-            id: 'leadership_improvement_other',
-            attribute_name: 'Leadership',
-            question_text: 'Please describe the other improvement needed:',
-            question_type: 'text',
-            is_required: false,
-            conditional_logic: {
-              show_if_answer: {
-                question_id: 'leadership_improvement_needed',
-                answer_value: ['Other (describe)']
-              }
-            },
-            order: 8
-          },
-          {
-            id: 'leadership_opportunities_response',
-            attribute_name: 'Leadership',
-            question_text: 'Have they been offered leadership opportunities—and how did they respond?',
-            question_type: 'single_select',
-            is_required: true,
-            options: [
-              'Stepped up successfully',
-              'Declined or avoided',
-              'Tried but struggled',
-              'Not given opportunity',
-              'Not sure'
-            ],
-            order: 9
-          },
-          {
-            id: 'leadership_gap_team_impact',
-            attribute_name: 'Leadership',
-            question_text: 'How does their leadership gap affect the team or outcomes?',
-            question_type: 'text',
-            is_required: false,
-            order: 10
           }
         ]
       }

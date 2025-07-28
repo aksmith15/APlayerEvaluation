@@ -11,6 +11,7 @@ import { AssignmentDebugger } from '../components/ui/AssignmentDebugger';
 // import { BulkAssignmentUpload } from '../components/ui/BulkAssignmentUpload';
 import { AssignmentStatusTable } from '../components/ui/AssignmentStatusTable';
 import { CoverageDashboard } from '../components/ui/CoverageDashboard';
+import { AttributeWeightsManager } from '../components/ui/AttributeWeightsManager';
 import { 
   fetchAllAssignments, 
   getAssignmentStatistics,
@@ -73,6 +74,12 @@ const RefreshIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }
   </svg>
 );
 
+const WeightsIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
+    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clipRule="evenodd" />
+  </svg>
+);
+
 const DebugIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 20 20">
     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
@@ -103,7 +110,7 @@ const AssignmentManagement: React.FC = () => {
   const [selectedAssignments, setSelectedAssignments] = useState<string[]>([]);
   
   // UI state
-  const [activeTab, setActiveTab] = useState<'overview' | 'create' | 'upload' | 'manage' | 'coverage' | 'debug'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'create' | 'upload' | 'manage' | 'coverage' | 'weights' | 'debug'>('overview');
   const [filters, setFilters] = useState<AssignmentFilters>({});
   const [refreshing, setRefreshing] = useState(false);
 
@@ -318,6 +325,7 @@ const AssignmentManagement: React.FC = () => {
               { id: 'upload', name: 'Bulk Upload', icon: UploadIcon },
               { id: 'manage', name: 'Manage Assignments', icon: FilterIcon },
               { id: 'coverage', name: 'Coverage Tracking', icon: UsersIcon },
+              { id: 'weights', name: 'Attribute Weights', icon: WeightsIcon },
               { id: 'debug', name: 'Debug', icon: DebugIcon }
             ].map((tab) => {
               const count = getTabCount(tab.id);
@@ -570,6 +578,18 @@ const AssignmentManagement: React.FC = () => {
         {activeTab === 'coverage' && (
           <div className="space-y-6">
             <CoverageDashboard onCreateAssignment={handleAssignmentCreated} />
+          </div>
+        )}
+
+        {/* Attribute Weights Tab */}
+        {activeTab === 'weights' && (
+          <div className="space-y-6">
+            <AttributeWeightsManager 
+              onWeightsUpdated={() => {
+                // Optionally reload data or show success message
+                console.log('Attribute weights updated successfully');
+              }}
+            />
           </div>
         )}
 

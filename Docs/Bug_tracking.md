@@ -2,6 +2,94 @@
 
 ## 🐛 Recently Resolved Issues
 
+### **Issue #026: Survey Question Refinement for Better Behavioral Focus** ✅ **RESOLVED**
+**Date Identified:** January 25, 2025  
+**Date Resolved:** January 25, 2025  
+**Severity:** Medium  
+**Category:** UI/UX Enhancement  
+**Reporter:** User Request  
+
+**Description:**
+User requested comprehensive refinement of all survey questions across 10 attributes to be more direct, behavior-focused, and eliminate escape routes (like "optional" questions and "Type NA" options). The goal was to force evaluators to connect specific behaviors to their ratings and provide concrete evidence rather than general impressions.
+
+**Current Question Structure Issues:**
+1. **Generic opening phrases**: "In your experience with this person, which of these have you observed?"
+2. **Optional escape routes**: Questions marked as "Optional" with "Type NA" fallbacks
+3. **Vague evidence gathering**: Asking for "any specific example" rather than targeted situations
+4. **Lack of behavioral specificity**: Questions focused on general impressions rather than specific behaviors
+
+**Refined Question Strategy:**
+1. **Direct behavioral focus**: Questions ask specifically about behaviors that influenced ratings
+2. **Situational specificity**: Questions force recall of specific recent situations
+3. **Eliminated escape routes**: All questions now required with specific prompts
+4. **Comparative evaluation**: Some questions force ranking/comparative thinking
+
+**Attributes Updated (All 10):**
+
+#### **Attribute 1: Reliability**
+- **Q1**: "In your experience..." → "What specific reliability behaviors most influenced your rating?"
+- **Q2**: "Any specific example (Optional)" → "Describe one recent situation that best represents their reliability level:"
+
+#### **Attribute 2: Accountability for Action**  
+- **Q1**: Updated options to focus on accountability moments and specific behaviors
+- **Q2**: "Any specific example (Optional)" → "Think of the most recent time this person faced a mistake or failure. How did they handle it?"
+
+#### **Attribute 3: Quality of Work**
+- **Q1**: "In your experience..." → "What patterns have you noticed in their work output?"
+- **Q2**: Changed from text to single-select → "When you receive their work, what's your typical first reaction?"
+
+#### **Attribute 4: Taking Initiative**
+- **Q1**: "In your experience..." → "How often do you see them act without being asked?"
+- **Q2**: "Any specific example (Optional)" → "What's the most significant thing they've initiated recently (without being asked)?"
+
+#### **Attribute 5: Adaptability**
+- **Q1**: "In your experience during changes..." → "When plans change unexpectedly, what do you typically observe?"
+- **Q2**: "Any specific example (Optional)" → "Describe their reaction to the most recent significant change that affected them:"
+
+#### **Attribute 6: Problem Solving Ability**
+- **Q1**: "In your experience when facing challenges..." → "When facing a challenging problem, what's their typical approach?"
+- **Q2**: "Any specific example (Optional)" → "Think of the last complex problem they encountered. What happened?"
+
+#### **Attribute 7: Teamwork**
+- **Q1**: "In your experience in team settings..." → "How do they typically contribute to team success?"
+- **Q2**: Changed from text to single-select → "In team settings, what role do they naturally play?"
+
+#### **Attribute 8: Continuous Improvement**
+- **Q1**: "In your experience with approach to growth..." → "How do they respond to feedback and development opportunities?"
+- **Q2**: "Any specific example (Optional)" → "What's the best example of them actually changing or improving based on feedback?"
+
+#### **Attribute 9: Communication Skills**
+- **Q1**: "In your experience with communication..." → "How clear and effective is their communication?"
+- **Q2**: Changed from text to single-select → "When they communicate important information, what's your confidence level that everyone will understand correctly?"
+
+#### **Attribute 10: Leadership**
+- **Q1**: "In your experience in leadership situations..." → "When leadership is needed, what do you observe?"
+- **Q2**: Changed from text to single-select → "If you had to choose someone to lead a critical project, where would this person rank among your options?"
+
+**Technical Implementation:**
+- **File Modified**: `a-player-dashboard/src/components/ui/EvaluationSurvey.tsx`
+- **Lines Changed**: Updated all 20 base questions (2 per attribute × 10 attributes)
+- **Question Types**: Mix of multi_select, single_select, and text based on optimal data collection
+- **Required Status**: All questions now marked as `is_required: true`
+- **Placeholders**: Updated to be specific and behavior-focused
+
+**User Experience Impact:**
+- ✅ **More Specific Data**: Forces evaluators to think about concrete behaviors
+- ✅ **Better Evidence**: Eliminates vague responses and "can't recall" excuses
+- ✅ **Faster Completion**: More targeted questions are easier to answer
+- ✅ **Higher Quality Feedback**: Behavioral focus produces more actionable insights
+- ✅ **Reduced Bias**: Specific situational questions reduce general impression bias
+
+**Quality Assurance:**
+- ✅ **TypeScript Compilation**: All changes pass TypeScript validation
+- ✅ **Question Logic**: Maintained existing conditional question flow
+- ✅ **Database Compatibility**: All question IDs and attribute names preserved
+- ✅ **UI Consistency**: Question formatting follows established patterns
+
+**Status:** ✅ **RESOLVED** - All survey questions refined to be more direct, behavior-focused, and evidence-based
+
+---
+
 ### **Issue #025: TypeScript Build Errors on Render Deployment** ✅ **RESOLVED**
 **Date Identified:** January 25, 2025  
 **Date Resolved:** January 25, 2025  
@@ -2431,5 +2519,547 @@ logger.performance('Chart rendering', startTime);
 2. **Data Validation**: Verify all chart data sources with real Supabase data
 3. **Performance Testing**: Chart rendering with larger datasets
 4. **Cross-Browser Testing**: Verify functionality across all supported browsers
+
+### **Issue #027: Survey Question Enhancement - Quality of Work Conditional Questions** ✅ **RESOLVED**
+**Date Identified:** January 25, 2025  
+**Severity:** Medium  
+**Category:** Survey Design/User Experience  
+**Reporter:** User - Request for more behavioral-focused Quality of Work questions  
+
+**Description:**
+User requested comprehensive replacement of all conditional questions for the "Quality of Work" attribute to be more direct, behavior-focused, and eliminate "escape routes" that allow evaluators to avoid providing concrete evidence-based responses.
+
+**Requirements:**
+- **Score Range 9-10**: Replace 5 existing questions with 4 new ones focused on excellence behaviors
+- **Score Range 6-8**: Replace 7 existing questions with 5 new ones focused on situational consistency  
+- **Score Range 1-5**: Replace 8 existing questions with 4 new ones focused on specific issues and causes
+- **Total Reduction**: 20 questions → 13 questions (35% reduction)
+
+**Current Problems with Existing Questions:**
+- Too many "escape route" options like "Not sure", "Other (describe)", and conditional optional questions
+- Questions focused on abstract concepts rather than observable behaviors
+- Excessive number of questions causing survey fatigue
+- Conditional logic creating inconsistent question paths
+
+**Solution Implementation:**
+✅ **Score Range 9-10 (Exceptional) - 5→4 Questions:**
+- `quality_excellence_behaviors`: What makes work quality exceptional (multi-select)
+- `quality_under_pressure`: Quality performance under pressure (single-select)
+- `quality_helps_others_improve`: How they elevate others' quality standards (single-select)
+- `quality_excellence_example`: Specific exceptional quality example (text with placeholder)
+
+✅ **Score Range 6-8 (Middle Ground) - 7→5 Questions:**
+- `quality_strong_situations`: Best quality work situations (multi-select)
+- `quality_inconsistent_situations`: Less consistent quality situations (multi-select)
+- `quality_improvement_barrier`: Main barrier to consistent quality (single-select)
+- `quality_high_stakes_confidence`: Confidence for high-stakes work (single-select)
+- `quality_development_focus`: What would help achieve consistency (text with placeholder)
+
+✅ **Score Range 1-5 (Needs Improvement) - 8→4 Questions:**
+- `quality_specific_issues`: Most frequent quality problems (multi-select)
+- `quality_primary_cause`: Primary cause of quality issues (single-select)
+- `quality_impact_severity`: Impact on team productivity (single-select)
+- `quality_improvement_potential`: What would help improvement (text with placeholder)
+
+**Key Improvements:**
+- **Behavioral Focus**: All questions focus on observable behaviors and specific situations
+- **Eliminated Escape Routes**: Removed "Not sure", "Other", and optional conditional questions
+- **Reduced Survey Length**: 35% fewer questions while maintaining comprehensive coverage
+- **Consistent Structure**: All score ranges follow similar question patterns
+- **Actionable Insights**: Questions designed to provide actionable feedback for development
+
+**Technical Changes:**
+- Updated `COMPREHENSIVE_ATTRIBUTE_DEFINITIONS` in `EvaluationSurvey.tsx`
+- Removed all conditional logic for Quality of Work attribute
+- Updated question IDs, texts, types, options, and placeholders
+- Maintained proper TypeScript type safety
+
+**Status:** ✅ **RESOLVED** - All Quality of Work conditional questions successfully replaced with more behavioral, direct questions that eliminate escape routes and provide better evaluation insights
+
+---
+
+### **Issue #028: Survey Question Enhancement - Taking Initiative Conditional Questions** ✅ **RESOLVED**
+**Date Identified:** January 25, 2025  
+**Severity:** Medium  
+**Category:** Survey Design/User Experience  
+**Reporter:** User - Request for more behavioral-focused Taking Initiative questions  
+
+**Description:**
+User requested comprehensive replacement of all conditional questions for the "Taking Initiative" attribute to be more direct, behavior-focused, and eliminate "escape routes" that allow evaluators to avoid providing concrete evidence-based responses.
+
+**Requirements:**
+- **Score Range 9-10**: Replace 4 existing questions with 4 new ones focused on proactive behaviors and influence
+- **Score Range 6-8**: Replace 8 existing questions with 5 new ones focused on comfort zones and barriers  
+- **Score Range 1-5**: Replace 7 existing questions with 4 new ones focused on avoidance patterns and impact
+- **Total Reduction**: 19 questions → 13 questions (32% reduction)
+
+**Current Problems with Existing Questions:**
+- Too many "escape route" options like "Not sure", "Other (describe)", and conditional optional questions
+- Questions focused on abstract frequency ratings rather than observable behavioral patterns
+- Excessive conditional logic creating inconsistent evaluation paths
+- Difficulty in providing actionable feedback for development
+
+**Solution Implementation:**
+✅ **Score Range 9-10 (Exceptional) - 4→4 Questions:**
+- `initiative_proactive_behaviors`: Types of proactive behaviors observed (multi-select)
+- `initiative_leadership_influence`: How their initiative influences others (single-select)
+- `initiative_scope_comfort`: Scope of initiative they're comfortable taking (single-select)
+- `initiative_excellence_example`: Most impactful recent initiative example (text with placeholder)
+
+✅ **Score Range 6-8 (Middle Ground) - 8→5 Questions:**
+- `initiative_comfortable_areas`: Areas where they take initiative readily (multi-select)
+- `initiative_hesitation_areas`: Areas where they hesitate to take initiative (multi-select)
+- `initiative_primary_barrier`: Primary barrier to taking more initiative (single-select)
+- `initiative_support_effectiveness`: How effective they are when taking initiative (single-select)
+- `initiative_development_focus`: What would help them be more consistent (text with placeholder)
+
+✅ **Score Range 1-5 (Needs Improvement) - 7→4 Questions:**
+- `initiative_avoidance_patterns`: Patterns regarding lack of initiative (multi-select)
+- `initiative_root_cause`: Root cause of lack of initiative (single-select)
+- `initiative_team_impact`: How lack of initiative affects team dynamics (single-select)
+- `initiative_improvement_potential`: What would help them become proactive (text with placeholder)
+
+**Key Improvements:**
+- **Behavioral Focus**: All questions focus on observable patterns and specific situations
+- **Eliminated Escape Routes**: Removed "Not sure", "Other", and optional conditional questions
+- **Reduced Survey Length**: 32% fewer questions while maintaining comprehensive evaluation coverage
+- **Action-Oriented**: Questions designed to identify specific development opportunities
+- **Consistency**: Structured approach across all score ranges for better comparison
+
+**Technical Changes:**
+- Updated `COMPREHENSIVE_ATTRIBUTE_DEFINITIONS` in `EvaluationSurvey.tsx`
+- Removed all conditional logic for Taking Initiative attribute
+- Updated question IDs, texts, types, options, and placeholders
+- Maintained proper TypeScript type safety and structure
+
+**Status:** ✅ **RESOLVED** - All Taking Initiative conditional questions successfully replaced with more behavioral, direct questions that eliminate escape routes and provide better insights for proactive behavior development
+
+---
+
+### **Issue #029: Survey Question Enhancement - Adaptability Conditional Questions** ✅ **RESOLVED**
+**Date Identified:** January 25, 2025  
+**Severity:** Medium  
+**Category:** Survey Design/User Experience  
+**Reporter:** User - Request for more behavioral-focused Adaptability questions  
+
+**Description:**
+User requested comprehensive replacement of all conditional questions for the "Adaptability" attribute to be more direct, behavior-focused, and eliminate "escape routes" that allow evaluators to avoid providing concrete evidence-based responses.
+
+**Requirements:**
+- **Score Range 9-10**: Replace 6 existing questions with 4 new ones focused on change response and recovery
+- **Score Range 6-8**: Replace 4 existing questions with 5 new ones focused on comfort zones and adjustment patterns  
+- **Score Range 1-5**: Replace 7 existing questions with 4 new ones focused on resistance behaviors and team impact
+- **Total Reduction**: 17 questions → 13 questions (24% reduction)
+
+**Current Problems with Existing Questions:**
+- Too many "escape route" options like "Not sure", "Other (describe)", and conditional optional questions
+- Questions focused on abstract change categories rather than observable behavioral responses
+- Excessive conditional logic creating inconsistent evaluation paths
+- Limited ability to provide actionable feedback for adaptability development
+
+**Solution Implementation:**
+✅ **Score Range 9-10 (Exceptional) - 6→4 Questions:**
+- `adaptability_change_response`: How they respond to significant changes (multi-select)
+- `adaptability_recovery_speed`: Recovery speed after unexpected changes (single-select)
+- `adaptability_helps_others`: How they help others during change (single-select)
+- `adaptability_excellence_example`: Recent example of exceptional adaptability (text with placeholder)
+
+✅ **Score Range 6-8 (Middle Ground) - 4→5 Questions:**
+- `adaptability_comfortable_changes`: Types of changes handled comfortably (multi-select)
+- `adaptability_challenging_changes`: Types of changes that create difficulty (multi-select)
+- `adaptability_adjustment_pattern`: Typical adjustment pattern when facing change (single-select)
+- `adaptability_communication_style`: Communication during change periods (single-select)
+- `adaptability_development_focus`: What would help them adapt more effectively (text with placeholder)
+
+✅ **Score Range 1-5 (Needs Improvement) - 7→4 Questions:**
+- `adaptability_resistance_behaviors`: Resistance behaviors observed during changes (multi-select)
+- `adaptability_primary_struggle`: Primary struggle with change (single-select)
+- `adaptability_team_impact`: How resistance affects team dynamics (single-select)
+- `adaptability_improvement_potential`: What would help them become more adaptable (text with placeholder)
+
+**Key Improvements:**
+- **Behavioral Focus**: All questions focus on observable responses and specific behavioral patterns during change
+- **Eliminated Escape Routes**: Removed "Not sure", "Other", and optional conditional questions
+- **Reduced Survey Length**: 24% fewer questions while maintaining comprehensive evaluation coverage
+- **Change-Specific**: Questions designed to assess adaptability in various change scenarios
+- **Development-Oriented**: Focus on identifying specific support needed for adaptability improvement
+
+**Technical Changes:**
+- Updated `COMPREHENSIVE_ATTRIBUTE_DEFINITIONS` in `EvaluationSurvey.tsx`
+- Removed all conditional logic for Adaptability attribute
+- Updated question IDs, texts, types, options, and placeholders
+- Maintained proper TypeScript type safety and structure
+
+**Status:** ✅ **RESOLVED** - All Adaptability conditional questions successfully replaced with more behavioral, direct questions that eliminate escape routes and provide better insights for change management and adaptability development
+
+---
+
+### **Issue #030: Survey Question Enhancement - Problem Solving Ability Conditional Questions** ✅ **RESOLVED**
+**Date Identified:** January 25, 2025  
+**Severity:** Medium  
+**Category:** Survey Design/User Experience  
+**Reporter:** User - Request for more behavioral-focused Problem Solving Ability questions  
+
+**Description:**
+User requested comprehensive replacement of all conditional questions for the "Problem Solving Ability" attribute to be more direct, behavior-focused, and eliminate "escape routes" that allow evaluators to avoid providing concrete evidence-based responses.
+
+**Requirements:**
+- **Score Range 9-10**: Replace 3 existing questions with 4 new ones focused on exceptional problem-solving approaches
+- **Score Range 6-8**: Replace 6 existing questions with 5 new ones focused on success types and consistency patterns  
+- **Score Range 1-5**: Replace 8 existing questions with 4 new ones focused on avoidance patterns and limitations
+- **Total Reduction**: 17 questions → 13 questions (24% reduction)
+
+**Current Problems with Existing Questions:**
+- Too many "escape route" options like "Not sure", "Other (describe)", and conditional optional questions
+- Questions focused on abstract performance descriptions rather than observable problem-solving behaviors
+- Excessive conditional logic creating inconsistent evaluation paths
+- Limited ability to provide actionable feedback for problem-solving development
+
+**Solution Implementation:**
+✅ **Score Range 9-10 (Exceptional) - 3→4 Questions:**
+- `problem_solving_approach_excellence`: What makes their approach exceptional (multi-select)
+- `problem_solving_complexity_handling`: How they handle complex problems (single-select)
+- `problem_solving_others_seek_help`: How often others seek their help (single-select)
+- `problem_solving_excellence_example`: Most impressive recent problem-solving success (text with placeholder)
+
+✅ **Score Range 6-8 (Middle Ground) - 6→5 Questions:**
+- `problem_solving_success_types`: Types of problems solved most effectively (multi-select)
+- `problem_solving_struggle_types`: Types of problems found most challenging (multi-select)
+- `problem_solving_approach_pattern`: Typical approach to unfamiliar problems (single-select)
+- `problem_solving_effectiveness_consistency`: Consistency of problem-solving effectiveness (single-select)
+- `problem_solving_development_focus`: What would help them become more effective (text with placeholder)
+
+✅ **Score Range 1-5 (Needs Improvement) - 8→4 Questions:**
+- `problem_solving_avoidance_patterns`: Problem-solving avoidance patterns observed (multi-select)
+- `problem_solving_primary_limitation`: Primary limitation in problem solving (single-select)
+- `problem_solving_team_impact`: How limitations affect team or work outcomes (single-select)
+- `problem_solving_improvement_potential`: What would help develop better abilities (text with placeholder)
+
+**Key Improvements:**
+- **Behavioral Focus**: All questions focus on observable problem-solving patterns and specific approaches
+- **Eliminated Escape Routes**: Removed "Not sure", "Other", and optional conditional questions
+- **Reduced Survey Length**: 24% fewer questions while maintaining comprehensive evaluation coverage
+- **Problem-Type Specific**: Questions designed to assess effectiveness across different problem categories
+- **Development-Oriented**: Focus on identifying specific support needed for problem-solving improvement
+
+**Technical Changes:**
+- Updated `COMPREHENSIVE_ATTRIBUTE_DEFINITIONS` in `EvaluationSurvey.tsx`
+- Removed all conditional logic for Problem Solving Ability attribute
+- Updated question IDs, texts, types, options, and placeholders
+- Maintained proper TypeScript type safety and structure
+
+**Status:** ✅ **RESOLVED** - All Problem Solving Ability conditional questions successfully replaced with more behavioral, direct questions that eliminate escape routes and provide better insights for analytical thinking and problem resolution development
+
+---
+
+### **Issue #031: Survey Question Enhancement - Teamwork Conditional Questions** ✅ **RESOLVED**
+**Date Identified:** January 25, 2025  
+**Severity:** Medium  
+**Category:** Survey Design/User Experience  
+**Reporter:** User - Request for more behavioral-focused Teamwork questions  
+
+**Description:**
+User requested comprehensive replacement of all conditional questions for the "Teamwork" attribute to be more direct, behavior-focused, and eliminate "escape routes" that allow evaluators to avoid providing concrete evidence-based responses.
+
+**Requirements:**
+- **Score Range 9-10**: Replace 4 existing questions with 4 new ones focused on exceptional contributions and leadership
+- **Score Range 6-8**: Replace 7 existing questions with 5 new ones focused on situational effectiveness and collaboration styles  
+- **Score Range 1-5**: Replace 8 existing questions with 4 new ones focused on problematic behaviors and team impact
+- **Total Reduction**: 19 questions → 13 questions (32% reduction)
+
+**Current Problems with Existing Questions:**
+- Too many "escape route" options like "Not sure", "Other (describe)", and conditional optional questions
+- Questions focused on abstract team descriptions rather than observable collaborative behaviors
+- Excessive conditional logic creating inconsistent evaluation paths
+- Limited ability to provide actionable feedback for teamwork development
+
+**Solution Implementation:**
+✅ **Score Range 9-10 (Exceptional) - 4→4 Questions:**
+- `teamwork_contribution_style`: What makes their teamwork contributions exceptional (multi-select)
+- `teamwork_conflict_resolution`: How they handle team conflicts or disagreements (single-select)
+- `teamwork_leadership_natural`: How others respond to their team leadership (single-select)
+- `teamwork_excellence_example`: Recent example of exceptional teamwork (text with placeholder)
+
+✅ **Score Range 6-8 (Middle Ground) - 7→5 Questions:**
+- `teamwork_strong_situations`: Team situations where they contribute most effectively (multi-select)
+- `teamwork_challenging_situations`: Team situations where they struggle (multi-select)
+- `teamwork_collaboration_style`: Typical collaboration style description (single-select)
+- `teamwork_improvement_barrier`: Main barrier to more effective teamwork (single-select)
+- `teamwork_development_focus`: What would help them become more effective (text with placeholder)
+
+✅ **Score Range 1-5 (Needs Improvement) - 8→4 Questions:**
+- `teamwork_problematic_behaviors`: Problematic teamwork behaviors observed (multi-select)
+- `teamwork_primary_issue`: Root cause of teamwork difficulties (single-select)
+- `teamwork_team_impact`: How issues affect overall team performance (single-select)
+- `teamwork_improvement_potential`: What would help them become better (text with placeholder)
+
+**Key Improvements:**
+- **Behavioral Focus**: All questions focus on observable collaboration patterns and specific team interactions
+- **Eliminated Escape Routes**: Removed "Not sure", "Other", and optional conditional questions
+- **Reduced Survey Length**: 32% fewer questions while maintaining comprehensive evaluation coverage
+- **Situation-Specific**: Questions designed to assess effectiveness across different team environments
+- **Development-Oriented**: Focus on identifying specific support needed for collaboration improvement
+
+**Technical Changes:**
+- Updated `COMPREHENSIVE_ATTRIBUTE_DEFINITIONS` in `EvaluationSurvey.tsx`
+- Removed all conditional logic for Teamwork attribute
+- Updated question IDs, texts, types, options, and placeholders
+- Maintained proper TypeScript type safety and structure
+
+**Status:** ✅ **RESOLVED** - All Teamwork conditional questions successfully replaced with more behavioral, direct questions that eliminate escape routes and provide better insights for collaboration and team effectiveness development
+
+---
+
+### **Issue #032: Survey Question Enhancement - Continuous Improvement Conditional Questions** ✅ **RESOLVED**
+**Date Identified:** January 25, 2025  
+**Severity:** Medium  
+**Category:** Survey Design/User Experience  
+**Reporter:** User - Request for more behavioral-focused Continuous Improvement questions  
+
+**Description:**
+User requested comprehensive replacement of all conditional questions for the "Continuous Improvement" attribute to be more direct, behavior-focused, and eliminate "escape routes" that allow evaluators to avoid providing concrete evidence-based responses.
+
+**Requirements:**
+- **Score Range 9-10**: Replace 6 existing questions with 4 new ones focused on growth behaviors and influence
+- **Score Range 6-8**: Replace 6 existing questions with 5 new ones focused on receptive areas and motivation patterns  
+- **Score Range 1-5**: Replace 9 existing questions with 4 new ones focused on resistance behaviors and impact
+- **Total Reduction**: 21 questions → 13 questions (38% reduction)
+
+**Current Problems with Existing Questions:**
+- Too many "escape route" options like "Not sure", "Other (describe)", and conditional optional questions
+- Questions focused on abstract growth descriptions rather than observable improvement behaviors
+- Excessive conditional logic creating inconsistent evaluation paths
+- Limited ability to provide actionable feedback for development
+
+**Solution Implementation:**
+✅ **Score Range 9-10 (Exceptional) - 6→4 Questions:**
+- `continuous_improvement_behaviors`: Growth behaviors observed consistently (multi-select)
+- `continuous_improvement_feedback_seeking`: Approach to feedback and development (single-select)
+- `continuous_improvement_influence_others`: How they influence others' growth mindset (single-select)
+- `continuous_improvement_excellence_example`: Recent example of commitment to improvement (text with placeholder)
+
+✅ **Score Range 6-8 (Middle Ground) - 6→5 Questions:**
+- `continuous_improvement_receptive_areas`: Areas most receptive to feedback (multi-select)
+- `continuous_improvement_resistance_areas`: Areas showing resistance or slower improvement (multi-select)
+- `continuous_improvement_motivation_driver`: What motivates their improvement efforts (single-select)
+- `continuous_improvement_consistency`: Consistency in following through on improvements (single-select)
+- `continuous_improvement_development_focus`: What would help them become more consistent (text with placeholder)
+
+✅ **Score Range 1-5 (Needs Improvement) - 9→4 Questions:**
+- `continuous_improvement_resistance_behaviors`: Resistance to improvement observed (multi-select)
+- `continuous_improvement_root_cause`: Root cause of resistance to improvement (single-select)
+- `continuous_improvement_team_impact`: How resistance affects team or work environment (single-select)
+- `continuous_improvement_potential`: What would help them become more open to growth (text with placeholder)
+
+**Key Improvements:**
+- **Behavioral Focus**: All questions focus on observable growth patterns and specific improvement behaviors
+- **Eliminated Escape Routes**: Removed "Not sure", "Other", and optional conditional questions
+- **Reduced Survey Length**: 38% fewer questions while maintaining comprehensive evaluation coverage
+- **Growth-Specific**: Questions designed to assess receptivity and resistance patterns across different development areas
+- **Development-Oriented**: Focus on identifying specific support needed for continuous improvement
+
+**Technical Changes:**
+- Updated `COMPREHENSIVE_ATTRIBUTE_DEFINITIONS` in `EvaluationSurvey.tsx`
+- Removed all conditional logic for Continuous Improvement attribute
+- Updated question IDs, texts, types, options, and placeholders
+- Maintained proper TypeScript type safety and structure
+
+**Status:** ✅ **RESOLVED** - All Continuous Improvement conditional questions successfully replaced with more behavioral, direct questions that eliminate escape routes and provide better insights for growth mindset and development planning
+
+---
+
+### **Issue #033: Survey Question Enhancement - Communication Skills Conditional Questions** ✅ **RESOLVED**
+**Date Identified:** January 25, 2025  
+**Severity:** Medium  
+**Category:** Survey Design/User Experience  
+**Reporter:** User - Request for more behavioral-focused Communication Skills questions  
+
+**Description:**
+User requested comprehensive replacement of all conditional questions for the "Communication Skills" attribute to be more direct, behavior-focused, and eliminate "escape routes" that allow evaluators to avoid providing concrete evidence-based responses.
+
+**Requirements:**
+- **Score Range 9-10**: Replace 7 existing questions with 4 new ones focused on communication excellence and influence
+- **Score Range 6-8**: Replace 9 existing questions with 5 new ones focused on situational effectiveness and development areas  
+- **Score Range 1-5**: Replace 7 existing questions with 4 new ones focused on frequent problems and impact
+- **Total Reduction**: 23 questions → 13 questions (43% reduction)
+
+**Current Problems with Existing Questions:**
+- Too many "escape route" options like "Not sure", "Other (describe)", and conditional optional questions
+- Questions focused on abstract communication descriptions rather than observable communication behaviors
+- Excessive conditional logic creating inconsistent evaluation paths
+- Limited ability to provide actionable feedback for communication development
+
+**Solution Implementation:**
+✅ **Score Range 9-10 (Exceptional) - 7→4 Questions:**
+- `communication_excellence_qualities`: What makes their communication exceptionally effective (multi-select)
+- `communication_pressure_performance`: Effectiveness under pressure or in critical situations (single-select)
+- `communication_influence_others`: How they use communication to influence and help others (single-select)
+- `communication_excellence_example`: Recent example of exceptional communication skills (text with placeholder)
+
+✅ **Score Range 6-8 (Middle Ground) - 9→5 Questions:**
+- `communication_strong_situations`: Communication situations where they are most effective (multi-select)
+- `communication_challenging_situations`: Communication situations where they struggle most (multi-select)
+- `communication_primary_gap`: Their primary communication limitation (single-select)
+- `communication_high_stakes_confidence`: Confidence level for high-stakes communication (single-select)
+- `communication_development_focus`: What would help them become more effective (text with placeholder)
+
+✅ **Score Range 1-5 (Needs Improvement) - 7→4 Questions:**
+- `communication_frequent_problems`: Communication problems that occur most frequently (multi-select)
+- `communication_root_cause`: Root cause of their communication difficulties (single-select)
+- `communication_team_impact`: How issues affect team effectiveness or relationships (single-select)
+- `communication_improvement_potential`: What would help them improve effectiveness (text with placeholder)
+
+**Key Improvements:**
+- **Behavioral Focus**: All questions focus on observable communication patterns and specific effectiveness indicators
+- **Eliminated Escape Routes**: Removed "Not sure", "Other", and optional conditional questions
+- **Reduced Survey Length**: 43% fewer questions while maintaining comprehensive communication assessment
+- **Situation-Specific**: Questions designed to assess effectiveness across different communication contexts and scenarios
+- **Development-Oriented**: Focus on identifying specific support needed for communication skill improvement
+
+**Technical Changes:**
+- Updated `COMPREHENSIVE_ATTRIBUTE_DEFINITIONS` in `EvaluationSurvey.tsx`
+- Removed all conditional logic for Communication Skills attribute
+- Updated question IDs, texts, types, options, and placeholders
+- Maintained proper TypeScript type safety and structure
+
+**Status:** ✅ **RESOLVED** - All Communication Skills conditional questions successfully replaced with more behavioral, direct questions that eliminate escape routes and provide better insights for communication effectiveness and professional development
+
+---
+
+### **Issue #034: Survey Question Enhancement - Leadership Conditional Questions** ✅ **RESOLVED**
+**Date Identified:** January 25, 2025  
+**Severity:** Medium  
+**Category:** Survey Design/User Experience  
+**Reporter:** User - Request for more behavioral-focused Leadership questions  
+
+**Description:**
+User requested comprehensive replacement of all conditional questions for the "Leadership" attribute to be more direct, behavior-focused, and eliminate "escape routes" that allow evaluators to avoid providing concrete evidence-based responses.
+
+**Requirements:**
+- **Score Range 9-10**: Replace 6 existing questions with 4 new ones focused on leadership influence and natural emergence
+- **Score Range 6-8**: Replace 6 existing questions with 5 new ones focused on influence areas and development barriers  
+- **Score Range 1-5**: Replace 10 existing questions with 4 new ones focused on leadership problems and limitations
+- **Total Reduction**: 22 questions → 13 questions (41% reduction)
+
+**Current Problems with Existing Questions:**
+- Too many "escape route" options like "Not sure", "Other (describe)", and conditional optional questions
+- Questions focused on abstract leadership descriptions rather than observable leadership behaviors
+- Excessive conditional logic creating inconsistent evaluation paths
+- Limited ability to provide actionable feedback for leadership development
+
+**Solution Implementation:**
+✅ **Score Range 9-10 (Exceptional) - 6→4 Questions:**
+- `leadership_influence_behaviors`: How they demonstrate leadership influence regardless of formal authority (multi-select)
+- `leadership_trust_level`: How others respond when decisions or guidance are needed (single-select)
+- `leadership_natural_situations`: Situations where their natural leadership emerges most clearly (single-select)
+- `leadership_excellence_example`: Recent example of leadership influence (text with placeholder)
+
+✅ **Score Range 6-8 (Middle Ground) - 6→5 Questions:**
+- `leadership_influence_areas`: Areas where they show the most leadership influence (multi-select)
+- `leadership_hesitation_areas`: Areas where they hesitate to show leadership or influence (multi-select)
+- `leadership_style_effectiveness`: Their leadership approach when they step up (single-select)
+- `leadership_development_barrier`: Main barrier to more consistent leadership influence (single-select)
+- `leadership_development_focus`: What would help them develop stronger leadership influence (text with placeholder)
+
+✅ **Score Range 1-5 (Needs Improvement) - 10→4 Questions:**
+- `leadership_influence_problems`: Problems observed with their leadership or influence attempts (multi-select)
+- `leadership_primary_limitation`: Primary limitation in leadership or influence (single-select)
+- `leadership_team_impact`: How leadership limitations affect team effectiveness (single-select)
+- `leadership_improvement_potential`: What would help them develop basic leadership capabilities (text with placeholder)
+
+**Key Improvements:**
+- **Behavioral Focus**: All questions focus on observable leadership patterns and specific influence indicators
+- **Eliminated Escape Routes**: Removed "Not sure", "Other", and optional conditional questions
+- **Reduced Survey Length**: 41% fewer questions while maintaining comprehensive leadership assessment
+- **Influence-Centered**: Questions designed to assess leadership impact regardless of formal authority
+- **Development-Oriented**: Focus on identifying specific barriers and support needed for leadership growth
+
+**Technical Changes:**
+- Updated `COMPREHENSIVE_ATTRIBUTE_DEFINITIONS` in `EvaluationSurvey.tsx`
+- Removed all conditional logic for Leadership attribute
+- Updated question IDs, texts, types, options, and placeholders
+- Maintained proper TypeScript type safety and structure
+
+**Status:** ✅ **RESOLVED** - All Leadership conditional questions successfully replaced with more behavioral, direct questions that eliminate escape routes and provide better insights for leadership influence and development planning
+
+---
+
+### **Issue #027: A-Player Letter Grading System Implementation** ✅ **RESOLVED**
+**Date Identified:** January 25, 2025  
+**Date Resolved:** January 25, 2025  
+**Severity:** High  
+**Category:** Feature Enhancement  
+**Reporter:** User Request  
+
+**Description:**
+User requested implementation of A-Player letter grading system to convert numeric scores (0-10) to letter grades (A-F) and provide configurable attribute weighting system for managers to customize evaluation priorities.
+
+**Requirements:**
+1. **Letter Grade Scale**: A (8.5-10), B (7.0-8.49), C (5.5-6.99), D (4.0-5.49), F (0-3.99)
+2. **Attribute Weights Management**: Admin interface for configuring attribute importance weights
+3. **Database Integration**: SQL functions and views for grade calculations
+4. **UI Integration**: Letter grades displayed in analytics and management interfaces
+
+**Technical Implementation:**
+
+#### **Database Layer (SQL Scripts Created):**
+1. **`add-letter-grades-to-views.sql`**:
+   - Created `get_letter_grade()` PostgreSQL function for score-to-grade conversion
+   - Enhanced `weighted_evaluation_scores` view with letter grade columns
+   - Added `quarter_final_scores` view with final quarter grades
+   - Created `grade_distribution` analytics view
+   - Added `a_player_summary` view for A-Player identification
+
+2. **`create-attribute-weights-system.sql`**:
+   - Created `attribute_weights` table with RLS security policies
+   - Implemented weight validation (0.1-5.0 range)
+   - Added functions: `get_attribute_weight()`, `calculate_weighted_attribute_score()`
+   - Created views: `weighted_evaluation_scores_with_custom_weights`, `quarter_final_scores_with_custom_weights`
+
+#### **Frontend Implementation:**
+1. **`AttributeWeightsManager.tsx`**: Complete admin interface with:
+   - Interactive weight sliders (0.1-5.0 range)
+   - Visual weight distribution charts
+   - Company default presets and validation
+   - Real-time weight impact calculation
+
+2. **`LetterGrade.tsx`**: Reusable letter grade display components:
+   - Color-coded grade badges (A=green, B=blue, C=yellow, D=orange, F=red)
+   - Compact and expandable display variants
+   - Grade comparison utilities
+
+3. **`attributeWeightsService.ts`**: Complete service layer:
+   - CRUD operations for weights management
+   - Custom weighted data fetching
+   - Weight validation and impact analysis
+
+#### **Admin Interface Integration:**
+- Added "Attribute Weights" tab to Assignment Management page
+- Implemented role-based access control (super_admin, hr_admin only)
+- Real-time weight updates with visual feedback
+
+**Issues Resolved:**
+1. **SQL Reserved Keyword**: Fixed `asc` table alias → `attr_scores` 
+2. **View Column Conflicts**: Used `DROP VIEW IF EXISTS ... CASCADE` instead of `CREATE OR REPLACE`
+3. **Index Creation Error**: Removed unsupported indexes on views
+4. **Admin Access**: Proper integration into existing admin dashboard
+
+**Files Created/Modified:**
+- `a-player-dashboard/add-letter-grades-to-views.sql` (Database schema)
+- `a-player-dashboard/create-attribute-weights-system.sql` (Weights system)
+- `a-player-dashboard/src/components/ui/AttributeWeightsManager.tsx` (Admin UI)
+- `a-player-dashboard/src/components/ui/LetterGrade.tsx` (Display components)
+- `a-player-dashboard/src/services/attributeWeightsService.ts` (Service layer)
+- `a-player-dashboard/src/pages/AssignmentManagement.tsx` (Admin integration)
+
+**Testing Status:**
+- ✅ Database functions working correctly
+- ✅ Admin interface accessible to managers
+- ✅ Weight calculations properly normalized
+- ✅ Letter grade conversion accurate
+
+**Status:** ✅ **RESOLVED** - Complete A-Player letter grading system implemented with customizable attribute weights, admin management interface, and database integration
+
+---
 
 This bug tracking system ensures systematic identification, documentation, and resolution of issues in the A-Player Evaluations Dashboard while maintaining high code quality and user experience standards.

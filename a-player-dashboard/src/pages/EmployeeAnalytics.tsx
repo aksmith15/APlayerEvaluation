@@ -7,6 +7,7 @@ import { useNavigation, useKeyboardNavigation } from '../contexts/NavigationCont
 import { useAuth } from '../contexts/AuthContext';
 import { useChartHeight } from '../utils/useResponsive';
 import { findCurrentQuarterInList, logCurrentQuarter } from '../utils/quarterUtils';
+import { getLetterGrade } from '../utils/calculations';
 import { ROUTES } from '../constants/config';
 import type { Person, WeightedEvaluationScore } from '../types/database';
 import type { Quarter } from '../types/evaluation';
@@ -625,6 +626,9 @@ export const EmployeeAnalytics: React.FC = () => {
             onProfilePictureUpdate={handleProfilePictureUpdate}
             isEditable={isUserEditable()}
             currentUserId={user?.id}
+            currentGrade={overallScore ? getLetterGrade(overallScore) : undefined}
+            currentScore={overallScore || undefined}
+            quarterName={selectedQuarterInfo?.name}
           />
         </div>
 

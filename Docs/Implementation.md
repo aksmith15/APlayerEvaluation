@@ -2036,3 +2036,289 @@ coverageStats.missing_peer_assignments
 - **Functionality:** Coverage Dashboard fully operational
 - **Maintainability:** Proper interface usage prevents future errors
 - **User Experience:** Assignment tracking data displays accurately
+
+---
+
+## 🆕 **Stage 10: Multi-Tenant Architecture Implementation** 🏢 **FUTURE PHASE - DEFERRED**
+**Planned Start Date:** After all current functionality is stable  
+**Estimated Duration:** 1-2 weeks  
+**Complexity:** Complex  
+**Priority:** Deferred  
+**Type:** Major Architecture Enhancement - **BREAKING CHANGE RISK**  
+
+### **📋 Objective:**
+Implement comprehensive multi-tenant architecture to support multiple companies (Ridgeline Electrical Industries + American Fabricators) with complete data isolation and role-based access control.
+
+### **🏗️ Requirements:**
+1. **Complete Data Isolation** - Companies cannot see each other's data
+2. **Role-Based Access** - Admins only see their company's data
+3. **Seamless UX** - Company context integrated throughout UI
+4. **Data Migration** - Existing Ridgeline data preserved and migrated
+5. **Scalable Architecture** - Support for future company additions
+
+### **⚠️ Risk Assessment:**
+- **🔴 HIGH RISK** - Major database schema changes could break current system
+- **🔴 DATA RISK** - RLS policy changes could cause data access issues  
+- **🔴 AUTH RISK** - JWT modifications could break existing authentication
+- **🔴 PRODUCTION RISK** - Could disrupt live system used by Ridgeline Electrical
+- **🟡 COMPLEXITY** - Requires extensive testing and rollback procedures
+
+### **🔍 Current State Analysis:**
+- ✅ **Stable Production** - System working well for Ridgeline Electrical
+- ✅ **RLS Foundation** - Row Level Security already implemented 
+- ✅ **User Authentication** - JWT-based auth with role system
+- ✅ **Database Structure** - Core tables established and operational
+- ❌ **Company Separation** - No tenant isolation currently exists
+- ❌ **Multi-Tenant RLS** - Policies focus on user-level, not company-level access
+
+### **📊 Database Tables Requiring Company Integration:**
+1. **people** - Employee data (core tenant relationship)
+2. **evaluation_cycles** - Quarter definitions (company-specific or shared)
+3. **weighted_evaluation_scores** - All evaluation data (tenant-isolated)
+4. **submissions** - Raw evaluation data (tenant-isolated)
+5. **attribute_scores** - Score details (tenant-isolated)
+6. **evaluation_assignments** - Assignment data (tenant-isolated)
+7. **analysis_jobs** - AI analysis data (tenant-isolated)
+8. **app_config** - Configuration (tenant-specific or shared)
+9. **attribute_weights** - Grading weights (tenant-specific)
+
+### **🛡️ Security Architecture:**
+**Multi-Level Access Control:**
+- **L1: Company Isolation** - Users only access their company's data
+- **L2: Role-Based Access** - Admin/Manager/User permissions within company
+- **L3: Employee-Level** - Individual evaluation access controls
+- **L4: Assignment-Level** - Survey assignment specific permissions
+
+---
+
+### **📋 Implementation Sub-Tasks:**
+
+#### **Stage 8.8.1: Database Schema Enhancement (Week 1.1)** 
+**Complexity:** High | **Priority:** Critical | **Dependencies:** None
+
+- [ ] **COMPLEX**: Create companies table with core tenant information
+  - *Implementation*: Company name, slug, settings, status, branding options
+  - *Security*: RLS policies for company data access
+  - *Features*: Company-specific configuration and customization
+
+- [ ] **COMPLEX**: Add company_id foreign keys to all core tables
+  - *Implementation*: Add company_id UUID columns with proper constraints
+  - *Migration*: Update existing data with Ridgeline Electrical company
+  - *Indexes*: Performance optimization for company-based queries
+
+- [ ] **COMPLEX**: Redesign all RLS policies for multi-tenant isolation
+  - *Implementation*: Company-aware RLS policies across 9 core tables
+  - *Security*: Prevent cross-company data access at database level
+  - *Testing*: Comprehensive policy validation and penetration testing
+
+#### **Stage 8.8.2: Authentication & User Management (Week 1.2)**
+**Complexity:** Medium | **Priority:** Critical | **Dependencies:** 8.8.1
+
+- [ ] **MEDIUM**: Enhance JWT token with company context
+  - *Implementation*: Add company_id and company_slug to JWT claims
+  - *Security*: Validate company association on all requests
+  - *Compatibility*: Maintain backward compatibility during transition
+
+- [ ] **MEDIUM**: Update user registration/invitation process
+  - *Implementation*: Company selection during user creation
+  - *Admin Features*: Company admin can invite users to their organization
+  - *Validation*: Prevent users from accessing wrong companies
+
+- [ ] **SIMPLE**: Add company selection to login flow
+  - *Implementation*: Company context selection after authentication
+  - *UX*: Seamless company identification for users
+  - *Security*: Validate company access permissions
+
+#### **Stage 8.8.3: UI/UX Multi-Tenant Integration (Week 1.3)**
+**Complexity:** Medium | **Priority:** High | **Dependencies:** 8.8.2
+
+- [ ] **MEDIUM**: Add company branding and context throughout UI
+  - *Implementation*: Company name/logo in header, dashboard titles
+  - *Design*: Subtle company identification without overwhelming interface
+  - *Customization*: Company-specific color schemes (future enhancement)
+
+- [ ] **SIMPLE**: Update navigation breadcrumbs with company context
+  - *Implementation*: Company name in breadcrumb navigation
+  - *UX*: Clear company context for user orientation
+  - *Accessibility*: Screen reader friendly company identification
+
+- [ ] **MEDIUM**: Enhance admin interfaces for company management
+  - *Implementation*: Company settings, user management, configuration
+  - *Features*: Company admin can manage their organization settings
+  - *Security*: Company-scoped admin capabilities only
+
+#### **Stage 8.8.4: Data Migration & Setup (Week 1.4)**
+**Complexity:** High | **Priority:** Critical | **Dependencies:** 8.8.1, 8.8.2
+
+- [ ] **COMPLEX**: Migrate existing Ridgeline Electrical Industries data
+  - *Implementation*: Assign all current data to Ridgeline company
+  - *Validation*: Ensure data integrity and proper company association
+  - *Rollback*: Backup and rollback procedures for safe migration
+
+- [ ] **MEDIUM**: Create American Fabricators company setup
+  - *Implementation*: New company record, initial configuration
+  - *Admin Setup*: Create first admin user for American Fabricators
+  - *Testing*: Validate complete isolation from Ridgeline data
+
+- [ ] **SIMPLE**: Prepare company-specific configuration templates
+  - *Implementation*: Default attribute weights, evaluation cycles
+  - *Customization*: Company-specific evaluation criteria
+  - *Documentation*: Setup guides for new company onboarding
+
+#### **Stage 8.8.5: Advanced Multi-Tenant Features (Week 2.1)**
+**Complexity:** Medium | **Priority:** Medium | **Dependencies:** 8.8.4
+
+- [ ] **MEDIUM**: Implement company-specific evaluation cycles
+  - *Implementation*: Companies can have different quarterly schedules
+  - *Flexibility*: Independent evaluation periods per company
+  - *Analytics*: Company-specific performance trending
+
+- [ ] **MEDIUM**: Add company-scoped attribute weight management
+  - *Implementation*: Each company configures their own attribute priorities
+  - *Admin Features*: Company-specific grading scale customization
+  - *Migration*: Inherit current weight settings per company
+
+- [ ] **SIMPLE**: Enhance reporting with company-level analytics
+  - *Implementation*: Company performance dashboards for super admins
+  - *Insights*: Cross-company benchmarking (anonymized)
+  - *Export*: Company-specific report generation
+
+#### **Stage 8.8.6: Testing & Security Validation (Week 2.2)**
+**Complexity:** High | **Priority:** Critical | **Dependencies:** All previous
+
+- [ ] **COMPLEX**: Comprehensive multi-tenant security testing
+  - *Implementation*: Automated tests for cross-company access prevention
+  - *Penetration Testing*: Validate RLS policies prevent data leakage
+  - *User Testing*: End-to-end workflow validation for both companies
+
+- [ ] **MEDIUM**: Performance testing with multi-tenant data
+  - *Implementation*: Load testing with multiple companies and large datasets
+  - *Optimization*: Query performance with company-scoped indexes
+  - *Monitoring*: Company-specific performance metrics
+
+- [ ] **SIMPLE**: Documentation and deployment procedures
+  - *Implementation*: Multi-tenant deployment guide and runbooks
+  - *Training*: Admin training for multi-company management
+  - *Support*: Troubleshooting guides for multi-tenant issues
+
+---
+
+### **🎯 Success Criteria:**
+- ✅ **Complete Data Isolation** - Ridgeline and American Fabricators cannot see each other's data
+- ✅ **Seamless User Experience** - Company context clear but not overwhelming
+- ✅ **Admin Functionality** - Company admins can fully manage their organization
+- ✅ **Performance Maintained** - Multi-tenancy doesn't degrade system performance
+- ✅ **Security Validated** - Comprehensive testing confirms no cross-company access
+- ✅ **Scalable Architecture** - Easy addition of new companies in the future
+
+### **🔧 Technical Architecture:**
+
+#### **Companies Table Schema:**
+```sql
+CREATE TABLE companies (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL, -- "Ridgeline Electrical Industries"
+    slug VARCHAR(100) NOT NULL UNIQUE, -- "ridgeline-electrical"
+    domain VARCHAR(255), -- "ridgelineelectrical.com" (optional)
+    status VARCHAR(50) DEFAULT 'active', -- active, inactive, suspended
+    settings JSONB DEFAULT '{}', -- Company-specific configuration
+    branding JSONB DEFAULT '{}', -- Logo, colors, etc.
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+#### **Enhanced RLS Policy Example:**
+```sql
+-- Multi-tenant people table policy
+CREATE POLICY "Company-isolated people access" ON people
+FOR ALL USING (
+    company_id = (
+        SELECT p.company_id FROM people p 
+        WHERE p.email = auth.email()
+    )
+);
+```
+
+#### **JWT Enhancement:**
+```typescript
+interface UserClaims {
+  id: string;
+  email: string;
+  role: string;
+  jwtRole: 'hr_admin' | 'super_admin' | null;
+  company_id: string; // NEW: Company isolation
+  company_slug: string; // NEW: Company identification
+}
+```
+
+### **📊 Benefits:**
+- **🏢 Enterprise Ready** - Support multiple organizations in single deployment
+- **🔒 Enhanced Security** - Company-level data isolation and access control  
+- **⚡ Scalable Growth** - Easy onboarding of new companies
+- **💰 Cost Effective** - Shared infrastructure with isolated data
+- **🎯 Targeted Features** - Company-specific customization and branding
+
+### **📈 Impact:**
+- **User Base Expansion** - Support for American Fabricators + future companies
+- **Revenue Growth** - Multi-tenant SaaS model enables business scaling
+- **Operational Efficiency** - Single system managing multiple organizations
+- **Security Enhancement** - Advanced isolation prevents data breaches
+- **Competitive Advantage** - Enterprise-grade multi-tenant architecture
+
+---
+
+## 🆕 **Stage 8.8: Safe Multi-Company Support (Interim Solution)** 🏢 **RECOMMENDED APPROACH**
+**Start Date:** January 25, 2025  
+**Estimated Duration:** 2-3 days  
+**Complexity:** Simple-Medium  
+**Priority:** High  
+**Type:** Safe Enhancement - **NO BREAKING CHANGES**
+
+### **📋 Safer Objective:**
+Implement basic multi-company support **without major architectural changes** to safely onboard American Fabricators while preserving current Ridgeline system stability.
+
+### **✅ Safe Implementation Strategy:**
+
+#### **Option A: Separate Database Deployment (SAFEST)**
+- **🟢 Zero Risk** - Deploy completely separate instance for American Fabricators
+- **🟢 No Changes** - Current Ridgeline system untouched
+- **🟢 Quick Setup** - Copy existing deployment, change branding/config
+- **🟢 Independent** - Each company has their own domain/database
+
+#### **Option B: Simple Company Field (LOW RISK)**
+- **🟡 Minimal Risk** - Add optional company field to people table only
+- **🟡 Gradual** - Test with new users first, migrate existing later
+- **🟡 Reversible** - Can easily remove if issues arise
+- **🟡 UI Enhancement** - Add company filter to admin interfaces
+
+### **🎯 Recommended: Option A (Separate Deployment)**
+
+**Benefits:**
+- ✅ **Zero Risk** to current Ridgeline system
+- ✅ **Independent Operation** - each company isolated by design
+- ✅ **Custom Branding** - each deployment can be customized
+- ✅ **Simple Management** - separate admin, separate data, separate domains
+- ✅ **Quick Implementation** - duplicate existing working system
+
+**Implementation Steps:**
+1. **Clone Repository** - Create American Fabricators deployment
+2. **Configure Environment** - New Supabase database + environment variables  
+3. **Update Branding** - Change company name, logo, colors in UI
+4. **Setup Admin** - Create initial admin user for American Fabricators
+5. **Deploy** - Separate domain (e.g., american-fabricators-evaluations.onrender.com)
+
+**Timeline:** 2-3 days vs 1-2 weeks for complex multi-tenancy
+
+---
+
+### **💡 Future Migration Path:**
+When ready for true multi-tenancy (Stage 10):
+1. **Proven Stability** - Both systems working independently
+2. **Lower Risk** - Can migrate one company at a time
+3. **Rollback Option** - Keep separate deployments as backup
+4. **User Training** - Teams familiar with the system before migration
+
+---
+
+**🚀 Recommendation:** Start with **Option A (Separate Deployment)** to safely support American Fabricators immediately, then consider **Stage 10 (True Multi-Tenancy)** once both companies are stable and satisfied with the system.

@@ -42,3 +42,136 @@ export const transformToPerformanceAttributes = (
     completionPercentage: score.completion_percentage
   }));
 }; 
+
+// A-Player Letter Grading System
+export type LetterGrade = 'A' | 'B' | 'C' | 'D' | 'F';
+
+export interface GradeScale {
+  grade: LetterGrade;
+  minScore: number;
+  maxScore: number;
+  description: string;
+  color: string;
+}
+
+// A-Player Grade Scale - Optimized for High Performance Evaluation
+export const A_PLAYER_GRADE_SCALE: GradeScale[] = [
+  {
+    grade: 'A',
+    minScore: 8.5,
+    maxScore: 10.0,
+    description: 'A-Player - Exceptional Performance',
+    color: 'text-green-700 bg-green-50'
+  },
+  {
+    grade: 'B',
+    minScore: 7.0,
+    maxScore: 8.49,
+    description: 'High Performer - Exceeds Expectations',
+    color: 'text-blue-700 bg-blue-50'
+  },
+  {
+    grade: 'C',
+    minScore: 5.5,
+    maxScore: 6.99,
+    description: 'Solid Contributor - Meets Expectations',
+    color: 'text-yellow-700 bg-yellow-50'
+  },
+  {
+    grade: 'D',
+    minScore: 4.0,
+    maxScore: 5.49,
+    description: 'Below Expectations - Needs Improvement',
+    color: 'text-orange-700 bg-orange-50'
+  },
+  {
+    grade: 'F',
+    minScore: 0.0,
+    maxScore: 3.99,
+    description: 'Failing Performance - Requires Action',
+    color: 'text-red-700 bg-red-50'
+  }
+];
+
+/**
+ * Convert numeric score to A-Player letter grade
+ * @param score - Numeric score (0-10 scale)
+ * @returns Letter grade (A, B, C, D, F)
+ */
+export const getLetterGrade = (score: number): LetterGrade => {
+  // Handle edge cases
+  if (score < 0 || score > 10 || isNaN(score)) {
+    return 'F';
+  }
+
+  // Find matching grade scale
+  for (const gradeScale of A_PLAYER_GRADE_SCALE) {
+    if (score >= gradeScale.minScore && score <= gradeScale.maxScore) {
+      return gradeScale.grade;
+    }
+  }
+
+  // Default fallback
+  return 'F';
+};
+
+/**
+ * Get grade scale information for a specific letter grade
+ * @param grade - Letter grade
+ * @returns Grade scale information
+ */
+export const getGradeScale = (grade: LetterGrade): GradeScale | undefined => {
+  return A_PLAYER_GRADE_SCALE.find(scale => scale.grade === grade);
+};
+
+/**
+ * Get grade scale information for a numeric score
+ * @param score - Numeric score (0-10 scale)
+ * @returns Grade scale information
+ */
+export const getGradeScaleForScore = (score: number): GradeScale | undefined => {
+  const grade = getLetterGrade(score);
+  return getGradeScale(grade);
+};
+
+/**
+ * Calculate letter grade distribution from multiple scores
+ * @param scores - Array of numeric scores
+ * @returns Grade distribution with counts and percentages
+ */
+export const calculateGradeDistribution = (scores: number[]) => {
+  const distribution = {
+    A: { count: 0, percentage: 0 },
+    B: { count: 0, percentage: 0 },
+    C: { count: 0, percentage: 0 },
+    D: { count: 0, percentage: 0 },
+    F: { count: 0, percentage: 0 }
+  };
+
+  if (scores.length === 0) return distribution;
+
+  // Count grades
+  scores.forEach(score => {
+    const grade = getLetterGrade(score);
+    distribution[grade].count++;
+  });
+
+  // Calculate percentages
+  const total = scores.length;
+  Object.keys(distribution).forEach(grade => {
+    const gradeKey = grade as LetterGrade;
+    distribution[gradeKey].percentage = Math.round((distribution[gradeKey].count / total) * 100);
+  });
+
+  return distribution;
+};
+
+/**
+ * Determine if a score qualifies as "A-Player" performance
+ * @param score - Numeric score (0-10 scale)
+ * @returns True if score is A or B grade (7.0+)
+ */
+export const isAPlayerPerformance = (score: number): boolean => {
+  const grade = getLetterGrade(score);
+  return grade === 'A' || grade === 'B';
+}; 

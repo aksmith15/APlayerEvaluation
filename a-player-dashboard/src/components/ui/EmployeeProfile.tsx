@@ -2,19 +2,27 @@ import React, { useState, useRef } from 'react';
 import type { Person } from '../../types/database';
 import { uploadProfilePicture, updateEmployeeProfilePicture, deleteEmployeeProfilePicture } from '../../services/dataFetching';
 import { LoadingSpinner } from './LoadingSpinner';
+import { LetterGrade } from './LetterGrade';
+import type { LetterGrade as LetterGradeType } from '../../utils/calculations';
 
 interface EmployeeProfileProps {
   employee: Person;
   onProfilePictureUpdate: (url: string | null) => void;
   isEditable?: boolean; // Can the current user edit the profile picture
   currentUserId?: string;
+  currentGrade?: LetterGradeType; // Current quarter letter grade
+  currentScore?: number; // Current quarter score for tooltip
+  quarterName?: string; // Current quarter name for context
 }
 
 export const EmployeeProfile: React.FC<EmployeeProfileProps> = ({
   employee,
   onProfilePictureUpdate,
   isEditable = false,
-  currentUserId
+  currentUserId,
+  currentGrade,
+  currentScore,
+  quarterName
 }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -234,8 +242,8 @@ export const EmployeeProfile: React.FC<EmployeeProfileProps> = ({
               </div>
             </div>
 
-            {/* Status Badge */}
-            <div className="flex items-center pt-2">
+            {/* Status Badge and Performance Grade */}
+            <div className="flex items-center gap-3 pt-2">
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                 employee.active 
                   ? 'bg-green-100 text-green-800' 
@@ -243,6 +251,24 @@ export const EmployeeProfile: React.FC<EmployeeProfileProps> = ({
               }`}>
                 {employee.active ? 'Active' : 'Inactive'}
               </span>
+              
+              {/* Current Quarter Grade - Subtle Display */}
+              {currentGrade && (
+                <div className="flex items-center gap-2">
+                  <LetterGrade 
+                    grade={currentGrade}
+                    score={currentScore}
+                    size="sm"
+                    showTooltip={true}
+                    className="shadow-sm"
+                  />
+                  {quarterName && (
+                    <span className="text-xs text-secondary-600">
+                      {quarterName}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
