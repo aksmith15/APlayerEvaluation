@@ -5,7 +5,7 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { ErrorMessage } from '../components/ui/ErrorMessage';
-import { EmptyState } from '../components/ui/EmptyState';
+
 // import { QuarterRangeSelector } from '../components/ui/QuarterRangeSelector';
 import { AssignmentCreationForm } from '../components/ui/AssignmentCreationForm';
 import { AssignmentDebugger } from '../components/ui/AssignmentDebugger';
@@ -95,7 +95,7 @@ interface AssignmentFilters {
 
 const AssignmentManagement: React.FC = () => {
   const { user } = useAuth();
-  const navigation = useNavigation();
+  const _navigation = useNavigation();
 
   // State management
   const [assignments, setAssignments] = useState<EvaluationAssignmentWithDetails[]>([]);

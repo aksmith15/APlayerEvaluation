@@ -6,7 +6,6 @@ import type {
   AssignmentCreationResult,
   BulkAssignmentData,
   AssignmentStatistics,
-  AssignmentSubmission,
   SurveyProgress,
   EvaluationType,
   AssignmentStatus 

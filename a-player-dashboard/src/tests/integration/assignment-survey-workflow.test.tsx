@@ -25,7 +25,7 @@ vi.mock('react-router-dom', async () => {
 });
 
 // Test data
-const mockUser = {
+const _mockUser = {
   id: 'user-123',
   email: 'evaluator@company.com',
   jwtRole: 'authenticated'

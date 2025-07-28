@@ -11,8 +11,7 @@ import {
   AssignmentCard
 } from '../components/ui';
 import { 
-  fetchUserAssignments,
-  getSurveyProgress 
+  fetchUserAssignments
 } from '../services/assignmentService';
 import type { 
   EvaluationAssignmentWithDetails,
@@ -48,7 +47,7 @@ interface AssignmentFilters {
 
 const MyAssignments: React.FC = () => {
   const { user } = useAuth();
-  const navigation = useNavigation();
+  const _navigation = useNavigation();
   const navigate = useNavigate();
 
   // State management
@@ -104,7 +103,7 @@ const MyAssignments: React.FC = () => {
     setRefreshing(false);
   };
 
-  const handleStartEvaluation = (assignmentId: string, surveyToken: string) => {
+  const handleStartEvaluation = (_assignmentId: string, surveyToken: string) => {
     // Navigate to survey page
     navigate(`/survey/${surveyToken}`);
   };

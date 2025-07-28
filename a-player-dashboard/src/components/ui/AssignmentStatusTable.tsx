@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from './Button';
 import { LoadingSpinner } from './LoadingSpinner';
 import { EmptyState } from './EmptyState';
@@ -51,7 +51,7 @@ export const AssignmentStatusTable: React.FC<AssignmentStatusTableProps> = ({
   onSelectionChange,
   filters, // Use filters from parent - single source of truth
   onFilterChange,
-  onAssignmentUpdate,
+  onAssignmentUpdate: _onAssignmentUpdate,
   loading = false
 }) => {
   const [sortField, setSortField] = useState<keyof EvaluationAssignmentWithDetails>('assigned_at');

@@ -24,7 +24,7 @@ export const checkCurrentQuarterDataAvailability = async (
 ): Promise<QuarterDataStatus | null> => {
   try {
     // Get current quarter info
-    const currentQuarter = getCurrentQuarter();
+    const _currentQuarter = getCurrentQuarter();
     
     // Find the quarter record in database that matches current quarter
     const { data: quarterData, error: quarterError } = await supabase

@@ -221,7 +221,6 @@ export const CoverageDashboard: React.FC<CoverageDashboardProps> = ({
   };
 
   const getEvaluationTypeIcon = (type: EvaluationType, hasType: boolean) => {
-    const iconClass = hasType ? "text-green-500" : "text-gray-300";
     switch (type) {
       case 'self':
         return <span className={`inline-block w-3 h-3 rounded-full ${hasType ? 'bg-blue-500' : 'bg-gray-300'}`} title="Self Evaluation" />;
