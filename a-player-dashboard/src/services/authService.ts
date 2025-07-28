@@ -36,14 +36,37 @@ export const authService = {
       // Get additional user profile from people table
       const profile = await this.getUserProfile(data.user.email!);
 
+      // CRITICAL: Always use people table ID for assignment creation
+      if (!profile?.id) {
+        console.error('❌ AUTHORIZATION FAILURE: No people table record found for email:', data.user.email);
+        console.error('💡 Solution: Add this user to the people table with appropriate jwt_role');
+        throw new Error(`Access denied: No people table record found for ${data.user.email}. Contact administrator to set up your account.`);
+      }
+
+      // Verify user has proper role for assignment creation
+      if (!profile.jwtRole || !['super_admin', 'hr_admin'].includes(profile.jwtRole)) {
+        console.warn('⚠️ User has people table record but no admin role:', {
+          email: data.user.email,
+          people_id: profile.id,
+          jwt_role: profile.jwtRole
+        });
+      }
+
       const user: User = {
-        id: data.user.id,
+        id: profile.id, // ALWAYS use people table ID - this fixes assignment creation
         email: data.user.email!,
-        name: profile?.name || data.user.user_metadata?.name || 'Test User',
-        role: profile?.role || 'Manager',
-        department: profile?.department || 'Test Department',
-        jwtRole: profile?.jwtRole || null
+        name: profile.name || data.user.user_metadata?.name || 'User',
+        role: profile.role || 'Manager',
+        department: profile.department || 'Default',
+        jwtRole: profile.jwtRole || null
       };
+
+      console.log('✅ Authentication successful with people table integration:', {
+        auth_email: data.user.email,
+        people_id: user.id,
+        jwt_role: user.jwtRole,
+        can_create_assignments: ['super_admin', 'hr_admin'].includes(user.jwtRole || '')
+      });
 
       // Update JWT custom claims if user has elevated role
       if (profile?.jwtRole) {
@@ -74,6 +97,7 @@ export const authService = {
 
   // Helper function to get user profile with timeout and JWT role
   async getUserProfile(email: string): Promise<{ 
+    id: string;
     name: string; 
     role: string; 
     department: string; 
@@ -81,6 +105,7 @@ export const authService = {
   } | null> {
     try {
       console.log('Fetching profile for:', email);
+      console.log('Starting people table lookup...');
       
       // Create a timeout promise that matches the query result type
       const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
@@ -90,7 +115,7 @@ export const authService = {
       // Execute the query - add jwt_role column if it exists
       const queryPromise = supabase
         .from('people')
-        .select('name, role, department, jwt_role')
+        .select('id, name, role, department, jwt_role')
         .eq('email', email)
         .eq('active', true)
         .maybeSingle();
@@ -101,15 +126,24 @@ export const authService = {
       ]);
 
       if (profileError) {
-        console.warn('Could not fetch user profile:', profileError);
+        console.error('Profile lookup failed:', profileError);
+        console.error('Email being searched:', email);
         return null;
       }
 
-      console.log('Profile found:', profile);
+      if (profile) {
+        console.log('✅ Profile found successfully:', profile);
+        console.log('People table ID:', profile.id);
+        console.log('JWT role:', profile.jwt_role);
+      } else {
+        console.error('❌ No profile found for email:', email);
+        console.error('This will cause assignment creation to fail!');
+      }
       
       if (!profile) return null;
 
       return {
+        id: profile.id,
         name: profile.name,
         role: profile.role,
         department: profile.department,
@@ -166,14 +200,27 @@ export const authService = {
       // Get additional user profile from people table
       const profile = await this.getUserProfile(session.user.email!);
 
+      // CRITICAL: For assignment creation, must have people table record
+      if (!profile?.id) {
+        console.warn('⚠️ Session found but no people table record for:', session.user.email);
+        // For getCurrentUser, we'll return null to force re-authentication
+        return null;
+      }
+
       const user = {
-        id: session.user.id,
+        id: profile.id, // ALWAYS use people table ID
         email: session.user.email!,
-        name: profile?.name || session.user.user_metadata?.name || 'Test User',
-        role: profile?.role || 'Manager',
-        department: profile?.department || 'Test Department',
-        jwtRole: profile?.jwtRole || session.user.user_metadata?.role || null
+        name: profile.name || session.user.user_metadata?.name || 'User',
+        role: profile.role || 'Manager', 
+        department: profile.department || 'Default',
+        jwtRole: profile.jwtRole || session.user.user_metadata?.role || null
       };
+
+      console.log('✅ Session validated with people table integration:', {
+        auth_email: session.user.email,
+        people_id: user.id,
+        jwt_role: user.jwtRole
+      });
 
       console.log('Final user object:', user);
       return user;
@@ -194,7 +241,7 @@ export const authService = {
           const profile = await this.getUserProfile(session.user.email!);
           
           const user: User = {
-            id: session.user.id,
+            id: profile?.id || session.user.id, // Use people table ID if available, fallback to JWT ID  
             email: session.user.email!,
             name: profile?.name || session.user.user_metadata?.name || 'Test User',
             role: profile?.role || 'Manager',

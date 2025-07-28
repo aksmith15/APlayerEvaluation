@@ -1,16 +1,16 @@
 // Performance attributes definitions
 
 export const PERFORMANCE_ATTRIBUTES = [
-  'Communication',
-  'Leadership',
-  'Technical Skills',
-  'Collaboration',
-  'Problem Solving',
-  'Initiative',
   'Reliability',
-  'Innovation',
-  'Quality Focus',
-  'Adaptability'
+  'Accountability for Action',
+  'Quality of Work',
+  'Taking Initiative',
+  'Adaptability',
+  'Problem Solving Ability',
+  'Teamwork',
+  'Continuous Improvement',
+  'Communication Skills',
+  'Leadership'
 ] as const;
 
 export type PerformanceAttributeName = typeof PERFORMANCE_ATTRIBUTES[number];

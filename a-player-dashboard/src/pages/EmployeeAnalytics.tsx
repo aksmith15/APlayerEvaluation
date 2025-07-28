@@ -6,6 +6,7 @@ import { LoadingSpinner, ErrorMessage, Card, RadarChart, ClusteredBarChart, Hist
 import { useNavigation, useKeyboardNavigation } from '../contexts/NavigationContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useChartHeight } from '../utils/useResponsive';
+import { findCurrentQuarterInList, logCurrentQuarter } from '../utils/quarterUtils';
 import { ROUTES } from '../constants/config';
 import type { Person, WeightedEvaluationScore } from '../types/database';
 import type { Quarter } from '../types/evaluation';
@@ -189,9 +190,21 @@ export const EmployeeAnalytics: React.FC = () => {
       setTrendDataRaw(trendData);
       setAvailableQuarters(availableQuartersData);
       
-      // Set the most recent quarter as default
+      // Set the current quarter as default based on today's date
       if (quartersData.length > 0) {
-        setSelectedQuarter(quartersData[0].id);
+        console.log('📅 Setting current quarter for employee analytics...');
+        logCurrentQuarter();
+        
+        const currentQuarter = findCurrentQuarterInList(quartersData);
+        
+        if (currentQuarter) {
+          console.log('✅ Setting current quarter as default:', currentQuarter.name);
+          setSelectedQuarter(currentQuarter.id);
+        } else {
+          // Fallback to most recent quarter if current not found
+          console.log('⚠️ Current quarter not found, using most recent:', quartersData[0]?.name);
+          setSelectedQuarter(quartersData[0].id);
+        }
       }
       
       // Set default historical range (last 2 quarters if available)

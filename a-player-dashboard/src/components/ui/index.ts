@@ -18,4 +18,12 @@ export { Breadcrumb, useBreadcrumbs } from './Breadcrumb';
 export { KeyboardShortcuts } from './KeyboardShortcuts';
 export { EmployeeProfile } from './EmployeeProfile';
 export { QuarterlyNotes } from './QuarterlyNotes';
-export { AuthenticationTest } from './AuthenticationTest'; 
+export { AuthenticationTest } from './AuthenticationTest';
+
+// Survey Assignment System Components
+export { AssignmentCard } from './AssignmentCard';
+export { AssignmentCreationForm } from './AssignmentCreationForm';
+export { AssignmentStatusTable } from './AssignmentStatusTable';
+export { EvaluationSurvey } from './EvaluationSurvey';
+export { AssignmentDebugger } from './AssignmentDebugger';
+export { CoverageDashboard } from './CoverageDashboard'; 

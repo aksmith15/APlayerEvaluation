@@ -364,6 +364,13 @@ export class PerformanceMonitor {
   private async sendToAnalytics(type: string, data: any): Promise<void> {
     try {
       if (this.config.reportingEndpoint) {
+        // Skip analytics in development if endpoint is localhost and not available
+        if (this.config.reportingEndpoint.includes('localhost:3001') && 
+            (import.meta.env.DEV || process.env.NODE_ENV === 'development')) {
+          // Silent skip - no need to spam console with connection errors
+          return;
+        }
+        
         await fetch(this.config.reportingEndpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -377,7 +384,10 @@ export class PerformanceMonitor {
         console.log(`[Analytics] ${type}:`, data);
       }
     } catch (error) {
-      console.warn('[Performance] Failed to send analytics:', error);
+      // Only warn if it's not the expected localhost development issue
+      if (!this.config.reportingEndpoint?.includes('localhost:3001')) {
+        console.warn('[Performance] Failed to send analytics:', error);
+      }
     }
   }
 

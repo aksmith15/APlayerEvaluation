@@ -2,7 +2,7 @@
 
 ## Project Architecture Overview
 
-The A-Player Evaluations Dashboard follows a modern React 18 + TypeScript + Tailwind CSS architecture optimized for a 3-page dashboard application. The structure emphasizes maintainability, scalability, and clear separation of concerns for data visualization and user interface components.
+The A-Player Evaluations Dashboard follows a modern React 18 + TypeScript + Tailwind CSS architecture optimized for a comprehensive 5-page evaluation management application. The structure emphasizes maintainability, scalability, and clear separation of concerns for data visualization, survey management, assignment tracking, and user interface components.
 
 ## Root Directory Structure
 
@@ -16,11 +16,17 @@ A-Player Evaluation2/
 │   │   ├── components/              # Reusable UI components
 │   │   │   ├── ui/                  # Complete UI component library
 │   │   │   │   ├── AnalysisJobManager.tsx    # AI analysis job management
+│   │   │   │   ├── AssignmentCard.tsx       # Assignment display cards with self/other variants
+│   │   │   │   ├── AssignmentCreationForm.tsx # Bulk assignment creation interface
+│   │   │   │   ├── AssignmentStatusTable.tsx # Assignment monitoring table
+│   │   │   │   ├── AttributeRating.tsx      # 1-10 scale rating component
+│   │   │   │   ├── BulkAssignmentUpload.tsx # CSV upload for assignments
 │   │   │   │   ├── Button.tsx               # Reusable button with variants
 │   │   │   │   ├── Button.test.tsx          # Button component tests
 │   │   │   │   ├── Card.tsx                 # Card layout component
 │   │   │   │   ├── Card.test.tsx            # Card component tests
 │   │   │   │   ├── ClusteredBarChart.tsx    # Attribute breakdown visualization
+│   │   │   │   ├── ConditionalQuestion.tsx  # Dynamic question rendering
 │   │   │   │   ├── DownloadAnalyticsButton.tsx # PDF export functionality
 │   │   │   │   ├── EmptyState.tsx           # Empty state component
 │   │   │   │   ├── ErrorBoundary.tsx        # Error boundary wrapper
@@ -31,10 +37,14 @@ A-Player Evaluation2/
 │   │   │   │   ├── PDFViewer.tsx           # PDF document viewer
 │   │   │   │   ├── PerformanceDashboard.tsx # Real-time performance monitoring
 │   │   │   │   ├── QuarterRangeSelector.tsx # Quarter filtering dropdown
+│   │   │   │   ├── QuestionGroup.tsx        # Grouped question display
 │   │   │   │   ├── RadarChart.tsx          # Employee attribute radar chart
 │   │   │   │   ├── SearchInput.tsx         # Search functionality
 │   │   │   │   ├── SearchInput.test.tsx    # Search component tests
 │   │   │   │   ├── SkeletonLoader.tsx      # Loading skeleton component
+│   │   │   │   ├── SurveyContainer.tsx      # Main survey wrapper component
+│   │   │   │   ├── SurveyNavigation.tsx     # Survey step navigation
+│   │   │   │   ├── SurveyProgress.tsx       # Survey completion progress indicator
 │   │   │   │   ├── TrendLineChart.tsx      # Performance trend visualization
 │   │   │   │   ├── Breadcrumb.tsx          # Navigation breadcrumbs
 │   │   │   │   └── index.ts                # Component exports
@@ -42,17 +52,23 @@ A-Player Evaluation2/
 │   │   ├── pages/                          # Main application pages
 │   │   │   ├── Login.tsx                   # Manager authentication page
 │   │   │   ├── EmployeeSelection.tsx       # Employee selection interface
-│   │   │   └── EmployeeAnalytics.tsx       # Employee analytics dashboard
+│   │   │   ├── EmployeeAnalytics.tsx       # Employee analytics dashboard
+│   │   │   ├── AssignmentManagement.tsx    # Manager assignment creation and monitoring dashboard
+│   │   │   ├── MyAssignments.tsx           # User assignment viewing dashboard
+│   │   │   └── EvaluationSurvey.tsx        # Custom survey component replacing fillout.com (PENDING STAGE 7.4)
 │   │   ├── services/                       # External service integrations
 │   │   │   ├── supabase.ts                 # Supabase client configuration
 │   │   │   ├── dataFetching.ts             # Data fetching utilities
 │   │   │   ├── authService.ts              # Authentication service
+│   │   │   ├── assignmentService.ts        # Assignment CRUD operations and assignment logic
 │   │   │   └── realtimeService.ts          # Real-time updates service
 │   │   ├── types/                          # TypeScript type definitions
 │   │   │   ├── database.ts                 # Database entity types
 │   │   │   ├── evaluation.ts               # Evaluation-specific types
 │   │   │   ├── auth.ts                     # Authentication types
-│   │   │   └── charts.ts                   # Chart data types
+│   │   │   ├── charts.ts                   # Chart data types
+│   │   │   ├── assignment.ts               # Assignment-specific TypeScript interfaces
+│   │   │   └── survey.ts                   # Survey response and question types
 │   │   ├── utils/                          # Utility functions
 │   │   │   ├── calculations.ts             # Score calculations and aggregations
 │   │   │   ├── downloadUtils.ts            # File download utilities
@@ -122,11 +138,17 @@ A-Player Evaluation2/
 ```
 ui/
 ├── AnalysisJobManager.tsx           # AI analysis job management and status
+├── AssignmentCard.tsx               # Assignment display cards with self/other variants
+├── AssignmentCreationForm.tsx       # Bulk assignment creation interface
+├── AssignmentStatusTable.tsx        # Assignment monitoring table
+├── AttributeRating.tsx              # 1-10 scale rating component
+├── BulkAssignmentUpload.tsx         # CSV upload for assignments
 ├── Button.tsx                       # Reusable button with variants and accessibility
 ├── Button.test.tsx                  # Comprehensive button component tests
 ├── Card.tsx                         # Card layout with hover effects and interactions
 ├── Card.test.tsx                    # Card component testing suite
 ├── ClusteredBarChart.tsx            # Multi-series bar chart for attribute breakdown
+├── ConditionalQuestion.tsx          # Dynamic question rendering
 ├── DownloadAnalyticsButton.tsx      # PDF export and download functionality
 ├── EmptyState.tsx                   # Empty state with icons and messages
 ├── ErrorBoundary.tsx                # React error boundary with error reporting
@@ -137,10 +159,14 @@ ui/
 ├── PDFViewer.tsx                    # PDF document viewer component
 ├── PerformanceDashboard.tsx         # Real-time performance monitoring dashboard
 ├── QuarterRangeSelector.tsx         # Advanced quarter filtering and selection
+├── QuestionGroup.tsx                # Grouped question display
 ├── RadarChart.tsx                   # Interactive radar chart for performance attributes
 ├── SearchInput.tsx                  # Advanced search with filtering and accessibility
 ├── SearchInput.test.tsx             # Search component test suite
 ├── SkeletonLoader.tsx               # Loading skeleton components
+├── SurveyContainer.tsx              # Main survey wrapper component
+├── SurveyNavigation.tsx             # Survey step navigation
+├── SurveyProgress.tsx               # Survey completion progress indicator
 ├── TrendLineChart.tsx               # Time-series trend visualization
 ├── Breadcrumb.tsx                   # Navigation breadcrumb component
 └── index.ts                         # Comprehensive component exports
@@ -149,7 +175,7 @@ ui/
 #### `/src/components/` - Component Architecture (Actual Implementation)
 ```
 components/
-├── ui/                              # Complete UI component library (24 components)
+├── ui/                              # Complete UI component library (33 components)
 │   └── [All components listed above]
 └── ProtectedRoute.tsx               # Route protection and authentication wrapper
 ```
@@ -202,9 +228,121 @@ export const signOut = async () => Promise<void>;
 export const getCurrentUser = () => User | null;
 export const onAuthStateChange = (callback: (user: User | null) => void) => Unsubscribe;
 
+// assignmentService.ts - Assignment CRUD operations and assignment logic
+export const fetchUserAssignments = async (userId: string) => Promise<EvaluationAssignment[]>;
+export const fetchManagedAssignments = async (managerId: string) => Promise<EvaluationAssignment[]>;
+export const createBulkAssignments = async (assignments: AssignmentCreationRequest[]) => Promise<EvaluationAssignment[]>;
+export const updateAssignmentStatus = async (assignmentId: string, status: string) => Promise<void>;
+export const getAssignmentByToken = async (surveyToken: string) => Promise<EvaluationAssignment>;
+export const processBulkAssignmentCSV = async (csvData: BulkAssignmentData[]) => Promise<void>;
+
 // realtimeService.ts - Real-time updates and subscriptions
 export const subscribeToEmployeeUpdates = (employeeId: string, callback: (data: any) => void) => Subscription;
 export const subscribeToQuarterUpdates = (callback: (data: any) => void) => Subscription;
+```
+
+### Route Structure - Application Navigation
+
+#### Protected Routes Configuration
+```typescript
+// Main application routes with role-based access control
+├── / (root)                                    # Redirects to /login or /employees based on auth
+├── /login                                      # Manager authentication page (public)
+├── /employees                                  # Employee selection interface (authenticated)
+├── /employees/:id/analytics                    # Employee analytics dashboard (authenticated)
+├── /assignments/manage                         # Assignment management dashboard (super_admin/hr_admin only)
+├── /assignments/my                             # User assignment viewing dashboard (all authenticated users)
+└── /survey/:assignmentId                       # Evaluation survey component (authenticated with valid assignment)
+```
+
+#### Route Protection Patterns
+```typescript
+// Route access control based on JWT roles
+- /login: Public access
+- /employees: All authenticated users
+- /employees/:id/analytics: All authenticated users  
+- /assignments/manage: super_admin and hr_admin roles only
+- /assignments/my: All authenticated users
+- /survey/:assignmentId: Authenticated users with valid assignment token
+```
+
+### Database Schema Extensions - Survey Assignment System
+
+#### evaluation_assignments Table Schema
+```sql
+-- New table for managing evaluation assignments and survey distribution
+CREATE TABLE evaluation_assignments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  evaluator_id UUID NOT NULL REFERENCES people(id) ON DELETE CASCADE,
+  evaluatee_id UUID NOT NULL REFERENCES people(id) ON DELETE CASCADE,
+  quarter_id UUID NOT NULL REFERENCES evaluation_cycles(id) ON DELETE CASCADE,
+  evaluation_type evaluation_type_enum NOT NULL, -- 'peer', 'manager', 'self'
+  status assignment_status_enum NOT NULL DEFAULT 'pending', -- 'pending', 'in_progress', 'completed'
+  assigned_by UUID NOT NULL REFERENCES people(id) ON DELETE CASCADE,
+  assigned_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  completed_at TIMESTAMP WITH TIME ZONE,
+  survey_token UUID UNIQUE DEFAULT gen_random_uuid(), -- Unique token for survey access
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  
+  -- Constraints
+  UNIQUE(evaluator_id, evaluatee_id, quarter_id, evaluation_type), -- One assignment per evaluator/evaluatee/quarter/type
+  CHECK (evaluator_id != evaluatee_id OR evaluation_type = 'self') -- Self-evaluations allowed for same person
+);
+
+-- Enum types for evaluation assignments
+CREATE TYPE evaluation_type_enum AS ENUM ('peer', 'manager', 'self');
+CREATE TYPE assignment_status_enum AS ENUM ('pending', 'in_progress', 'completed');
+
+-- Indexes for performance optimization
+CREATE INDEX idx_evaluation_assignments_evaluator ON evaluation_assignments(evaluator_id);
+CREATE INDEX idx_evaluation_assignments_evaluatee ON evaluation_assignments(evaluatee_id);
+CREATE INDEX idx_evaluation_assignments_quarter ON evaluation_assignments(quarter_id);
+CREATE INDEX idx_evaluation_assignments_status ON evaluation_assignments(status);
+CREATE INDEX idx_evaluation_assignments_survey_token ON evaluation_assignments(survey_token);
+
+-- Row Level Security (RLS) Policies for evaluation_assignments
+-- Policy 1: Users can view their own assignments (as evaluator)
+CREATE POLICY "Users can view own assignments" ON evaluation_assignments
+FOR SELECT USING (
+  evaluator_id IN (
+    SELECT id FROM people 
+    WHERE email = auth.email()
+  )
+);
+
+-- Policy 2: Super admin and HR admin can view all assignments
+CREATE POLICY "Admins can view all assignments" ON evaluation_assignments
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM people 
+    WHERE email = auth.email() 
+    AND jwt_role IN ('super_admin', 'hr_admin')
+  )
+);
+
+-- Policy 3: Users can update status of their own assignments
+CREATE POLICY "Users can update own assignment status" ON evaluation_assignments
+FOR UPDATE USING (
+  evaluator_id IN (
+    SELECT id FROM people 
+    WHERE email = auth.email()
+  )
+) WITH CHECK (
+  evaluator_id IN (
+    SELECT id FROM people 
+    WHERE email = auth.email()
+  )
+);
+```
+
+#### Database Relationships
+```
+evaluation_assignments
+├── evaluator_id → people(id)           # Who is doing the evaluation
+├── evaluatee_id → people(id)           # Who is being evaluated  
+├── quarter_id → evaluation_cycles(id)  # Which evaluation period
+├── assigned_by → people(id)            # Who created the assignment
+└── survey_token (unique)               # Secure access token for survey
 ```
 
 ### `/src/types/` - TypeScript Type Definitions
@@ -247,6 +385,70 @@ export interface ChartData {
   peerScore: number;
   selfScore: number;
   weightedScore: number;
+}
+
+// assignment.ts - Assignment-specific TypeScript interfaces
+export interface EvaluationAssignment {
+  id: string;
+  evaluator_id: string;
+  evaluatee_id: string;
+  quarter_id: string;
+  evaluation_type: 'peer' | 'manager' | 'self';
+  status: 'pending' | 'in_progress' | 'completed';
+  assigned_by: string;
+  assigned_at: string;
+  completed_at?: string;
+  survey_token: string;
+  created_at: string;
+}
+
+export interface AssignmentCreationRequest {
+  evaluatee_ids: string[];
+  evaluator_ids: string[];
+  quarter_id: string;
+  evaluation_type: 'peer' | 'manager' | 'self';
+  assigned_by: string;
+}
+
+export interface BulkAssignmentData {
+  evaluator_email: string;
+  evaluatee_email: string;
+  quarter_name: string;
+  evaluation_type: 'peer' | 'manager' | 'self';
+}
+
+// survey.ts - Survey response and question types
+export interface SurveyQuestion {
+  id: string;
+  question_text: string;
+  question_type: 'rating' | 'text' | 'multiple_choice';
+  attribute_name?: string;
+  is_required: boolean;
+  conditional_logic?: {
+    show_if_score: 'high' | 'medium' | 'low'; // 9-10, 6-8, <6
+    dependent_attribute?: string;
+  };
+}
+
+export interface SurveyResponse {
+  assignment_id: string;
+  question_id: string;
+  response_value: string | number;
+  attribute_score?: number;
+  response_timestamp: string;
+}
+
+export interface SurveyProgress {
+  total_questions: number;
+  completed_questions: number;
+  current_step: 'confirmation' | 'welcome' | 'preliminary' | 'attributes' | 'completion';
+  percentage_complete: number;
+}
+
+export interface AttributeRating {
+  attribute_name: string;
+  score: number; // 1-10 scale
+  follow_up_questions?: SurveyQuestion[];
 }
 ```
 
@@ -407,7 +609,7 @@ server {
 #### Production Configuration Files
 ```sql
 -- database-schema.sql - Complete database schema
--- Tables: employee_data, evaluation_scores, quarters, app_config
+-- Tables: employee_data, evaluation_scores, quarters, app_config, evaluation_assignments
 -- Indexes: Performance optimization for large datasets
 -- Constraints: Data integrity and foreign key relationships
 
@@ -768,4 +970,4 @@ src/
 - Test utilities: `testUtils.ts`
 - Mock files: `__mocks__/serviceName.ts`
 
-This project structure provides a solid foundation for building a scalable, maintainable A-Player Evaluations Dashboard with clear separation of concerns and modern React development practices.
+This project structure provides a comprehensive foundation for building a scalable, maintainable A-Player Evaluations Dashboard with complete assignment management and survey capabilities. The architecture supports clear separation of concerns, role-based access control, and modern React development practices for a full-featured evaluation management system that replaces external survey tools with custom React components.

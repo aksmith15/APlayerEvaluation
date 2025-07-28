@@ -18,5 +18,8 @@ export const API_ENDPOINTS = {
 export const ROUTES = {
   LOGIN: '/',
   EMPLOYEE_SELECTION: '/employees',
-  EMPLOYEE_ANALYTICS: '/analytics'
+  EMPLOYEE_ANALYTICS: '/analytics',
+  ASSIGNMENT_MANAGEMENT: '/assignments/manage',
+  MY_ASSIGNMENTS: '/assignments/my',
+  EVALUATION_SURVEY: '/survey/:token'
 } as const; 

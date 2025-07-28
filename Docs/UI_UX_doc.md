@@ -1405,6 +1405,1115 @@ The authentication system has been enhanced for better user experience and relia
 - **Responsive Images**: Proper image sizing and lazy loading for better performance
 - **Bundle Optimization**: Code splitting and tree shaking for smaller bundles
 
+## Survey Assignment System UI/UX
+
+### Assignment Card Components
+
+The assignment card system provides visual distinction between different types of evaluation assignments with clear visual cues and consistent interaction patterns.
+
+#### Base Assignment Card Styling
+```css
+.assignment-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--secondary-200);
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.assignment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  border-color: var(--primary-300);
+}
+
+.assignment-card:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+```
+
+#### Assignment Card Variants
+```css
+/* Self-Evaluation Cards - Blue Theme */
+.assignment-card.self-evaluation {
+  border-left: 4px solid var(--primary-500); /* Blue accent */
+  background: linear-gradient(135deg, var(--primary-50) 0%, var(--bg-primary) 100%);
+}
+
+.assignment-card.self-evaluation:hover {
+  border-left-color: var(--primary-600);
+  background: linear-gradient(135deg, var(--primary-100) 0%, var(--bg-primary) 100%);
+}
+
+/* Evaluate Others Cards - Green Theme */
+.assignment-card.evaluate-others {
+  border-left: 4px solid var(--success); /* Green accent */
+  background: linear-gradient(135deg, #f0fdf4 0%, var(--bg-primary) 100%);
+}
+
+.assignment-card.evaluate-others:hover {
+  border-left-color: #059669;
+  background: linear-gradient(135deg, #dcfce7 0%, var(--bg-primary) 100%);
+}
+
+/* Manager Assignment Cards - Orange Theme */
+.assignment-card.manager-assignment {
+  border-left: 4px solid var(--warning); /* Orange accent */
+  background: linear-gradient(135deg, #fefbf3 0%, var(--bg-primary) 100%);
+}
+
+.assignment-card.manager-assignment:hover {
+  border-left-color: #d97706;
+  background: linear-gradient(135deg, #fef3c7 0%, var(--bg-primary) 100%);
+}
+```
+
+#### Assignment Card Content Structure
+```css
+.assignment-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.assignment-type-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.assignment-type-badge.self {
+  background: var(--primary-100);
+  color: var(--primary-700);
+}
+
+.assignment-type-badge.peer {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.assignment-type-badge.manager {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.assignment-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-pending { background: var(--warning); }
+.status-in-progress { background: var(--info); }
+.status-completed { background: var(--success); }
+
+.assignment-evaluatee {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--secondary-800);
+  margin-bottom: 8px;
+}
+
+.assignment-details {
+  color: var(--secondary-600);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.assignment-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--secondary-200);
+  font-size: 0.75rem;
+  color: var(--secondary-500);
+}
+
+.assignment-due-date {
+  font-weight: 500;
+}
+
+.assignment-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+```
+
+### Assignment Management Dashboard
+
+#### Dashboard Layout
+```css
+.assignment-management-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.assignment-management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.assignment-management-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--secondary-800);
+}
+
+.assignment-management-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.assignment-dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 32px;
+}
+
+.assignment-main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.assignment-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+```
+
+#### Assignment Creation Form
+```css
+.assignment-creation-form {
+  background: var(--bg-primary);
+  border: 1px solid var(--secondary-200);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.form-section {
+  margin-bottom: 24px;
+}
+
+.form-section:last-child {
+  margin-bottom: 0;
+}
+
+.form-section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--secondary-800);
+  margin-bottom: 16px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.multi-select-container {
+  position: relative;
+}
+
+.multi-select {
+  min-height: 120px;
+  border: 1px solid var(--secondary-300);
+  border-radius: 8px;
+  padding: 8px;
+  background: var(--bg-primary);
+}
+
+.selected-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--primary-100);
+  color: var(--primary-700);
+  padding: 4px 8px;
+  border-radius: 6px;
+  margin: 2px;
+  font-size: 0.875rem;
+}
+
+.selected-item-remove {
+  cursor: pointer;
+  font-weight: bold;
+  color: var(--primary-600);
+}
+
+.selected-item-remove:hover {
+  color: var(--primary-800);
+}
+```
+
+#### Bulk Assignment Upload
+```css
+.bulk-upload-container {
+  background: var(--bg-primary);
+  border: 1px solid var(--secondary-200);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.upload-dropzone {
+  border: 2px dashed var(--secondary-300);
+  border-radius: 8px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upload-dropzone:hover {
+  border-color: var(--primary-400);
+  background: var(--primary-50);
+}
+
+.upload-dropzone.dragover {
+  border-color: var(--primary-500);
+  background: var(--primary-100);
+}
+
+.upload-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+  color: var(--secondary-400);
+}
+
+.upload-text {
+  color: var(--secondary-600);
+  margin-bottom: 8px;
+}
+
+.upload-subtext {
+  color: var(--secondary-500);
+  font-size: 0.875rem;
+}
+
+.csv-template-link {
+  color: var(--primary-600);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.csv-template-link:hover {
+  color: var(--primary-800);
+}
+
+.upload-progress {
+  margin-top: 16px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--secondary-200);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
+  transition: width 0.3s ease;
+}
+
+.upload-results {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.upload-results.success {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.upload-results.error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+}
+```
+
+#### Assignment Status Table
+```css
+.assignment-status-table {
+  background: var(--bg-primary);
+  border: 1px solid var(--secondary-200);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.table-header {
+  background: var(--secondary-50);
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--secondary-200);
+}
+
+.table-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--secondary-800);
+}
+
+.table-filters {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.filter-select {
+  min-width: 140px;
+}
+
+.assignment-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.assignment-table th {
+  background: var(--secondary-50);
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--secondary-700);
+  border-bottom: 1px solid var(--secondary-200);
+}
+
+.assignment-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--secondary-100);
+  vertical-align: middle;
+}
+
+.assignment-table tr:hover {
+  background: var(--secondary-50);
+}
+
+.table-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-button.view {
+  background: var(--primary-100);
+  color: var(--primary-700);
+}
+
+.action-button.remind {
+  background: var(--warning);
+  color: white;
+}
+
+.action-button.delete {
+  background: var(--danger);
+  color: white;
+}
+```
+
+### My Assignments Dashboard
+
+#### Dashboard Grid Layout
+```css
+.my-assignments-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.my-assignments-header {
+  margin-bottom: 32px;
+}
+
+.my-assignments-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--secondary-800);
+  margin-bottom: 8px;
+}
+
+.my-assignments-subtitle {
+  color: var(--secondary-600);
+  font-size: 1.125rem;
+}
+
+.assignments-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.summary-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--secondary-200);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.summary-number {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.summary-number.pending { color: var(--warning); }
+.summary-number.in-progress { color: var(--info); }
+.summary-number.completed { color: var(--success); }
+
+.summary-label {
+  color: var(--secondary-600);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.assignments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+.assignments-section {
+  margin-bottom: 40px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--secondary-800);
+}
+
+.section-count {
+  background: var(--secondary-100);
+  color: var(--secondary-600);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+```
+
+### Survey Components
+
+#### Survey Container
+```css
+.survey-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.survey-header {
+  background: var(--bg-primary);
+  border: 1px solid var(--secondary-200);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.survey-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--secondary-800);
+  margin-bottom: 8px;
+}
+
+.survey-evaluatee {
+  font-size: 1.25rem;
+  color: var(--primary-600);
+  margin-bottom: 16px;
+}
+
+.survey-description {
+  color: var(--secondary-600);
+  line-height: 1.6;
+}
+
+.survey-content {
+  flex: 1;
+  background: var(--bg-primary);
+  border: 1px solid var(--secondary-200);
+  border-radius: 12px;
+  padding: 32px;
+}
+```
+
+#### Survey Progress Indicator
+```css
+.survey-progress {
+  margin-bottom: 32px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.progress-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--secondary-700);
+}
+
+.progress-percentage {
+  font-size: 0.875rem;
+  color: var(--secondary-600);
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: var(--secondary-200);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.progress-steps {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--secondary-500);
+}
+
+.progress-step.active {
+  color: var(--primary-600);
+  font-weight: 500;
+}
+
+.progress-step.completed {
+  color: var(--success);
+}
+
+.step-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--secondary-300);
+  background: var(--bg-primary);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-circle.active {
+  border-color: var(--primary-500);
+  background: var(--primary-500);
+  color: white;
+}
+
+.step-circle.completed {
+  border-color: var(--success);
+  background: var(--success);
+  color: white;
+}
+```
+
+#### Attribute Rating Component
+```css
+.attribute-rating {
+  margin-bottom: 32px;
+  padding: 24px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.attribute-header {
+  margin-bottom: 20px;
+}
+
+.attribute-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--secondary-800);
+  margin-bottom: 8px;
+}
+
+.attribute-description {
+  color: var(--secondary-600);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.rating-scale {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.rating-button {
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--secondary-300);
+  border-radius: 50%;
+  background: var(--bg-primary);
+  color: var(--secondary-600);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rating-button:hover {
+  border-color: var(--primary-400);
+  background: var(--primary-50);
+  color: var(--primary-600);
+}
+
+.rating-button.selected {
+  border-color: var(--primary-500);
+  background: var(--primary-500);
+  color: white;
+  transform: scale(1.1);
+}
+
+.rating-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--secondary-500);
+  margin-bottom: 16px;
+}
+
+.rating-feedback {
+  padding: 16px;
+  background: var(--primary-50);
+  border-radius: 6px;
+  border-left: 4px solid var(--primary-500);
+  font-size: 0.875rem;
+  color: var(--secondary-700);
+}
+```
+
+#### Conditional Question Component
+```css
+.conditional-question {
+  margin-top: 20px;
+  padding: 20px;
+  background: var(--bg-primary);
+  border: 1px solid var(--secondary-200);
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-500);
+}
+
+.question-header {
+  margin-bottom: 16px;
+}
+
+.question-text {
+  font-weight: 500;
+  color: var(--secondary-800);
+  margin-bottom: 8px;
+}
+
+.question-context {
+  font-size: 0.875rem;
+  color: var(--secondary-600);
+  font-style: italic;
+}
+
+.question-input {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  border: 1px solid var(--secondary-300);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.question-input:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.question-types {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.question-type-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.question-type-badge.improvement {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.question-type-badge.standard {
+  background: var(--primary-100);
+  color: var(--primary-700);
+}
+
+.question-type-badge.advanced {
+  background: #dcfce7;
+  color: #166534;
+}
+```
+
+#### Question Group Component
+```css
+.question-group {
+  margin-bottom: 40px;
+}
+
+.group-header {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.group-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--secondary-800);
+  margin-bottom: 8px;
+}
+
+.group-description {
+  color: var(--secondary-600);
+  line-height: 1.6;
+}
+
+.group-progress {
+  background: var(--secondary-100);
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: var(--secondary-600);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+```
+
+#### Survey Navigation
+```css
+.survey-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--secondary-200);
+}
+
+.nav-button {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.nav-button.secondary {
+  background: var(--bg-primary);
+  color: var(--secondary-700);
+  border: 1px solid var(--secondary-300);
+}
+
+.nav-button.secondary:hover {
+  background: var(--secondary-50);
+  border-color: var(--secondary-400);
+}
+
+.nav-button.primary {
+  background: var(--primary-600);
+  color: white;
+}
+
+.nav-button.primary:hover {
+  background: var(--primary-700);
+}
+
+.nav-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.nav-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-step-info {
+  font-size: 0.875rem;
+  color: var(--secondary-600);
+}
+
+.nav-save-status {
+  font-size: 0.75rem;
+  color: var(--success);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+```
+
+### Responsive Design for Survey System
+
+#### Mobile Optimizations
+```css
+@media (max-width: 767px) {
+  .assignment-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .assignment-sidebar {
+    order: -1;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .assignments-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .assignments-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .rating-scale {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .rating-button {
+    width: 40px;
+    height: 40px;
+    font-size: 0.875rem;
+  }
+  
+  .survey-navigation {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .nav-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .assignment-card {
+    padding: 16px;
+  }
+  
+  .survey-content {
+    padding: 20px;
+  }
+  
+  .attribute-rating {
+    padding: 16px;
+  }
+  
+  .rating-scale {
+    justify-content: center;
+    gap: 6px;
+  }
+  
+  .rating-button {
+    width: 36px;
+    height: 36px;
+    font-size: 0.75rem;
+  }
+}
+```
+
+#### Tablet Optimizations
+```css
+@media (min-width: 768px) and (max-width: 1023px) {
+  .assignment-dashboard-grid {
+    grid-template-columns: 1fr 280px;
+    gap: 24px;
+  }
+  
+  .assignments-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .assignments-summary {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+```
+
+### Accessibility Features for Survey System
+
+#### Focus Management
+```css
+.survey-container:focus-within .question-input:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.rating-button:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+.assignment-card:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+```
+
+#### ARIA Labels and Screen Reader Support
+```html
+<!-- Assignment Card Accessibility -->
+<div class="assignment-card self-evaluation" 
+     role="button" 
+     tabindex="0"
+     aria-label="Self evaluation for John Doe, Q2 2025, Status: Pending"
+     aria-describedby="assignment-details-1">
+  <div id="assignment-details-1" class="sr-only">
+    Complete your self-evaluation for Q2 2025. Due date: March 15, 2025.
+  </div>
+</div>
+
+<!-- Rating Scale Accessibility -->
+<fieldset class="rating-scale" aria-labelledby="attribute-title">
+  <legend id="attribute-title">Communication - Rate from 1 to 10</legend>
+  <button class="rating-button" 
+          aria-label="Rate 1 out of 10 for Communication"
+          aria-pressed="false">1</button>
+  <!-- ... more rating buttons -->
+</fieldset>
+
+<!-- Survey Progress Accessibility -->
+<div class="survey-progress" 
+     role="progressbar" 
+     aria-valuenow="60" 
+     aria-valuemin="0" 
+     aria-valuemax="100"
+     aria-label="Survey completion progress">
+  <span class="sr-only">60% complete</span>
+</div>
+```
+
+#### Keyboard Navigation Support
+```css
+.survey-container {
+  /* Ensure logical tab order */
+}
+
+.rating-button {
+  /* Arrow key navigation within rating scale */
+}
+
+.survey-navigation .nav-button:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+/* Skip link for survey sections */
+.survey-skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--secondary-800);
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 1000;
+}
+
+.survey-skip-link:focus {
+  top: 6px;
+}
+```
+
 ---
 
-This comprehensive UI/UX documentation provides the foundation for creating a consistent, accessible, and user-friendly A-Player Evaluations Dashboard that effectively presents complex evaluation data in an intuitive interface. The recent enhancements focus on improved authentication flow, better data visualization, and enhanced user feedback throughout the application.
+This comprehensive UI/UX documentation provides the foundation for creating a consistent, accessible, and user-friendly A-Player Evaluations Dashboard that effectively presents complex evaluation data in an intuitive interface. The recent enhancements focus on improved authentication flow, better data visualization, enhanced user feedback throughout the application, and the complete Survey Assignment System with role-based assignment management and custom React survey components.

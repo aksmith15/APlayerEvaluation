@@ -10,6 +10,9 @@ import { ROUTES } from './constants/config';
 const Login = React.lazy(() => import('./pages/Login').then(module => ({ default: module.Login })));
 const EmployeeSelection = React.lazy(() => import('./pages/EmployeeSelection').then(module => ({ default: module.EmployeeSelection })));
 const EmployeeAnalytics = React.lazy(() => import('./pages/EmployeeAnalytics').then(module => ({ default: module.EmployeeAnalytics })));
+const AssignmentManagement = React.lazy(() => import('./pages/AssignmentManagement'));
+const MyAssignments = React.lazy(() => import('./pages/MyAssignments'));
+const EvaluationSurvey = React.lazy(() => import('./components/ui').then(module => ({ default: module.EvaluationSurvey })));
 
 const App: React.FC = () => {
   return (
@@ -47,6 +50,39 @@ const App: React.FC = () => {
                       </ProtectedRoute>
                     } 
                   />
+                  
+                  {/* User assignment routes - require authentication */}
+                  <Route 
+                    path={ROUTES.MY_ASSIGNMENTS} 
+                    element={
+                      <ProtectedRoute>
+                        <MyAssignments />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  
+                  {/* Survey route - requires authentication and valid token */}
+                  <Route 
+                    path="/survey/:token" 
+                    element={
+                      <ProtectedRoute>
+                        <EvaluationSurvey />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  
+                  {/* Admin routes - require authentication + admin role (validated in component) */}
+                  <Route 
+                    path={ROUTES.ASSIGNMENT_MANAGEMENT} 
+                    element={
+                      <ProtectedRoute>
+                        <AssignmentManagement />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  
+                  {/* Default route - redirect to employee selection */}
+                  <Route path="/dashboard" element={<Navigate to={ROUTES.EMPLOYEE_SELECTION} replace />} />
                   
                   {/* Redirect any unknown routes to login */}
                   <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />

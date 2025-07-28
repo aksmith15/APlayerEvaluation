@@ -133,4 +133,171 @@ export interface AnalysisJob {
   pdf_data?: string; // Base64 encoded PDF data (from BYTEA)
   pdf_filename?: string; // Original filename
   error_message?: string;
+}
+
+// ===================================================================
+// STAGE 7: SURVEY ASSIGNMENT SYSTEM TYPES
+// ===================================================================
+
+// Enum types for evaluation assignments
+export type EvaluationType = 'peer' | 'manager' | 'self';
+export type AssignmentStatus = 'pending' | 'in_progress' | 'completed';
+
+// Main evaluation assignment interface (matches existing table structure)
+export interface EvaluationAssignment {
+  id: string;
+  evaluator_id: string;
+  evaluatee_id: string;
+  quarter_id: string;
+  evaluation_type: EvaluationType;
+  status: AssignmentStatus;
+  assigned_by: string;
+  assigned_at: string;
+  completed_at?: string;
+  survey_token: string;
+  created_at: string;
+}
+
+// Extended assignment interface with related data for UI display (from assignment_details view)
+export interface EvaluationAssignmentWithDetails extends EvaluationAssignment {
+  evaluator_name: string;
+  evaluator_email: string;
+  evaluator_department?: string;
+  evaluatee_name: string;
+  evaluatee_email: string;
+  evaluatee_department?: string;
+  quarter_name: string;
+  quarter_start_date: string;
+  quarter_end_date: string;
+  assigned_by_name: string;
+  submission_id?: string;
+  progress_percentage: number;
+}
+
+// Bridge table between assignments and existing submissions
+export interface AssignmentSubmission {
+  id: string;
+  assignment_id: string;
+  submission_id: string;
+  created_at: string;
+}
+
+// Assignment statistics interface for reporting (from assignment_statistics view)
+export interface AssignmentStatistics {
+  quarter_id: string;
+  quarter_name: string;
+  evaluation_type: EvaluationType;
+  total_assignments: number;
+  pending_count: number;
+  in_progress_count: number;
+  completed_count: number;
+  completion_percentage: number;
+}
+
+// Interface for bulk assignment creation
+export interface AssignmentCreationRequest {
+  evaluatee_ids: string[];
+  evaluator_ids: string[];
+  quarter_id: string;
+  evaluation_type: EvaluationType;
+  assigned_by: string;
+}
+
+// Interface for CSV bulk assignment upload
+export interface BulkAssignmentData {
+  evaluator_email: string;
+  evaluatee_email: string;
+  quarter_name: string;
+  evaluation_type: EvaluationType;
+}
+
+// Interface for assignment creation result
+export interface AssignmentCreationResult {
+  success: boolean;
+  created_count: number;
+  skipped_count: number;
+  errors: string[];
+  assignments?: EvaluationAssignment[];
+}
+
+// Interface for survey progress tracking (calculated from existing submissions/responses)
+export interface SurveyProgress {
+  assignment_id: string;
+  submission_id?: string;
+  total_attributes: number;
+  completed_attributes: number;
+  current_attribute?: string;
+  percentage_complete: number;
+  estimated_time_remaining?: number; // in minutes
+  last_saved_at?: string;
+}
+
+// Interface for survey question definition (based on the logic-based survey provided)
+export interface SurveyQuestion {
+  id: string;
+  attribute_name: string;
+  question_text: string;
+  question_type: 'rating' | 'text' | 'multi_select' | 'single_select' | 'yes_no' | 'scale';
+  is_required: boolean;
+  options?: string[]; // For select questions
+  conditional_logic?: {
+    show_if_score_range?: '1-5' | '6-8' | '9-10';
+    show_if_answer?: {
+      question_id: string;
+      answer_value: any;
+    };
+    dependent_question_id?: string;
+  };
+  order: number;
+  placeholder?: string;
+  description?: string;
+}
+
+// Enhanced conditional question structure for score-based logic
+export interface ConditionalQuestionSet {
+  score_range: '1-5' | '6-8' | '9-10';
+  questions: SurveyQuestion[];
+}
+
+// Interface for attribute definition in surveys with comprehensive question sets
+export interface AttributeDefinition {
+  name: string;
+  display_name: string;
+  definition: string;
+  scale_descriptions: {
+    excellent: string; // 10
+    good: string; // 7
+    below_expectation: string; // 5
+    poor: string; // 1
+  };
+  base_questions: SurveyQuestion[]; // Questions shown before scoring
+  conditional_question_sets: ConditionalQuestionSet[]; // Score-based question sets
+}
+
+// Enhanced survey response structure for complex questions
+export interface EnhancedSurveyResponseData {
+  attribute_name: string;
+  attribute_score: number; // 1-10 rating
+  base_responses: Record<string, any>; // Responses to questions before scoring
+  conditional_responses: Record<string, any>; // Responses to score-based questions
+  response_metadata: {
+    score_range: '1-5' | '6-8' | '9-10';
+    questions_shown: string[]; // Track which questions were actually displayed
+    completion_timestamp: string;
+  };
+}
+
+// Interface for survey session data with enhanced tracking
+export interface EnhancedSurveySession {
+  assignment_id: string;
+  submission_id?: string;
+  current_attribute: string;
+  current_attribute_index: number;
+  current_score?: number;
+  base_responses: Record<string, Record<string, any>>; // Per-attribute base responses
+  conditional_responses: Record<string, Record<string, any>>; // Per-attribute conditional responses
+  completed_attributes: string[]; // Track completed attributes
+  start_time: string;
+  last_activity: string;
+  is_complete: boolean;
 } 

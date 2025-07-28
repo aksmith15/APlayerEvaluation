@@ -6,6 +6,21 @@ import { fetchEmployees } from '../services/dataFetching';
 import { LoadingSpinner, ErrorMessage, SearchInput, Card, EmployeeCardSkeleton, NoEmployeesFound, KeyboardShortcuts } from '../components/ui';
 import { ROUTES, APP_CONFIG } from '../constants/config';
 import type { Employee } from '../types/evaluation';
+import { batchCheckCurrentQuarterDataAvailability, formatQuarterDataStatus, type QuarterDataStatus } from '../services/evaluationDataService';
+
+// Icon components for navigation
+const ClipboardIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
+    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+    <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+  </svg>
+);
+
+const UsersIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
+    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+  </svg>
+);
 
 export const EmployeeSelection: React.FC = () => {
   const navigate = useNavigate();
@@ -21,6 +36,10 @@ export const EmployeeSelection: React.FC = () => {
   const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [quarterDataStatuses, setQuarterDataStatuses] = useState<Record<string, QuarterDataStatus | null>>({});
+
+  // Check if user is admin
+  const isAdmin = user?.jwtRole === 'super_admin' || user?.jwtRole === 'hr_admin';
 
   // Get unique departments for filtering
   const departments = ['all', ...Array.from(new Set(employees.map(emp => emp.department)))];
@@ -36,62 +55,71 @@ export const EmployeeSelection: React.FC = () => {
     }
   }, [location.state]);
 
-  useEffect(() => {
-    let filtered = employees.filter(employee =>
-      employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.role.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    if (selectedDepartment !== 'all') {
-      filtered = filtered.filter(employee => employee.department === selectedDepartment);
-    }
-
-    setFilteredEmployees(filtered);
-  }, [employees, searchTerm, selectedDepartment]);
-
   const loadEmployees = async () => {
     try {
       setLoading(true);
-      const data = await fetchEmployees();
-      setEmployees(data);
       setError(null);
+      
+      const employeeData = await fetchEmployees();
+      setEmployees(employeeData);
+      setFilteredEmployees(employeeData);
+      
+      // Load quarter data statuses for all employees
+      const employeeIds = employeeData.map(emp => emp.id);
+      const quarterStatuses = await batchCheckCurrentQuarterDataAvailability(employeeIds);
+      setQuarterDataStatuses(quarterStatuses);
     } catch (err) {
-      setError('Failed to load employees');
       console.error('Error loading employees:', err);
+      setError('Failed to load employees. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEmployeeSelect = (employeeId: string) => {
-    const employee = employees.find(emp => emp.id === employeeId);
-    if (employee) {
-      // Store current filters in navigation state
-      updateNavigationState({
-        searchFilters: { searchTerm, department: selectedDepartment }
-      });
-      
-      // Navigate using navigation context
-      navigateToEmployee(employeeId, employee.name);
-    }
+  const handleEmployeeSelect = (employee: Employee) => {
+    // Store current search state for navigation context
+    updateNavigationState({
+      searchFilters: {
+        searchTerm,
+        department: selectedDepartment
+      }
+    });
+    
+    navigateToEmployee(employee.id, employee.name);
   };
 
   const handleLogout = async () => {
     try {
       await logout();
       navigate(ROUTES.LOGIN);
-    } catch (err) {
-      console.error('Logout error:', err);
+    } catch (error) {
+      console.error('Logout failed:', error);
     }
   };
 
-  const handleClearFilters = () => {
-    setSearchTerm('');
-    setSelectedDepartment('all');
-  };
+  // Filter employees based on search and department
+  useEffect(() => {
+    let filtered = employees;
 
-  const getScoreBadgeColor = (score?: number) => {
+    // Apply search filter
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(emp => 
+        emp.name.toLowerCase().includes(searchLower) ||
+        emp.department.toLowerCase().includes(searchLower) ||
+        emp.role.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Apply department filter
+    if (selectedDepartment !== 'all') {
+      filtered = filtered.filter(emp => emp.department === selectedDepartment);
+    }
+
+    setFilteredEmployees(filtered);
+  }, [employees, searchTerm, selectedDepartment]);
+
+  const getOverallScoreClass = (score?: number) => {
     if (!score) return 'bg-secondary-100 text-secondary-600';
     if (score >= 4.0) return 'bg-green-100 text-green-700';
     if (score >= 3.0) return 'bg-yellow-100 text-yellow-700';
@@ -116,12 +144,37 @@ export const EmployeeSelection: React.FC = () => {
                 Welcome, {user?.name || user?.email} • Select an employee to view their evaluation analytics
               </p>
             </div>
-            <button
-              onClick={handleLogout}
-              className="btn-secondary"
-            >
-              Sign Out
-            </button>
+
+            {/* Navigation Links */}
+            <div className="flex items-center space-x-4">
+              {/* My Assignments - Available to all users */}
+              <button
+                onClick={() => navigate(ROUTES.MY_ASSIGNMENTS)}
+                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                <ClipboardIcon className="w-4 h-4" />
+                <span>My Assignments</span>
+              </button>
+
+              {/* Assignment Management - Admin only */}
+              {isAdmin && (
+                <button
+                  onClick={() => navigate(ROUTES.ASSIGNMENT_MANAGEMENT)}
+                  className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-primary-700 bg-primary-100 hover:bg-primary-200 rounded-lg transition-colors"
+                >
+                  <UsersIcon className="w-4 h-4" />
+                  <span>Assignment Management</span>
+                </button>
+              )}
+
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="btn-secondary"
+              >
+                Sign Out
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -188,11 +241,24 @@ export const EmployeeSelection: React.FC = () => {
               <Card
                 key={employee.id}
                 hoverable
-                onClick={() => handleEmployeeSelect(employee.id)}
+                onClick={() => handleEmployeeSelect(employee)}
               >
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-primary-600 font-semibold text-lg">
+                  <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
+                    {employee.profile_picture_url ? (
+                      <img
+                        src={employee.profile_picture_url}
+                        alt={`${employee.name}'s profile`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // Fallback to initials if image fails to load
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          target.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                    ) : null}
+                    <span className={`text-primary-600 font-semibold text-lg ${employee.profile_picture_url ? 'hidden' : ''}`}>
                       {employee.name.split(' ').map(n => n[0]).join('')}
                     </span>
                   </div>
@@ -213,7 +279,7 @@ export const EmployeeSelection: React.FC = () => {
                   {employee.overallScore ? (
                     <div className="mt-4 pt-4 border-t border-secondary-200">
                       <div className="flex items-center justify-center gap-2 mb-2">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getScoreBadgeColor(employee.overallScore)}`}>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getOverallScoreClass(employee.overallScore)}`}>
                           {employee.overallScore.toFixed(1)}
                         </span>
                         <span className="text-xs text-secondary-500">Overall Score</span>
@@ -226,8 +292,8 @@ export const EmployeeSelection: React.FC = () => {
                     </div>
                   ) : (
                     <div className="mt-4 pt-4 border-t border-secondary-200">
-                      <span className="text-xs text-secondary-400">
-                        No evaluation data
+                      <span className="text-xs text-secondary-500">
+                        {formatQuarterDataStatus(quarterDataStatuses[employee.id])}
                       </span>
                     </div>
                   )}
@@ -237,7 +303,7 @@ export const EmployeeSelection: React.FC = () => {
           </div>
         ) : (
           <NoEmployeesFound 
-            onReset={searchTerm || selectedDepartment !== 'all' ? handleClearFilters : undefined}
+            onReset={searchTerm || selectedDepartment !== 'all' ? () => { setSearchTerm(''); setSelectedDepartment('all'); } : undefined}
           />
         )}
       </main>
