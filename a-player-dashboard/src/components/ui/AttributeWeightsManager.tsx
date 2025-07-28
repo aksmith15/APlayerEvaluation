@@ -9,7 +9,7 @@ import {
   validateWeight 
 } from '../../services/attributeWeightsService';
 import type { AttributeWeight, AttributeWeightUpdate, WeightDistribution } from '../../types/database';
-import { Button, Card, LoadingSpinner, ErrorMessage } from './';
+import { Button, Card, LoadingSpinner } from './';
 
 interface AttributeWeightsManagerProps {
   onWeightsUpdated?: () => void;
