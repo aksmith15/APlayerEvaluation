@@ -249,6 +249,7 @@ export interface SurveyQuestion {
   question_type: 'rating' | 'text' | 'multi_select' | 'single_select' | 'yes_no' | 'scale';
   is_required: boolean;
   options?: string[]; // For select questions
+  max_selections?: number; // For multi_select questions - limits number of selections
   conditional_logic?: {
     show_if_score_range?: '1-5' | '6-8' | '9-10';
     show_if_answer?: {

@@ -414,14 +414,52 @@ export const processBulkAssignmentCSV = async (csvData: BulkAssignmentData[], as
 // ===================================================================
 
 /**
- * Update assignment status
+ * Update assignment status with enhanced error debugging
  */
 export const updateAssignmentStatus = async (assignmentId: string, status: AssignmentStatus, completedAt?: string): Promise<void> => {
   try {
+    console.log(`🔄 Updating assignment ${assignmentId} to status: ${status}`);
+    
+    // Debug: Check current auth context
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error(`Authentication failed: ${authError?.message || 'No user found'}`);
+    }
+    
+    console.log(`📧 Auth context: ${user.email}, ID: ${user.id}`);
+    
+    // Debug: Verify assignment exists and user is evaluator
+    const { data: assignment, error: assignmentError } = await supabase
+      .from('assignment_details')
+      .select('id, evaluator_id, evaluator_email, status, evaluator_name')
+      .eq('id', assignmentId)
+      .single();
+    
+    if (assignmentError) {
+      console.error('❌ Assignment verification failed:', assignmentError);
+      throw new Error(`Assignment verification failed: ${assignmentError.message}`);
+    }
+    
+    if (!assignment) {
+      throw new Error(`Assignment ${assignmentId} not found`);
+    }
+    
+    console.log(`👤 Assignment evaluator: ${assignment.evaluator_email} (${assignment.evaluator_name})`);
+    
+    // Debug: Check if emails match (case-insensitive)
+    const emailsMatch = user.email?.toLowerCase() === assignment.evaluator_email?.toLowerCase();
+    console.log(`✅ Email match: ${emailsMatch} (Auth: ${user.email} vs Assignment: ${assignment.evaluator_email})`);
+    
+    if (!emailsMatch) {
+      throw new Error(`Authentication mismatch: User ${user.email} is not authorized to update assignment for ${assignment.evaluator_email}`);
+    }
+
     const updates: Partial<EvaluationAssignment> = { 
       status,
       ...(status === 'completed' && completedAt ? { completed_at: completedAt } : {})
     };
+
+    console.log(`📝 Applying updates:`, updates);
 
     const { error } = await supabase
       .from('evaluation_assignments')
@@ -429,9 +467,21 @@ export const updateAssignmentStatus = async (assignmentId: string, status: Assig
       .eq('id', assignmentId);
 
     if (error) {
-      console.error('Error updating assignment status:', error);
-      throw new Error(`Failed to update assignment status: ${error.message}`);
+      console.error('❌ RLS Error updating assignment status:', {
+        error,
+        assignmentId,
+        updates,
+        userEmail: user.email,
+        evaluatorEmail: assignment.evaluator_email
+      });
+      
+      // Enhanced error message with debugging info
+      throw new Error(`Failed to update assignment status: ${error.message}. 
+        Debug Info: User ${user.email} trying to update assignment for ${assignment.evaluator_email}.
+        Please check RLS policies and email matching.`);
     }
+    
+    console.log(`✅ Successfully updated assignment ${assignmentId} to ${status}`);
   } catch (error) {
     console.error('Error in updateAssignmentStatus:', error);
     throw error;

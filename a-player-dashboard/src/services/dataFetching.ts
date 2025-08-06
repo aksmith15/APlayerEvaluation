@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import { API_ENDPOINTS } from '../constants/config';
 import type { WeightedEvaluationScore, Person, QuarterlyTrendData, QuarterOption } from '../types/database';
-import type { Employee, Quarter, WebhookPayload, AIAnalysisResult } from '../types/evaluation';
+import type { Employee, Quarter, WebhookPayload, AIAnalysisResult, EnhancedTrendResponse } from '../types/evaluation';
 
 // Data fetching utilities
 
@@ -248,6 +248,77 @@ export const fetchQuarterlyTrendData = async (employeeId: string, quarterCount: 
     return data;
   } catch (error) {
     console.error('Error fetching quarterly trend data:', error);
+    throw error;
+  }
+};
+
+// Enhanced function for Stage 11: Fetch trend data with core group integration
+export const fetchEnhancedTrendData = async (
+  employeeId: string, 
+  quarterCount: number = 4
+): Promise<EnhancedTrendResponse> => {
+  try {
+    console.log(`Fetching enhanced trend data (individual + core groups) for employee: ${employeeId}`);
+    
+    // Fetch individual trend data (existing functionality)
+    const individualTrendsRaw = await fetchQuarterlyTrendData(employeeId, quarterCount);
+    
+    // Import core group service function
+    const { fetchCoreGroupTrends } = await import('./coreGroupService');
+    
+    // Fetch core group trends
+    const coreGroupTrendsRaw = await fetchCoreGroupTrends(employeeId);
+    
+    // Get employee metadata
+    const { data: employeeData } = await supabase
+      .from('people')
+      .select('id, name')
+      .eq('id', employeeId)
+      .single();
+    
+    // Transform individual trends to enhanced format
+    const individualTrends = individualTrendsRaw.map(quarter => ({
+      quarter: quarter.quarter_id,
+      score: quarter.final_quarter_score,
+      date: quarter.quarter_start_date,
+      overall: quarter.final_quarter_score,
+      // Core group data will be merged separately if available
+      competence: undefined,
+      character: undefined,
+      curiosity: undefined
+    }));
+    
+    // Transform core group trends to standard format  
+    const coreGroupTrends = coreGroupTrendsRaw.map(trend => ({
+      quarter: trend.quarter,
+      competence: trend.competence,
+      character: trend.character,
+      curiosity: trend.curiosity,
+      quarter_start_date: trend.quarter_start_date
+    }));
+    
+    // Determine quarter range
+    const quarters = individualTrendsRaw.length > 0 ? individualTrendsRaw : coreGroupTrendsRaw;
+    const quarterRange = quarters.length > 0 ? {
+      start: quarters[0]?.quarter_start_date || '',
+      end: quarters[quarters.length - 1]?.quarter_start_date || ''
+    } : { start: '', end: '' };
+    
+    const response: EnhancedTrendResponse = {
+      individualTrends,
+      coreGroupTrends,
+      quarterRange,
+      employeeMetadata: {
+        id: employeeId,
+        name: employeeData?.name || 'Unknown Employee'
+      }
+    };
+    
+    console.log(`✅ Enhanced trend data fetched: ${individualTrends.length} individual + ${coreGroupTrends.length} core group quarters`);
+    return response;
+    
+  } catch (error) {
+    console.error('Error fetching enhanced trend data:', error);
     throw error;
   }
 };

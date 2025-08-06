@@ -30,4 +30,18 @@ export { CoverageDashboard } from './CoverageDashboard';
 
 // A-Player Grading System Components
 export { AttributeWeightsManager } from './AttributeWeightsManager';
-export { LetterGrade, LetterGradeWithLabel, GradeComparison } from './LetterGrade'; 
+export { LetterGrade, LetterGradeWithLabel, GradeComparison } from './LetterGrade';
+
+// Core Group Analytics Components
+export { TopAnalyticsGrid } from './TopAnalyticsGrid';
+export { CoreGroupPerformanceCard } from './CoreGroupPerformanceCard';
+export { EvaluationConsensusCard } from './EvaluationConsensusCard';
+
+// Stage 12 - Detailed Core Group Analysis Tabs
+export { CoreGroupAnalysisTabs } from './CoreGroupAnalysisTabs';
+export { CompetenceTab } from './CompetenceTab';
+export { CharacterTab } from './CharacterTab';
+export { CuriosityTab } from './CuriosityTab';
+
+// Persona Classification Components
+export { PersonaQuickGlanceWidget, PersonaQuickBadge } from './PersonaQuickGlanceWidget'; 

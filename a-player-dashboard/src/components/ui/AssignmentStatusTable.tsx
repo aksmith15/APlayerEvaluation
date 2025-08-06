@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from './Button';
 import { LoadingSpinner } from './LoadingSpinner';
 import { EmptyState } from './EmptyState';
@@ -56,6 +56,72 @@ export const AssignmentStatusTable: React.FC<AssignmentStatusTableProps> = ({
 }) => {
   const [sortField, setSortField] = useState<keyof EvaluationAssignmentWithDetails>('assigned_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  
+  // Local search state for debouncing
+  const [localSearchValue, setLocalSearchValue] = useState(filters.search || '');
+
+  // Helper function to normalize search values (treat empty string and undefined as equivalent)
+  const normalizeSearchValue = (value: string | undefined): string => {
+    return value || '';
+  };
+
+  // Debounced search effect - only trigger parent filter change after user stops typing
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const normalizedLocal = normalizeSearchValue(localSearchValue);
+      const normalizedFilter = normalizeSearchValue(filters.search);
+      
+      // Only trigger if values are actually different (normalized comparison)
+      if (normalizedLocal !== normalizedFilter) {
+        console.log('🔍 Debounced search triggered:', localSearchValue);
+        
+        // Inline filter update to avoid circular dependencies
+        const updatedFilters: AssignmentFilters = { ...filters };
+        if (localSearchValue && localSearchValue.trim()) {
+          updatedFilters.search = localSearchValue.trim();
+        } else {
+          delete (updatedFilters as any).search;
+        }
+        onFilterChange(updatedFilters);
+      }
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timeoutId);
+  }, [localSearchValue, filters.search]); // Removed handleFilterChange dependency
+
+  // Standard filter change handler for other filters (non-search)
+  const handleFilterChange = (newFilters: Partial<AssignmentFilters>) => {
+    const updatedFilters = { ...filters };
+    
+    // Update filters, removing any that are set to undefined or empty string
+    Object.entries(newFilters).forEach(([key, value]) => {
+      if (value === undefined || value === '') {
+        delete updatedFilters[key as keyof AssignmentFilters];
+      } else {
+        updatedFilters[key as keyof AssignmentFilters] = value as any;
+      }
+    });
+    
+    console.log('🔄 Filter change in table:', {
+      newFilters,
+      updatedFilters,
+      previousFilters: filters
+    });
+    
+    // Let parent handle the state - single source of truth
+    onFilterChange(updatedFilters);
+  };
+
+  // Sync local search with parent filters (for external filter changes only)
+  useEffect(() => {
+    const normalizedFilter = normalizeSearchValue(filters.search);
+    const normalizedLocal = normalizeSearchValue(localSearchValue);
+    
+    // Only sync if values are actually different (normalized comparison)
+    if (normalizedFilter !== normalizedLocal) {
+      setLocalSearchValue(filters.search || '');
+    }
+  }, [filters.search]); // Removed localSearchValue - only sync on external changes
 
   // Get unique filter options from assignments
   const quarters = Array.from(new Set(assignments.map(a => ({ id: a.quarter_id, name: a.quarter_name }))))
@@ -111,28 +177,6 @@ export const AssignmentStatusTable: React.FC<AssignmentStatusTableProps> = ({
 
     return filtered;
   }, [assignments, filters, sortField, sortDirection]);
-
-  const handleFilterChange = (newFilters: Partial<AssignmentFilters>) => {
-    const updatedFilters = { ...filters };
-    
-    // Update filters, removing any that are set to undefined or empty string
-    Object.entries(newFilters).forEach(([key, value]) => {
-      if (value === undefined || value === '') {
-        delete updatedFilters[key as keyof AssignmentFilters];
-      } else {
-        updatedFilters[key as keyof AssignmentFilters] = value as any;
-      }
-    });
-    
-    console.log('🔄 Filter change in table:', {
-      newFilters,
-      updatedFilters,
-      previousFilters: filters
-    });
-    
-    // Let parent handle the state - single source of truth
-    onFilterChange(updatedFilters);
-  };
 
   const handleSort = (field: keyof EvaluationAssignmentWithDetails) => {
     if (sortField === field) {
@@ -227,8 +271,8 @@ export const AssignmentStatusTable: React.FC<AssignmentStatusTableProps> = ({
             <input
               type="text"
               id="search"
-              value={filters.search || ''}
-              onChange={(e) => handleFilterChange({ search: e.target.value })}
+              value={localSearchValue}
+              onChange={(e) => setLocalSearchValue(e.target.value)}
               placeholder="Search evaluators/evaluatees..."
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             />

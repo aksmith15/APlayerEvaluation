@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   Card,
@@ -47,6 +47,7 @@ interface AssignmentFilters {
 const MyAssignments: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // State management
   const [assignments, setAssignments] = useState<EvaluationAssignmentWithDetails[]>([]);
@@ -63,6 +64,63 @@ const MyAssignments: React.FC = () => {
       loadAssignments();
     }
   }, [user?.id, filters]);
+
+  // Auto-refresh when page gains focus (user comes back from survey)
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log('📱 MyAssignments page gained focus - refreshing data');
+      if (user?.id && !loading) {
+        loadAssignments();
+      }
+    };
+
+    // Add focus listener
+    window.addEventListener('focus', handleFocus);
+    
+    // Add visibility change listener (tab switching)
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user?.id && !loading) {
+        console.log('👁️ MyAssignments tab became visible - refreshing data');
+        loadAssignments();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Cleanup listeners
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user?.id, loading]);
+
+  // Auto-refresh when navigating to this page (from React Router)
+  useEffect(() => {
+    console.log('🧭 Navigated to MyAssignments - refreshing data');
+    if (user?.id && !loading) {
+      loadAssignments();
+    }
+  }, [location.pathname, location.search]); // Trigger when URL path or query params change
+
+  // Special handling for survey completion redirect
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.get('completed') === 'true') {
+      console.log('🎉 Survey completed! Force refreshing assignments...');
+      if (user?.id) {
+        // Wait a brief moment for database to propagate, then refresh
+        setTimeout(() => {
+          loadAssignments();
+        }, 500);
+      }
+      
+      // Clean up URL by removing the completed parameter
+      searchParams.delete('completed');
+      const newSearch = searchParams.toString();
+      const newUrl = newSearch ? `${location.pathname}?${newSearch}` : location.pathname;
+      navigate(newUrl, { replace: true });
+    }
+  }, [location.search, user?.id, navigate, location.pathname]);
 
   const loadAssignments = async () => {
     if (!user?.id) return;

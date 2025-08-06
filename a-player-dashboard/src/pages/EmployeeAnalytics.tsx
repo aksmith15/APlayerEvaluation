@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { fetchEmployeeData, fetchQuarters, fetchEvaluationScores, fetchQuarterlyTrendData, fetchHistoricalEvaluationScores, fetchAvailableQuarters, generateAIMetaAnalysis, pollAnalysisCompletion, checkExistingAnalysis } from '../services/dataFetching';
+import { fetchEmployeeData, fetchQuarters, fetchEvaluationScores, fetchQuarterlyTrendData, fetchEnhancedTrendData, fetchHistoricalEvaluationScores, fetchAvailableQuarters, generateAIMetaAnalysis, pollAnalysisCompletion, checkExistingAnalysis } from '../services/dataFetching';
+import { fetchCoreGroupAnalytics, checkCoreGroupDataAvailability } from '../services/coreGroupService';
 import { subscribeToEmployeeEvaluations, subscribeToQuarterlyScores, subscribeToEvaluationCycles, realtimeManager } from '../services/realtimeService';
-import { LoadingSpinner, ErrorMessage, Card, RadarChart, ClusteredBarChart, HistoricalClusteredBarChart, TrendLineChart, ChartSkeleton, NoEvaluationData, Breadcrumb, useBreadcrumbs, KeyboardShortcuts, PDFViewer, DownloadAnalyticsButton, EmployeeProfile, QuarterlyNotes } from '../components/ui';
+import { LoadingSpinner, ErrorMessage, Card, RadarChart, ClusteredBarChart, HistoricalClusteredBarChart, TrendLineChart, ChartSkeleton, NoEvaluationData, Breadcrumb, useBreadcrumbs, KeyboardShortcuts, PDFViewer, DownloadAnalyticsButton, EmployeeProfile, QuarterlyNotes, TopAnalyticsGrid, CoreGroupAnalysisTabs } from '../components/ui';
 import { useNavigation, useKeyboardNavigation } from '../contexts/NavigationContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useChartHeight } from '../utils/useResponsive';
@@ -10,7 +11,8 @@ import { findCurrentQuarterInList, logCurrentQuarter } from '../utils/quarterUti
 import { getLetterGrade } from '../utils/calculations';
 import { ROUTES } from '../constants/config';
 import type { Person, WeightedEvaluationScore } from '../types/database';
-import type { Quarter } from '../types/evaluation';
+import type { TrendViewMode, EnhancedTrendResponse } from '../types/evaluation';
+import type { Quarter, CoreGroupAnalyticsResponse } from '../types/evaluation';
 
 export const EmployeeAnalytics: React.FC = () => {
   const navigate = useNavigate();
@@ -40,6 +42,10 @@ export const EmployeeAnalytics: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [dataLoading, setDataLoading] = useState(false);
   
+  // Enhanced trend data state for Stage 11
+  const [enhancedTrendData, setEnhancedTrendData] = useState<EnhancedTrendResponse | null>(null);
+  const [trendViewMode, setTrendViewMode] = useState<TrendViewMode>('individual');
+  
   // Historical comparison state
   const [historicalData, setHistoricalData] = useState<any[]>([]);
   const [availableQuarters, setAvailableQuarters] = useState<any[]>([]);
@@ -61,6 +67,11 @@ export const EmployeeAnalytics: React.FC = () => {
   // Real-time update state
   const [realtimeConnected, setRealtimeConnected] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null);
+
+  // Core Group Analytics - Overview data for TopAnalyticsGrid (Stage 12)
+  const [coreGroupData, setCoreGroupData] = useState<CoreGroupAnalyticsResponse | null>(null);
+  const [coreGroupLoading, setCoreGroupLoading] = useState(false);
+  const [coreGroupError, setCoreGroupError] = useState<string | null>(null);
 
   // Helper functions for user permissions and profile management
   const isUserEditable = () => {
@@ -96,6 +107,13 @@ export const EmployeeAnalytics: React.FC = () => {
     }
   }, [historicalStartQuarter, historicalEndQuarter, employeeId]);
 
+  // Load core group data when quarter or employee changes (for overview)
+  useEffect(() => {
+    if (selectedQuarter && employeeId) {
+      loadCoreGroupData();
+    }
+  }, [selectedQuarter, employeeId]);
+
   // Set up real-time subscriptions
   useEffect(() => {
     if (!employeeId) return;
@@ -125,10 +143,14 @@ export const EmployeeAnalytics: React.FC = () => {
       // Reload trend data
       if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
         console.log('Reloading trend data due to real-time update');
-        // Reload trend data
-        fetchQuarterlyTrendData(employeeId, 4)
-          .then(setTrendDataRaw)
-          .catch(console.error);
+        // Reload both legacy and enhanced trend data
+        Promise.all([
+          fetchQuarterlyTrendData(employeeId, 4),
+          fetchEnhancedTrendData(employeeId, 4)
+        ]).then(([trendData, enhancedTrends]) => {
+          setTrendDataRaw(trendData);
+          setEnhancedTrendData(enhancedTrends);
+        }).catch(console.error);
         
         // Also reload historical data if it might be affected
         if (historicalStartQuarter && historicalEndQuarter) {
@@ -179,16 +201,18 @@ export const EmployeeAnalytics: React.FC = () => {
 
     try {
       setLoading(true);
-      const [employeeData, quartersData, trendData, availableQuartersData] = await Promise.all([
+      const [employeeData, quartersData, trendData, enhancedTrends, availableQuartersData] = await Promise.all([
         fetchEmployeeData(employeeId),
         fetchQuarters(),
-        fetchQuarterlyTrendData(employeeId, 4), // Get last 4 quarters for trend
+        fetchQuarterlyTrendData(employeeId, 4), // Legacy trend data for compatibility
+        fetchEnhancedTrendData(employeeId, 4), // Enhanced trend data with core groups (Stage 11)
         fetchAvailableQuarters(employeeId) // Get available quarters for historical comparison
       ]);
 
       setEmployee(employeeData);
       setQuarters(quartersData);
       setTrendDataRaw(trendData);
+      setEnhancedTrendData(enhancedTrends);
       setAvailableQuarters(availableQuartersData);
       
       // Set the current quarter as default based on today's date
@@ -349,6 +373,37 @@ export const EmployeeAnalytics: React.FC = () => {
     }
   };
 
+  // Load core group analytics data for overview (TopAnalyticsGrid)
+  const loadCoreGroupData = async () => {
+    if (!employeeId || !selectedQuarter) return;
+
+    try {
+      setCoreGroupLoading(true);
+      setCoreGroupError(null);
+      
+      // First check if core group data is available
+      const isDataAvailable = await checkCoreGroupDataAvailability(employeeId, selectedQuarter);
+      
+      if (isDataAvailable) {
+        // Fetch the actual core group analytics data
+        const coreGroupAnalytics = await fetchCoreGroupAnalytics(employeeId, selectedQuarter);
+        setCoreGroupData(coreGroupAnalytics);
+        console.log('✅ Core group analytics loaded successfully');
+      } else {
+        // No data available - clear previous data
+        setCoreGroupData(null);
+        console.log('⚠️ No core group data available for this employee/quarter combination');
+      }
+      
+    } catch (err) {
+      console.error('Error loading core group data:', err);
+      setCoreGroupError(err instanceof Error ? err.message : 'Failed to load core group analytics');
+      setCoreGroupData(null);
+    } finally {
+      setCoreGroupLoading(false);
+    }
+  };
+
   const handleBackToSelection = () => {
     navigateToEmployeeSelection(true);
   };
@@ -458,18 +513,61 @@ export const EmployeeAnalytics: React.FC = () => {
     }));
   };
 
-  // Transform quarterly trend data from Supabase view to chart format
+  // Enhanced trend data transformation with core group support (Stage 11)
   const getTrendData = () => {
-    if (!trendDataRaw || trendDataRaw.length === 0) return [];
+    if (!enhancedTrendData) {
+      // Fallback to legacy trend data if enhanced data is not available
+      if (!trendDataRaw || trendDataRaw.length === 0) return [];
+      
+      return trendDataRaw.map(quarterData => ({
+        quarter: quarterData.quarter_id,
+        quarterName: quarterData.quarter_name,
+        averageScore: quarterData.final_quarter_score,
+        completionRate: quarterData.completion_percentage,
+        quarterDate: quarterData.quarter_start_date
+      }));
+    }
     
-    // Transform QuarterlyTrendData to TrendDataPoint format
-    return trendDataRaw.map(quarterData => ({
-      quarter: quarterData.quarter_id,
-      quarterName: quarterData.quarter_name,
-      averageScore: quarterData.final_quarter_score,
-      completionRate: quarterData.completion_percentage,
-      quarterDate: quarterData.quarter_start_date
-    }));
+    console.log('🔍 Enhanced trend data available:', enhancedTrendData);
+    console.log('📊 Individual trends:', enhancedTrendData.individualTrends);
+    console.log('📈 Core group trends:', enhancedTrendData.coreGroupTrends);
+    
+    // Create a map of core group data by quarter for easier merging
+    const coreGroupMap = new Map();
+    enhancedTrendData.coreGroupTrends.forEach(coreGroup => {
+      console.log('📋 Processing core group:', coreGroup);
+      if (!coreGroupMap.has(coreGroup.quarter)) {
+        coreGroupMap.set(coreGroup.quarter, {
+          quarterName: coreGroup.quarterName,
+          competence: coreGroup.competence,
+          character: coreGroup.character,
+          curiosity: coreGroup.curiosity
+        });
+      }
+    });
+    
+    console.log('🗺️ Core group map:', coreGroupMap);
+    
+    // Transform enhanced trend data to TrendDataPoint format with core group support
+    const result = enhancedTrendData.individualTrends.map(quarterData => {
+      const coreGroupData = coreGroupMap.get(quarterData.quarter);
+      console.log(`🔄 Merging quarter ${quarterData.quarter}:`, { quarterData, coreGroupData });
+      
+      return {
+        quarter: quarterData.quarter,
+        quarterName: coreGroupData?.quarterName || quarterData.quarter || 'Unknown Quarter', // Use quarter name from core group data if available
+        averageScore: quarterData.overall || quarterData.score,
+        completionRate: 100, // Default completion rate (can be enhanced later)
+        quarterDate: quarterData.date,
+        // Add core group data if available
+        competence: coreGroupData?.competence,
+        character: coreGroupData?.character,
+        curiosity: coreGroupData?.curiosity
+      };
+    });
+    
+    console.log('✅ Final trend data for chart:', result);
+    return result;
   };
 
   // Get selected quarter info
@@ -629,6 +727,8 @@ export const EmployeeAnalytics: React.FC = () => {
             currentGrade={overallScore ? getLetterGrade(overallScore) : undefined}
             currentScore={overallScore || undefined}
             quarterName={selectedQuarterInfo?.name}
+            quarterId={selectedQuarter}
+            showPersonaWidget={true}
           />
         </div>
 
@@ -645,6 +745,28 @@ export const EmployeeAnalytics: React.FC = () => {
             />
           </div>
         )}
+
+        {/* Core Group Strategic Analytics Overview - Stage 12 Enhanced */}
+        <div className="page-break-avoid core-group-analytics mb-6">
+          <TopAnalyticsGrid
+            data={coreGroupData}
+            isLoading={coreGroupLoading}
+            error={coreGroupError}
+            employeeName={employee?.name}
+            quarterName={selectedQuarterInfo?.name}
+          />
+        </div>
+
+        {/* Core Group Detailed Analysis Tabs - Drill-Down View */}
+        <div className="page-break-avoid core-group-detailed-tabs">
+          <CoreGroupAnalysisTabs
+            employeeId={employeeId || ''}
+            quarterId={selectedQuarter}
+            employeeName={employee?.name}
+            quarterName={selectedQuarterInfo?.name}
+            className="mb-8"
+          />
+        </div>
 
         {/* Performance Overview (Radar Chart) - Full Width */}
         <div className="mb-8 page-break-avoid analytics-section">
@@ -702,6 +824,9 @@ export const EmployeeAnalytics: React.FC = () => {
               data={trendData}
               height={trendChartHeight}
               employeeName={employee?.name}
+              viewMode={trendViewMode}
+              onViewModeChange={setTrendViewMode}
+              showViewToggle={true}
             />
           </Card>
 

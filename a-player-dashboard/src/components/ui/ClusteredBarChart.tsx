@@ -36,6 +36,7 @@ interface ClusteredBarChartProps {
   height?: number;
   showLegend?: boolean;
   title?: string;
+  showHelperText?: boolean;
 }
 
 type EvaluationType = 'all' | 'manager' | 'peer' | 'self' | 'weighted';
@@ -104,6 +105,11 @@ const CustomLegend = ({ payload }: LegendProps) => {
 
 // Function to create smart abbreviations for attributes
 const createSmartLabel = (attribute: string): string => {
+  // Handle undefined/null attribute names
+  if (!attribute || typeof attribute !== 'string') {
+    return 'Unknown';
+  }
+  
   // Clean up the attribute name first
   const cleanName = attribute
     .replace(/_/g, ' ')  // Remove underscores
@@ -152,19 +158,25 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = memo(({
   data, 
   height = 400,
   showLegend = true,
-  title
+  title,
+  showHelperText = true
 }) => {
   const [selectedType, setSelectedType] = useState<EvaluationType>('all');
 
   // Memoize expensive data transformations
   const chartData = useMemo(() => {
+    // Safety check for data
+    if (!data || !Array.isArray(data)) {
+      return [];
+    }
+    
     // Transform data for chart - create smart labels and keep full names
     const baseChartData = data.map(item => ({
       ...item,
-      attribute: createSmartLabel(item.attribute),
-      fullAttribute: item.attribute.replace(/_/g, ' ').replace(/\b\w+/g, word => 
+      attribute: createSmartLabel(item?.attribute),
+      fullAttribute: item?.attribute ? item.attribute.replace(/_/g, ' ').replace(/\b\w+/g, word => 
         word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-      )
+      ) : 'Unknown Attribute'
     }));
 
     // Filter data based on selected evaluation type
@@ -305,9 +317,11 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = memo(({
         </ResponsiveContainer>
       </div>
       
-      <div className="text-xs text-secondary-500 text-center mt-2">
-        Hover over bars to see full attribute names • Use the dropdown above to filter by evaluation type
-      </div>
+      {showHelperText && (
+        <div className="text-xs text-secondary-500 text-center mt-2">
+          Hover over bars to see full attribute names • Use the dropdown above to filter by evaluation type
+        </div>
+      )}
     </div>
   );
 });

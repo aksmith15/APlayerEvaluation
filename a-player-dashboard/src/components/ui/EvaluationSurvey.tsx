@@ -99,28 +99,33 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
     },
     base_questions: [
       {
-        id: 'reliability_observed',
+        id: 'reliability_commitment_follow_through',
         attribute_name: 'Reliability',
-        question_text: 'In your experience with this person, which reliability behaviors have you observed? (Select all that apply)',
-        question_type: 'multi_select',
+        question_text: 'When this person makes a commitment, how often do they follow through completely?',
+        question_type: 'single_select',
         is_required: true,
         options: [
-          'Consistently delivers ahead of deadlines without supervision',
-          'Generally meets commitments with occasional minor delays',
-          'Others actively seek them out for critical or time-sensitive work',
-          'Completes work accurately but often needs deadline extensions',
-          'Requires regular check-ins or follow-up to ensure completion',
-          'Frequently misses deadlines or fails to follow through on commitments'
+          'Always delivers on commitments, often ahead of schedule',
+          'Usually delivers with occasional minor delays or adjustments',
+          'Sometimes delivers but often needs reminders or support',
+          'Frequently fails to deliver or delivers incomplete work',
+          'Consistently unreliable with commitments'
         ],
         order: 1
       },
       {
-        id: 'reliability_example',
+        id: 'reliability_communication_proactivity',
         attribute_name: 'Reliability',
-        question_text: 'Describe one recent situation that best represents their reliability level:',
-        question_type: 'text',
+        question_text: 'How do they communicate when issues might affect their commitments?',
+        question_type: 'single_select',
         is_required: true,
-        placeholder: 'Describe a specific recent situation...',
+        options: [
+          'Proactively communicates potential issues early with solutions',
+          'Usually gives advance notice when problems arise',
+          'Sometimes communicates issues but often at the last minute',
+          'Rarely communicates problems until asked directly',
+          'Consistently fails to communicate issues affecting commitments'
+        ],
         order: 2
       }
     ],
@@ -131,12 +136,13 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'reliability_excellence_systems',
             attribute_name: 'Reliability',
-            question_text: 'What organizational systems or habits do you think contribute most to their reliability?',
-            question_type: 'single_select',
+            question_text: 'What are the top two systems or methods this person uses to ensure their exceptional reliability? (Select top 2)',
+            question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Uses detailed planning and scheduling systems',
-              'Has personal tracking methods for commitments', 
+              'Has personal tracking methods for commitments',
               'Builds in buffer time for unexpected issues',
               'Creates personal accountability checkpoints',
               'Uses reminder systems consistently',
@@ -147,13 +153,13 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'reliability_pressure_performance',
             attribute_name: 'Reliability',
-            question_text: 'How does their reliability change under high pressure or stress?',
+            question_text: 'How does this person typically respond when under pressure?',
             question_type: 'single_select',
             is_required: true,
             options: [
               'Becomes even more reliable and organized',
               'Maintains same level of reliability',
-              'Slight decrease but still very reliable', 
+              'Slight decrease but still very reliable',
               'Noticeable decrease under pressure',
               'Haven\'t observed them under pressure'
             ],
@@ -162,14 +168,14 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'reliability_teaching_others',
             attribute_name: 'Reliability',
-            question_text: 'Do they actively help other people become more reliable?',
+            question_text: 'How does this person support others in being more reliable?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Yes, regularly coaches others on reliability',
-              'Yes, occasionally when asked for advice',
+              'Regularly coaches others on reliability',
+              'Occasionally when asked for advice',
               'Others learn by observing their example',
-              'No, they focus on their own work',
+              'They focus on their own work',
               'I haven\'t observed this'
             ],
             order: 3
@@ -177,11 +183,40 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'reliability_excellence_example',
             attribute_name: 'Reliability',
-            question_text: 'Describe one specific situation that best demonstrates why you rated their reliability this high:',
+            question_text: 'Describe one specific situation that best demonstrates why you rated their reliability this high.',
             question_type: 'text',
-            is_required: false,
-            placeholder: 'Focus on what made their reliability exceptional in this situation...',
+            is_required: true,
             order: 4
+          },
+          {
+            id: 'reliability_leadership_readiness',
+            attribute_name: 'Reliability',
+            question_text: 'How ready is this person for greater responsibility based on their reliability?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Ready for significantly expanded responsibility',
+              'Could handle moderate additional responsibility',
+              'Should focus on deepening expertise in current role',
+              'Not ready for additional responsibility yet',
+              'Unclear about their leadership potential'
+            ],
+            order: 5
+          },
+          {
+            id: 'reliability_organizational_impact',
+            attribute_name: 'Reliability',
+            question_text: 'What effect does this person\'s reliability have on the rest of the team?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Raises the bar for entire team performance',
+              'Serves as reliable anchor during team challenges',
+              'Others seek them out for critical work',
+              'Consistent individual contributor without team impact',
+              'I haven\'t observed their impact on others'
+            ],
+            order: 6
           }
         ]
       },
@@ -191,15 +226,16 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'reliability_success_situations',
             attribute_name: 'Reliability',
-            question_text: 'In what types of situations is this person MOST reliable?',
+            question_text: 'In what types of situations does this person perform most reliably? (Select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
-              'Familiar, routine tasks',
-              'Individual work without dependencies',
+              'Work within their established expertise',
+              'Projects they can fully control',
               'Short-term, clear deadlines',
               'Work they\'re passionate about',
-              'Low-pressure, predictable environments',
+              'Stable, consistent work rhythms',
               'When expectations are explicitly detailed'
             ],
             order: 1
@@ -207,14 +243,15 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'reliability_struggle_situations',
             attribute_name: 'Reliability',
-            question_text: 'In what types of situations is this person LEAST reliable?',
+            question_text: 'What types of situations seem to challenge their reliability the most? (Select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
-              'Complex, unfamiliar tasks',
-              'Collaborative work with multiple dependencies',
-              'Long-term projects without milestones',
-              'Work outside their interests',
+              'Tasks requiring new skills they haven\'t developed',
+              'Work requiring constant coordination with others',
+              'Projects without regular feedback or progress markers',
+              'Tasks that feel disconnected from their goals',
               'High-pressure, changing environments',
               'When expectations are unclear or assumed'
             ],
@@ -223,7 +260,7 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'reliability_workload_impact',
             attribute_name: 'Reliability',
-            question_text: 'How does their workload level affect their reliability?',
+            question_text: 'How does this person\'s reliability change depending on their workload?',
             question_type: 'single_select',
             is_required: true,
             options: [
@@ -236,9 +273,24 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
             order: 3
           },
           {
+            id: 'reliability_consistency_pattern',
+            attribute_name: 'Reliability',
+            question_text: 'What is the most common pattern you see in their reliability over time?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Consistent performance with occasional dips',
+              'Strong starts but fades on longer projects',
+              'Reliable for important work, less so for routine tasks',
+              'Performance varies with team dynamics',
+              'Struggles with competing priorities'
+            ],
+            order: 4
+          },
+          {
             id: 'reliability_primary_motivation',
             attribute_name: 'Reliability',
-            question_text: 'What seems to motivate their reliable behavior most?',
+            question_text: 'What seems to most motivate this person to stay reliable?',
             question_type: 'single_select',
             is_required: true,
             options: [
@@ -247,17 +299,8 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
               'Clear consequences or accountability',
               'Genuine interest in the work',
               'External oversight or check-ins',
-              'Unclear what motivates them'
+              'Not sure what motivates their reliability'
             ],
-            order: 4
-          },
-          {
-            id: 'reliability_development_insight',
-            attribute_name: 'Reliability',
-            question_text: 'What specific change or support would help them become more consistently reliable?',
-            question_type: 'text',
-            is_required: false,
-            placeholder: 'Be specific about what you think would make the biggest difference...',
             order: 5
           }
         ]
@@ -268,64 +311,88 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'reliability_primary_cause',
             attribute_name: 'Reliability',
-            question_text: 'What do you think is the main cause of their reliability issues?',
+            question_text: 'What seems to be the primary cause of their unreliable performance?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Lack of organizational skills',
-              'Overwhelming workload',
-              'Unclear expectations',
-              'Personal life interference',
-              'Poor time estimation abilities',
-              'Avoidance of difficult tasks',
-              'Mismatch between role and abilities'
+              'Lacks organizational systems and methods',
+              'Consistently overcommits relative to capacity',
+              'Avoids difficult or uncomfortable tasks',
+              'Personal life significantly interfering with work',
+              'Misaligned expectations about role requirements',
+              'Lacks motivation or engagement with the work'
             ],
             order: 1
           },
           {
-            id: 'reliability_pattern_duration',
+            id: 'reliability_improvement_pattern',
             attribute_name: 'Reliability',
-            question_text: 'How long have you observed these reliability issues?',
+            question_text: 'What is the current pattern of their reliability performance over time?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Since I started working with them',
-              'Developed over the past year',
-              'Started after a specific change or event',
-              'Recent issue (last few months)',
-              'Comes and goes unpredictably'
+              'Steady improvement over recent months',
+              'Inconsistent – good periods followed by setbacks',
+              'Stable poor performance with no change',
+              'Getting progressively worse over time',
+              'Too early to determine pattern'
             ],
             order: 2
           },
           {
-            id: 'reliability_intervention_attempts',
+            id: 'reliability_intervention_response',
             attribute_name: 'Reliability',
-            question_text: 'Have direct conversations about reliability been attempted with this person?',
+            question_text: 'How has this person responded to conversations or efforts to improve their reliability?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Yes, multiple formal conversations',
-              'Yes, one or two discussions',
-              'Informal mentions but no formal discussion',
-              'No direct conversations yet',
-              'I\'m not sure what conversations have occurred'
+              'Actively works on improvements and shows progress',
+              'Acknowledges issues but struggles to implement changes',
+              'Agrees to improvements but doesn\'t follow through',
+              'Defensive about feedback and resistant to change',
+              'Haven\'t had direct improvement conversations yet'
             ],
             order: 3
           },
           {
+            id: 'reliability_support_needs',
+            attribute_name: 'Reliability',
+            question_text: 'What type of support do you think would help them improve most? (Select top 2)',
+            question_type: 'multi_select',
+            is_required: true,
+            max_selections: 2,
+            options: [
+              'More structured systems and processes',
+              'Clearer expectations and more frequent check-ins',
+              'Workload adjustment or reprioritization help',
+              'Skill development in specific areas',
+              'Personal support for external challenges',
+              'Role clarification or potential reassignment'
+            ],
+            order: 4
+          },
+          {
             id: 'reliability_improvement_likelihood',
             attribute_name: 'Reliability',
-            question_text: 'How likely do you think significant improvement is for this person?',
+            question_text: 'How likely do you think it is that this person\'s reliability will improve?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Very likely with proper support',
-              'Possible but would require significant effort',
-              'Unlikely but minor improvements possible',
+              'Very likely with appropriate support and time',
+              'Possible but will require significant effort from everyone',
+              'Unlikely unless external circumstances change significantly',
               'Very unlikely in their current role',
-              'Uncertain - depends on factors outside work'
+              'Too early to assess improvement potential'
             ],
-            order: 4
+            order: 5
+          },
+          {
+            id: 'reliability_specific_examples',
+            attribute_name: 'Reliability',
+            question_text: 'Describe 1–2 recent examples of reliability failures.',
+            question_type: 'text',
+            is_required: true,
+            order: 6
           }
         ]
       }
@@ -343,28 +410,35 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
     },
     base_questions: [
       {
-        id: 'accountability_observed',
+        id: 'accountability_ownership_speed',
         attribute_name: 'Accountability for Action',
-        question_text: 'When accountability was required, what have you observed? (Select all that apply)',
-        question_type: 'multi_select',
+        question_text: 'When something goes wrong in their area, how quickly do they take ownership?',
+        question_type: 'single_select',
         is_required: true,
         options: [
-          'Immediately owned the outcome and took action',
-          'Accepted responsibility when prompted but needed guidance',
-          'Made excuses or blamed circumstances beyond their control',
-          'Avoided taking ownership even when clearly responsible',
-          'Proactively took accountability for team/shared outcomes',
-          'Acknowledged mistakes but follow-through was inconsistent'
+          'Immediately steps forward before being asked',
+          'Takes ownership when it becomes clear it\'s their responsibility',
+          'Needs prompting but then accepts responsibility',
+          'Reluctant even with clear responsibility',
+          'Actively avoids or deflects ownership',
+          'Haven\'t observed this directly'
         ],
         order: 1
       },
       {
-        id: 'accountability_example',
+        id: 'accountability_learning_demonstration',
         attribute_name: 'Accountability for Action',
-        question_text: 'Think of the most recent time this person faced a mistake or failure. How did they handle it?',
-        question_type: 'text',
+        question_text: 'After taking accountability for an issue, how do they demonstrate learning? (Select top 2)',
+        question_type: 'multi_select',
         is_required: true,
-        placeholder: 'Describe how they handled a recent mistake or failure...',
+        max_selections: 2,
+        options: [
+          'Implements systematic changes to prevent recurrence',
+          'Shares lessons learned with others proactively',
+          'Makes personal adjustments but doesn\'t share broadly',
+          'Says they\'ve learned but behavior doesn\'t change',
+          'Rarely references past accountability situations'
+        ],
         order: 2
       }
     ],
@@ -373,57 +447,66 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
         score_range: '9-10',
         questions: [
           {
-            id: 'accountability_ownership_scope',
+            id: 'accountability_leadership_style',
             attribute_name: 'Accountability for Action',
-            question_text: 'What level of ownership do they typically take?',
+            question_text: 'How do they influence accountability in others?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Takes ownership for individual work and team outcomes',
-              'Primarily individual work, occasionally team issues',
-              'Only individual work when directly responsible',
-              'Minimal ownership even for individual work',
-              'Varies significantly by situation'
+              'Creates culture of ownership through visible example',
+              'Coaches others through accountability moments',
+              'Takes preventive ownership before issues arise',
+              'Transforms failures into team learning opportunities',
+              'Quietly ensures nothing falls through cracks',
+              'Haven\'t observed these directly'
             ],
             order: 1
           },
           {
-            id: 'accountability_mistake_response',
+            id: 'accountability_boundary_management',
             attribute_name: 'Accountability for Action',
-            question_text: 'When they make a mistake, what do they typically do first?',
+            question_text: 'How well do they manage what to own vs. what not to own?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Immediately acknowledge and propose solutions',
-              'Acknowledge when asked and work to fix it',
-              'Focus on fixing it without explicitly acknowledging',
-              'Wait to see if anyone notices',
-              'Look for external factors that contributed'
+              'Perfect balance - owns their part without overreaching',
+              'Sometimes takes too much responsibility for others\' failures',
+              'Occasionally under-owns shared responsibilities',
+              'Clear about boundaries and communicates them well',
+              'Boundary clarity varies by situation',
+              'Haven\'t observed this directly'
             ],
             order: 2
           },
           {
-            id: 'accountability_high_stakes_behavior',
+            id: 'accountability_speaking_up',
             attribute_name: 'Accountability for Action',
-            question_text: 'How do they handle accountability in high-stakes situations?',
+            question_text: 'When they make a mistake that affects senior leaders, what do they do?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Steps up and takes visible ownership',
-              'Takes ownership but prefers to work behind the scenes',
-              'Participates in solutions but avoids being the face of accountability',
-              'Tends to step back and let others take the lead',
-              'Haven\'t observed them in high-stakes situations'
+              'Openly admits mistakes to senior leaders, even when uncomfortable',
+              'Carefully but honestly communicates issues upward',
+              'Strong ownership with peers, more cautious with managers',
+              'Avoids taking ownership when senior people are involved',
+              'Haven\'t seen them need to own mistakes with leadership'
             ],
             order: 3
           },
           {
-            id: 'accountability_excellence_example',
+            id: 'accountability_scope_awareness',
             attribute_name: 'Accountability for Action',
-            question_text: 'Describe a specific situation where their accountability stood out as exceptional:',
-            question_type: 'text',
-            is_required: false,
-            placeholder: 'Focus on what made their approach to accountability impressive...',
+            question_text: 'When taking ownership, how much do they consider the wider impact?',
+            question_type: 'single_select',
+            is_required: true,
+            options: [
+              'Explains how their actions affected the team/organization',
+              'Focuses on fixing their specific task',
+              'Helps others understand the domino effect of accountability',
+              'Only thinks about their individual responsibility',
+              'Develops systems to prevent similar issues team-wide',
+              'Unsure'
+            ],
             order: 4
           }
         ]
@@ -434,9 +517,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'accountability_comfort_situations',
             attribute_name: 'Accountability for Action',
-            question_text: 'In what situations do they take accountability most readily?',
+            question_text: 'In what situations do they take accountability most readily? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Individual mistakes with clear solutions',
               'Team issues where they played a clear role',
@@ -450,9 +534,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'accountability_avoidance_situations',
             attribute_name: 'Accountability for Action',
-            question_text: 'In what situations do they avoid or delay taking accountability?',
+            question_text: 'In what situations do they avoid or delay taking accountability? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Complex situations with multiple contributing factors',
               'High-visibility mistakes with senior leadership involved',
@@ -495,13 +580,21 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
             order: 4
           },
           {
-            id: 'accountability_development_focus',
+            id: 'accountability_support_needs',
             attribute_name: 'Accountability for Action',
-            question_text: 'What would most help them take accountability more consistently?',
-            question_type: 'text',
-            is_required: false,
-            placeholder: 'Think about what support, training, or environment changes would help...',
-            order: 5
+            question_text: 'What would help them take accountability more consistently? (Select top 2)',
+            question_type: 'multi_select',
+            is_required: true,
+            max_selections: 2,
+            options: [
+              'Needs clearer role definitions and expectations',
+              'Requires safer environment for admitting mistakes',
+              'Benefits from accountability partners or structures',
+              'Needs skill development in specific areas',
+              'Requires different consequence/reward balance',
+              'Not sure what support would help'
+            ],
+            order: 4
           }
         ]
       },
@@ -580,33 +673,32 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
     },
     base_questions: [
       {
-        id: 'quality_observed',
+        id: 'quality_output_consistency',
         attribute_name: 'Quality of Work',
-        question_text: 'What patterns have you observed in their work output? (Select all that apply)',
-        question_type: 'multi_select',
+        question_text: 'How would you describe the consistency of their work quality?',
+        question_type: 'single_select',
         is_required: true,
         options: [
-          'Consistently exceeds quality standards with minimal oversight',
-          'Produces solid work but occasionally requires minor revisions',
-          'Output is adequate but often needs clarification or corrections',
-          'Work frequently requires significant rework or has notable errors',
-          'Sets the quality benchmark that others reference',
-          'Quality varies significantly depending on the project'
+          'Exceptional quality across all types of work',
+          'High quality with rare exceptions',
+          'Good quality with occasional inconsistencies',
+          'Quality varies significantly by task type',
+          'Generally below expected standards'
         ],
         order: 1
       },
       {
-        id: 'quality_example',
+        id: 'quality_self_assessment',
         attribute_name: 'Quality of Work',
-        question_text: 'When you receive their work, what\'s your typical first reaction?',
+        question_text: 'How accurately do they judge their own work quality before submitting it?',
         question_type: 'single_select',
         is_required: true,
         options: [
-          'Ready to use immediately',
-          'Quick review needed, then good to go',
-          'Requires moderate editing or clarification',
-          'Needs substantial revision before it\'s usable',
-          'Varies greatly by project'
+          'Highly accurate - rarely surprised by feedback',
+          'Generally accurate with minor blind spots',
+          'Sometimes overestimates their work quality',
+          'Often unaware of quality gaps',
+          'Haven\'t observed their self-assessment'
         ],
         order: 2
       }
@@ -618,9 +710,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'quality_excellence_behaviors',
             attribute_name: 'Quality of Work',
-            question_text: 'What makes their work quality exceptional? (Select all that apply)',
+            question_text: 'What makes their work quality exceptional? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Nearly always accurate and error-free on first submission',
               'Exceeds expectations in thoroughness and completeness',
@@ -680,6 +773,7 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
             question_text: 'In what situations does this person produce their highest quality work?',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Familiar or routine tasks',
               'Complex problem-solving projects',
@@ -696,6 +790,7 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
             question_text: 'In what situations does their quality become less consistent?',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Unfamiliar or complex tasks',
               'Rushed deadlines or high pressure',
@@ -754,9 +849,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'quality_specific_issues',
             attribute_name: 'Quality of Work',
-            question_text: 'What specific quality problems occur most frequently?',
+            question_text: 'What specific quality problems occur most frequently? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Errors or inaccuracies in work',
               'Poor organization or structure',
@@ -785,17 +881,17 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
             order: 2
           },
           {
-            id: 'quality_impact_severity',
+            id: 'quality_downstream_impact',
             attribute_name: 'Quality of Work',
-            question_text: 'How severely do quality issues impact team productivity or outcomes?',
+            question_text: 'What is the top impact of their quality problems on the team?',
             question_type: 'single_select',
             is_required: true,
             options: [
-              'Creates significant delays or rework for others',
-              'Requires regular cleanup but manageable',
-              'Impacts some deliverables but not critical',
-              'Minor impact - mostly affects their own work',
-              'Too early to assess full impact'
+              'Creates critical failures requiring escalation',
+              'Causes significant rework for colleagues',
+              'Minor inconveniences but work is usable',
+              'Mainly affects their own productivity',
+              'Impact varies by project type'
             ],
             order: 3
           },
@@ -824,29 +920,44 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
     },
     base_questions: [
       {
-        id: 'initiative_observed',
+        id: 'initiative_frequency',
         attribute_name: 'Taking Initiative',
-        question_text: 'How often do you see them act without being asked? (Select what you\'ve observed)',
-        question_type: 'multi_select',
+        question_text: 'In your experience with this person, how frequently do they act without being asked?',
+        question_type: 'single_select',
         is_required: true,
         options: [
-          'Regularly jumps in to solve problems before being assigned',
-          'Occasionally takes initiative when they see clear opportunities',
-          'Usually waits for direction but will act when specifically encouraged',
-          'Rarely acts without explicit instruction or assignment',
-          'Actively avoids taking on additional responsibilities',
-          'Takes initiative in familiar areas but hesitates in new situations'
+          'Consistently takes ownership and steps in proactively',
+          'Often takes initiative, especially when comfortable with the context',
+          'Occasionally steps up but usually waits for direction',
+          'Rarely takes initiative, even when opportunities are clear',
+          'Not sure / haven\'t observed'
         ],
         order: 1
       },
       {
+        id: 'initiative_style',
+        attribute_name: 'Taking Initiative',
+        question_text: 'When they do take initiative, what best describes their style? (select top 2)',
+        question_type: 'multi_select',
+        is_required: true,
+        max_selections: 2,
+        options: [
+          'Problem-solver: fixes things before they break',
+          'Builder: creates or improves systems, tools, or processes',
+          'Helper: supports others without being prompted',
+          'Challenger: questions assumptions to create value',
+          'Opportunist: spots and seizes new openings',
+          'Not sure / haven\'t observed'
+        ],
+        order: 2
+      },
+      {
         id: 'initiative_example',
         attribute_name: 'Taking Initiative',
-        question_text: 'What\'s the most significant thing they\'ve initiated recently (without being asked)?',
+        question_text: 'Share an example of when this person took initiative.',
         question_type: 'text',
-        is_required: true,
-        placeholder: 'Describe something specific they initiated recently...',
-        order: 2
+        is_required: false,
+        order: 3
       }
     ],
     conditional_question_sets: [
@@ -856,9 +967,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'initiative_proactive_behaviors',
             attribute_name: 'Taking Initiative',
-            question_text: 'What types of proactive behaviors do you observe most frequently?',
+            question_text: 'What types of proactive behaviors do you observe most frequently? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Identifies and solves problems before they escalate',
               'Takes on additional responsibilities without being asked',
@@ -916,9 +1028,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'initiative_comfortable_areas',
             attribute_name: 'Taking Initiative',
-            question_text: 'In what areas do they most readily take initiative?',
+            question_text: 'In what areas do they most readily take initiative? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Within their core expertise and responsibilities',
               'When they see clear problems that need solving',
@@ -932,9 +1045,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'initiative_hesitation_areas',
             attribute_name: 'Taking Initiative',
-            question_text: 'In what areas do they hesitate to take initiative?',
+            question_text: 'In what areas do they hesitate to take initiative? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Cross-departmental or unfamiliar areas',
               'High-visibility or high-stakes situations',
@@ -993,9 +1107,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'initiative_avoidance_patterns',
             attribute_name: 'Taking Initiative',
-            question_text: 'What patterns do you observe regarding their lack of initiative?',
+            question_text: 'What patterns do you observe regarding their lack of initiative? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Waits for explicit direction even when action is clearly needed',
               'Sees problems but doesn\'t act to address them',
@@ -1062,28 +1177,29 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
     },
     base_questions: [
       {
-        id: 'adaptability_observed',
+        id: 'adaptability_observation',
         attribute_name: 'Adaptability',
-        question_text: 'When plans change unexpectedly, what do you typically observe? (Select all that apply)',
+        question_text: 'In your experience with this person during changes or uncertainty, which of these have you observed? (select top 2)',
         question_type: 'multi_select',
         is_required: true,
+        max_selections: 2,
         options: [
-          'Smoothly adjusts and helps others navigate the change',
-          'Takes some time to adapt but gets there without drama',
-          'Shows visible stress or resistance but eventually complies',
-          'Becomes notably disruptive or negative during transitions',
-          'Actually performs better when things are uncertain',
-          'Struggles significantly and impacts team momentum'
+          'Thrives during change and helps guide others through transitions smoothly',
+          'Adjusts well to most changes with only brief periods of adjustment',
+          'Adapts eventually but needs time and support during transitions',
+          'Becomes notably stressed or resistant when faced with unexpected changes',
+          'Maintains high performance and composure even during major organizational shifts',
+          'Handles routine changes adequately but struggles with significant or frequent disruptions',
+          'Shows strong adaptability in technical/process changes but struggles with interpersonal or cultural shifts'
         ],
         order: 1
       },
       {
         id: 'adaptability_example',
         attribute_name: 'Adaptability',
-        question_text: 'Describe their reaction to the most recent significant change that affected them:',
+        question_text: 'Any specific example that stands out? (Type NA if you can\'t recall)',
         question_type: 'text',
-        is_required: true,
-        placeholder: 'Describe how they handled a recent significant change...',
+        is_required: false,
         order: 2
       }
     ],
@@ -1094,9 +1210,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'adaptability_change_response',
             attribute_name: 'Adaptability',
-            question_text: 'How do they typically respond when significant changes occur?',
+            question_text: 'How do they typically respond when significant changes occur? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Embraces change and helps others navigate it',
               'Adapts quickly and maintains productivity',
@@ -1154,9 +1271,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'adaptability_comfortable_changes',
             attribute_name: 'Adaptability',
-            question_text: 'What types of changes do they handle most comfortably?',
+            question_text: 'What types of changes do they handle most comfortably? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Gradual or planned changes with advance notice',
               'Technical or process improvements',
@@ -1170,9 +1288,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'adaptability_challenging_changes',
             attribute_name: 'Adaptability',
-            question_text: 'What types of changes create the most difficulty for them?',
+            question_text: 'What types of changes create the most difficulty for them? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Sudden or unexpected changes with no warning',
               'Changes that affect their core responsibilities',
@@ -1230,9 +1349,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'adaptability_resistance_behaviors',
             attribute_name: 'Adaptability',
-            question_text: 'What resistance behaviors do you observe when changes occur?',
+            question_text: 'What resistance behaviors do you observe when changes occur? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Openly complains or criticizes the changes',
               'Becomes withdrawn or disengaged',
@@ -1299,28 +1419,26 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
     },
     base_questions: [
       {
-        id: 'problem_solving_observed',
+        id: 'problem_solving_approach',
         attribute_name: 'Problem Solving Ability',
-        question_text: 'When facing a challenging problem, what\'s their typical approach? (Select what you\'ve observed)',
-        question_type: 'multi_select',
+        question_text: 'In your experience with this person, how do they typically approach problem solving?',
+        question_type: 'single_select',
         is_required: true,
         options: [
-          'Digs in independently and usually finds effective solutions',
-          'Works through it methodically with occasional guidance',
-          'Tries basic approaches but escalates complex issues',
-          'Avoids difficult problems or gives up quickly',
-          'Others specifically seek them out for tough challenges',
-          'Needs significant support to reach workable solutions'
+          'They quickly recognize problems and solve them effectively, often improving systems or helping others learn',
+          'They handle most problems methodically, occasionally needing support for complex or ambiguous issues',
+          'They handle routine problems reliably but struggle when things get uncertain, interpersonal, or high-pressure',
+          'They often avoid, escalate, or delay when problems arise',
+          'Not sure / I haven\'t observed enough'
         ],
         order: 1
       },
       {
         id: 'problem_solving_example',
         attribute_name: 'Problem Solving Ability',
-        question_text: 'Think of the last complex problem they encountered. What happened?',
+        question_text: 'Describe a situation where their problem solving stood out—positively or negatively.',
         question_type: 'text',
-        is_required: true,
-        placeholder: 'Describe how they handled a recent complex problem...',
+        is_required: false,
         order: 2
       }
     ],
@@ -1331,9 +1449,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'problem_solving_approach_excellence',
             attribute_name: 'Problem Solving Ability',
-            question_text: 'What makes their problem-solving approach exceptional? (Select all that apply)',
+            question_text: 'What makes their problem-solving approach exceptional? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Quickly identifies root causes rather than just symptoms',
               'Develops creative solutions others hadn\'t considered',
@@ -1391,9 +1510,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'problem_solving_success_types',
             attribute_name: 'Problem Solving Ability',
-            question_text: 'What types of problems do they solve most effectively?',
+            question_text: 'What types of problems do they solve most effectively? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Technical or equipment-related issues',
               'Process or workflow problems',
@@ -1407,9 +1527,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'problem_solving_struggle_types',
             attribute_name: 'Problem Solving Ability',
-            question_text: 'What types of problems do they find most challenging?',
+            question_text: 'What types of problems do they find most challenging? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Complex problems with multiple causes',
               'Issues outside their area of expertise',
@@ -1467,9 +1588,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'problem_solving_avoidance_patterns',
             attribute_name: 'Problem Solving Ability',
-            question_text: 'What problem-solving avoidance patterns do you observe?',
+            question_text: 'What problem-solving avoidance patterns do you observe? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Immediately escalates problems rather than attempting solutions',
               'Avoids problems entirely and hopes others will handle them',
@@ -1536,35 +1658,28 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
     },
     base_questions: [
       {
-        id: 'teamwork_observed',
+        id: 'teamwork_observation',
         attribute_name: 'Teamwork',
-        question_text: 'How do they typically contribute to team success? (Select all that apply)',
+        question_text: 'In your experience with this person in team settings, which of these have you observed? (select top 2)',
         question_type: 'multi_select',
         is_required: true,
+        max_selections: 2,
         options: [
-          'Actively supports teammates and strengthens group dynamics',
-          'Collaborates well and delivers their part reliably',
-          'Focuses mainly on individual work with minimal team engagement',
-          'Creates tension or conflicts that impact team effectiveness',
-          'Others specifically request to work with them',
-          'Participates when required but doesn\'t add extra value'
+          'Actively strengthens team dynamics and goes above and beyond to support colleagues',
+          'Collaborates well with most people and contributes positively to team goals',
+          'Works adequately in teams but tends to focus primarily on their own responsibilities',
+          'Creates tension or conflict that negatively impacts team productivity and morale',
+          'Others specifically request to work with them because of their collaborative skills',
+          'Participates in team activities but requires encouragement to fully engage or contribute'
         ],
         order: 1
       },
       {
         id: 'teamwork_example',
         attribute_name: 'Teamwork',
-        question_text: 'In team settings, what role do they naturally play?',
-        question_type: 'single_select',
-        is_required: true,
-        options: [
-          'The person others look to for guidance and support',
-          'A reliable contributor who delivers what\'s expected',
-          'Someone who works better individually than in groups',
-          'A source of energy and positivity for the team',
-          'Often creates friction or slows progress',
-          'Varies significantly depending on the team composition'
-        ],
+        question_text: 'Any specific example that stands out?',
+        question_type: 'text',
+        is_required: false,
         order: 2
       }
     ],
@@ -1575,9 +1690,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'teamwork_contribution_style',
             attribute_name: 'Teamwork',
-            question_text: 'What makes their teamwork contributions exceptional? (Select all that apply)',
+            question_text: 'What makes their teamwork contributions exceptional? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Actively supports and helps teammates succeed',
               'Builds trust and improves team communication',
@@ -1635,9 +1751,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'teamwork_strong_situations',
             attribute_name: 'Teamwork',
-            question_text: 'In what team situations do they contribute most effectively?',
+            question_text: 'In what team situations do they contribute most effectively? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Small, familiar teams with established relationships',
               'Project-based teams with clear goals',
@@ -1651,9 +1768,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'teamwork_challenging_situations',
             attribute_name: 'Teamwork',
-            question_text: 'In what team situations do they struggle or contribute less effectively?',
+            question_text: 'In what team situations do they struggle or contribute less effectively? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Large teams with many personalities',
               'Teams with unclear roles or goals',
@@ -1712,9 +1830,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'teamwork_problematic_behaviors',
             attribute_name: 'Teamwork',
-            question_text: 'What problematic teamwork behaviors do you observe most frequently?',
+            question_text: 'What problematic teamwork behaviors do you observe most frequently? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Avoids collaboration or team responsibilities',
               'Creates conflict or tension with teammates',
@@ -1781,28 +1900,28 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
     },
     base_questions: [
       {
-        id: 'continuous_improvement_observed',
+        id: 'continuous_improvement_observation',
         attribute_name: 'Continuous Improvement',
-        question_text: 'How do they respond to feedback and development opportunities? (Select what you\'ve observed)',
+        question_text: 'In your experience with this person\'s approach to growth and learning, which of these have you observed? (select top 2)',
         question_type: 'multi_select',
         is_required: true,
+        max_selections: 2,
         options: [
-          'Actively seeks feedback and consistently applies it',
-          'Receptive when feedback is offered and usually acts on it',
-          'Accepts feedback politely but application is inconsistent',
-          'Becomes defensive or resistant when given constructive input',
-          'Others view them as a model for growth and learning',
-          'Acknowledges development needs but rarely takes action'
+          'Proactively seeks growth opportunities and consistently applies feedback to achieve measurable improvements',
+          'Generally receptive to feedback and shows steady improvement over time',
+          'Shows some interest in learning but inconsistent in applying feedback or making changes',
+          'Resists feedback and tends to stick with familiar methods despite better alternatives available',
+          'Others look to them as a model for professional development and continuous learning',
+          'Acknowledges the value of improvement but rarely takes concrete steps to develop new skills'
         ],
         order: 1
       },
       {
         id: 'continuous_improvement_example',
         attribute_name: 'Continuous Improvement',
-        question_text: 'What\'s the best example of them actually changing or improving based on feedback?',
+        question_text: 'Any specific example that stands out?',
         question_type: 'text',
-        is_required: true,
-        placeholder: 'Describe a specific example of improvement based on feedback...',
+        is_required: false,
         order: 2
       }
     ],
@@ -1813,9 +1932,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'continuous_improvement_behaviors',
             attribute_name: 'Continuous Improvement',
-            question_text: 'What growth behaviors do you observe most consistently? (Select all that apply)',
+            question_text: 'What growth behaviors do you observe most consistently? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Proactively seeks feedback without being prompted',
               'Regularly reflects on and improves their own methods',
@@ -1873,9 +1993,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'continuous_improvement_receptive_areas',
             attribute_name: 'Continuous Improvement',
-            question_text: 'In what areas are they most receptive to feedback and improvement?',
+            question_text: 'In what areas are they most receptive to feedback and improvement? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Technical skills and job-specific competencies',
               'Process efficiency and work methods',
@@ -1889,9 +2010,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'continuous_improvement_resistance_areas',
             attribute_name: 'Continuous Improvement',
-            question_text: 'In what areas do they show resistance or slower improvement?',
+            question_text: 'In what areas do they show resistance or slower improvement? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Interpersonal or soft skills feedback',
               'Changes to established work methods',
@@ -1950,9 +2072,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'continuous_improvement_resistance_behaviors',
             attribute_name: 'Continuous Improvement',
-            question_text: 'What resistance to improvement do you observe most frequently?',
+            question_text: 'What resistance to improvement do you observe most frequently? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Rejects or dismisses feedback and suggestions',
               'Accepts feedback but never acts on it',
@@ -2019,34 +2142,28 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
     },
     base_questions: [
       {
-        id: 'communication_observed',
+        id: 'communication_observation',
         attribute_name: 'Communication Skills',
-        question_text: 'How clear and effective is their communication? (Select what you\'ve observed)',
+        question_text: 'In your experience with this person\'s communication, which of these have you observed? (select top 2)',
         question_type: 'multi_select',
         is_required: true,
+        max_selections: 2,
         options: [
-          'Exceptionally clear - others often praise their communication',
-          'Generally gets the message across with minor occasional confusion',
-          'Adequate communication but sometimes lacks clarity or detail',
-          'Frequently creates misunderstandings or requires clarification',
-          'Others specifically seek them out for important communications',
-          'Often needs follow-up questions to clarify their meaning'
+          'Communicates with exceptional clarity and others frequently praise their ability to explain complex topics',
+          'Generally communicates effectively with occasional minor misunderstandings or delays',
+          'Gets their point across adequately but sometimes lacks clarity or important details',
+          'Frequently creates confusion through unclear messaging or poor listening habits',
+          'Others specifically seek them out for important communications because of their skill',
+          'Attempts to communicate well but often needs follow-up questions to clarify their meaning'
         ],
         order: 1
       },
       {
         id: 'communication_example',
         attribute_name: 'Communication Skills',
-        question_text: 'When they communicate important information, what\'s your confidence level that everyone will understand correctly?',
-        question_type: 'single_select',
-        is_required: true,
-        options: [
-          'Very high - they\'re consistently clear',
-          'Generally good with occasional miscommunication',
-          'Mixed - depends on the topic and audience',
-          'Often requires follow-up for clarity',
-          'Low - frequently creates confusion'
-        ],
+        question_text: 'Any specific example that stands out?',
+        question_type: 'text',
+        is_required: false,
         order: 2
       }
     ],
@@ -2057,9 +2174,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'communication_excellence_qualities',
             attribute_name: 'Communication Skills',
-            question_text: 'What makes their communication exceptionally effective? (Select all that apply)',
+            question_text: 'What makes their communication exceptionally effective? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Always clear, concise, and easy to understand',
               'Adapts communication style to different audiences effectively',
@@ -2116,9 +2234,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'communication_strong_situations',
             attribute_name: 'Communication Skills',
-            question_text: 'In what communication situations are they most effective?',
+            question_text: 'In what communication situations are they most effective? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'One-on-one or small group conversations',
               'Written communication and documentation',
@@ -2132,9 +2251,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'communication_challenging_situations',
             attribute_name: 'Communication Skills',
-            question_text: 'In what communication situations do they struggle most?',
+            question_text: 'In what communication situations do they struggle most? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Large groups or formal presentations',
               'Difficult or sensitive conversations',
@@ -2196,6 +2316,7 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
             question_text: 'What communication problems occur most frequently?',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Messages are unclear or confusing to others',
               'Fails to communicate important information',
@@ -2262,34 +2383,28 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
     },
     base_questions: [
       {
-        id: 'leadership_observed',
+        id: 'leadership_observation',
         attribute_name: 'Leadership',
-        question_text: 'When leadership is needed, what do you observe? (Select all that apply)',
+        question_text: 'In your experience with this person in leadership situations (formal or informal), which of these have you observed? (select top 2)',
         question_type: 'multi_select',
         is_required: true,
+        max_selections: 2,
         options: [
-          'Naturally steps up and others willingly follow',
-          'Shows good leadership skills when formally assigned the role',
-          'Has leadership potential but inconsistent in stepping forward',
-          'Avoids leadership responsibilities when possible',
-          'Others actively seek their leadership on important work',
-          'Tries to lead but often needs significant support to be effective'
+          'Naturally inspires others and consistently demonstrates exceptional leadership that people want to follow',
+          'Shows solid leadership qualities and others often turn to them for guidance and direction',
+          'Displays some leadership potential but inconsistent in taking charge when situations require it',
+          'Avoids leadership responsibilities and struggles when others look to them for direction',
+          'Others actively seek their leadership on important projects because of their proven track record',
+          'Attempts to lead when asked but often needs significant support to be effective in leadership roles'
         ],
         order: 1
       },
       {
         id: 'leadership_example',
         attribute_name: 'Leadership',
-        question_text: 'If you had to choose someone to lead a critical project, where would this person rank among your options?',
-        question_type: 'single_select',
-        is_required: true,
-        options: [
-          'First choice - I\'d specifically request them',
-          'Strong consideration - among my top picks',
-          'Possible choice depending on the project type',
-          'Would not be in my initial consideration',
-          'Would actively prefer someone else'
-        ],
+        question_text: 'Any specific example that stands out?',
+        question_type: 'text',
+        is_required: false,
         order: 2
       }
     ],
@@ -2300,9 +2415,10 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
           {
             id: 'leadership_influence_behaviors',
             attribute_name: 'Leadership',
-            question_text: 'How do they demonstrate leadership influence, regardless of formal authority? (Select all that apply)',
+            question_text: 'How do they demonstrate leadership influence, regardless of formal authority? (select top 2)',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Others naturally seek their guidance and advice',
               'Sets a strong example that others follow',
@@ -2363,6 +2479,7 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
             question_text: 'In what areas do they show the most leadership influence?',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Within their area of technical expertise',
               'When mentoring or training others',
@@ -2379,6 +2496,7 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
             question_text: 'In what areas do they hesitate to show leadership or influence?',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Outside their area of expertise or comfort zone',
               'With senior or more experienced team members',
@@ -2440,6 +2558,7 @@ const COMPREHENSIVE_ATTRIBUTE_DEFINITIONS: Record<string, AttributeDefinition> =
             question_text: 'What problems do you observe with their leadership or influence attempts?',
             question_type: 'multi_select',
             is_required: true,
+            max_selections: 2,
             options: [
               'Avoids stepping up when guidance or direction is needed',
               'Others don\'t trust or follow their guidance',
@@ -2732,27 +2851,93 @@ export const EvaluationSurvey: React.FC = () => {
 
     const handleChange = isBaseQuestion ? handleBaseQuestionResponse : handleConditionalQuestionResponse;
 
+    // Helper function to identify exclusive options (like "Haven't observed" or "Not sure")
+    const isExclusiveOption = (option: string): boolean => {
+      const exclusivePatterns = [
+        /^haven't observed/i,
+        /^not sure/i,
+        /^none of the above/i,
+        /^don't know/i,
+        /^i haven't observed/i,
+        /^unsure$/i
+      ];
+      return exclusivePatterns.some(pattern => pattern.test(option));
+    };
+
     switch (question.question_type) {
       case 'multi_select':
+        // Ensure currentValues is always an array
+        const currentValues = Array.isArray(currentValue) ? currentValue : (currentValue ? [currentValue] : []);
+        const hasExclusiveSelected = currentValues.some((val: string) => isExclusiveOption(val));
+        const hasNonExclusiveSelected = currentValues.some((val: string) => !isExclusiveOption(val));
+        const maxSelections = question.max_selections || Infinity;
+
         return (
           <div className="space-y-3">
-            {question.options?.map(option => (
-              <label key={option} className="flex items-start space-x-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={currentValue?.includes(option) || false}
-                  onChange={(e) => {
-                    const currentValues = currentValue || [];
-                    const updatedValues = e.target.checked
-                      ? [...currentValues, option]
-                      : currentValues.filter((v: string) => v !== option);
-                    handleChange(question.id, updatedValues);
-                  }}
-                  className="mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                />
-                <span className="text-sm text-gray-700 group-hover:text-gray-900 leading-relaxed">{option}</span>
-              </label>
-            ))}
+            {question.options?.map(option => {
+              const isThisExclusive = isExclusiveOption(option);
+              const isSelected = currentValues.includes(option);
+              const atMaxSelections = currentValues.length >= maxSelections;
+              
+              // Disable logic:
+              // 1. If an exclusive option is selected and this is not exclusive -> disable
+              // 2. If non-exclusive options are selected and this is exclusive -> disable  
+              // 3. If at max selections and this option is not selected -> disable
+              const isDisabled = (!isSelected && atMaxSelections) ||
+                                (hasExclusiveSelected && !isThisExclusive) ||
+                                (hasNonExclusiveSelected && isThisExclusive);
+
+              return (
+                <label 
+                  key={option} 
+                  className={`flex items-start space-x-3 cursor-pointer group ${
+                    isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    disabled={isDisabled}
+                    onChange={(e) => {
+                      if (isDisabled) return;
+                      
+                      let updatedValues: string[];
+                      
+                      if (e.target.checked) {
+                        if (isThisExclusive) {
+                          // If selecting an exclusive option, clear all others
+                          updatedValues = [option];
+                        } else {
+                          // If selecting a non-exclusive option, clear any exclusive options first
+                          const nonExclusiveValues = currentValues.filter((v: string) => !isExclusiveOption(v));
+                          updatedValues = [...nonExclusiveValues, option];
+                        }
+                      } else {
+                        // Simply remove the unchecked option
+                        updatedValues = currentValues.filter((v: string) => v !== option);
+                      }
+                      
+                      handleChange(question.id, updatedValues);
+                    }}
+                    className={`mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded ${
+                      isDisabled ? 'cursor-not-allowed' : ''
+                    }`}
+                  />
+                  <span className={`text-sm leading-relaxed ${
+                    isDisabled 
+                      ? 'text-gray-400' 
+                      : 'text-gray-700 group-hover:text-gray-900'
+                  }`}>
+                    {option}
+                  </span>
+                </label>
+              );
+            })}
+            {question.max_selections && (
+              <div className="text-xs text-gray-500 mt-2">
+                {currentValues.length}/{question.max_selections} selected
+              </div>
+            )}
           </div>
         );
 
@@ -2993,7 +3178,8 @@ export const EvaluationSurvey: React.FC = () => {
       if (token) {
         localStorage.removeItem(`survey_session_${token}`);
       }
-      navigate('/assignments/my');
+      // Navigate with refresh parameter to ensure assignments list updates
+      navigate('/assignments/my?completed=true');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to complete survey');
     }
