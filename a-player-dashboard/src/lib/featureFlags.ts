@@ -9,7 +9,7 @@ interface FeatureFlags {
 
 // Default feature flags - can be overridden via environment or runtime
 const defaultFlags: FeatureFlags = {
-  useReactPdf: false  // Legacy PDF generator by default (production-ready)
+  useReactPdf: true  // React-PDF generator now enabled by default (production-ready)
 };
 
 // Load runtime flags from localStorage if available
