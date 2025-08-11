@@ -34,7 +34,7 @@ export const CoreGroupAnalysisTabs: React.FC<CoreGroupAnalysisTabsProps> = ({
     character: null,
     curiosity: null
   });
-  const [loading, setLoading] = useState(true);
+  // Removed unused loading state; rely on data presence
 
   // Eager load summary data for all tabs to show header scores immediately
   useEffect(() => {
@@ -42,7 +42,7 @@ export const CoreGroupAnalysisTabs: React.FC<CoreGroupAnalysisTabsProps> = ({
       if (!employeeId || !quarterId) return;
       
       try {
-        setLoading(true);
+        // start preloading
         console.log('🚀 Pre-loading all core group tab summaries for header display');
         
         // Load all three core group analyses in parallel
@@ -72,7 +72,7 @@ export const CoreGroupAnalysisTabs: React.FC<CoreGroupAnalysisTabsProps> = ({
       } catch (error) {
         console.error('Error loading core group tab summaries:', error);
       } finally {
-        setLoading(false);
+        // finished preloading
       }
     };
 

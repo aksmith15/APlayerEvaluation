@@ -277,7 +277,7 @@ function generateTimelineRecommendations(persona: PersonaClassification): {
   const { persona_type, coaching_focus, stretch_assignments } = persona;
 
   // Default timeline structure based on persona type
-  const timelineMap: Record<PersonaType, { immediate: string[]; short_term: string[]; long_term: string[]; }> = {
+  const timelineMap: Partial<Record<PersonaType, { immediate: string[]; short_term: string[]; long_term: string[]; }>> = {
     'A-Player': {
       immediate: ['Take on stretch assignment', 'Begin mentoring junior team members'],
       short_term: ['Lead cross-functional initiative', 'Develop executive presence'],

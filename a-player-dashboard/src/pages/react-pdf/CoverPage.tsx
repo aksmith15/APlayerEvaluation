@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from '@react-pdf/renderer';
-import { PageWrapper, ScoreCard } from '../../components/pdf';
+import { PageWrapper } from '../../components/pdf';
 import { COLORS, TYPOGRAPHY, LAYOUT, getPerformanceColor, getFontWeight } from '../../lib/theme';
 import type { PDFEmployeeData } from '../../services/pdfDataService';
 

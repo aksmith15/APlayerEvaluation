@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import { PageWrapper } from '../../components/pdf';
-import { COLORS, TYPOGRAPHY, LAYOUT, getFontWeight } from '../../lib/theme';
+import { COLORS, LAYOUT, getFontWeight } from '../../lib/theme';
 
 interface CoachingReportPageProps {
   data: any; // PDFEmployeeData
@@ -77,7 +77,7 @@ export const CoachingReportPage: React.FC<CoachingReportPageProps> = ({ data, re
   return (
     <PageWrapper pageNumber={pageNumber} totalPages={totalPages}>
       <View style={styles.container}>
-        <Text style={styles.pageTitle}>Coaching Report</Text>
+        <Text style={styles.pageTitle}>Coaching Report — {employeeName}</Text>
 
         <Text style={styles.sectionHeader}>Top Strengths</Text>
         {bullets(report?.top_strengths)}

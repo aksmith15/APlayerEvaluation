@@ -5,10 +5,11 @@
 
 import { supabase } from './supabase';
 import type { 
-  CoreGroupData, 
-  EvaluationConsensus, 
   CoreGroupPerformance,
-  CoreGroupAnalyticsResponse 
+  CoreGroupAnalyticsResponse,
+  DetailedCoreGroupAnalysis,
+  DetailedAttributeScore,
+  CoreGroupInsight
 } from '../types/evaluation';
 
 /**

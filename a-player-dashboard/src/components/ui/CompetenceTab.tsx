@@ -76,10 +76,11 @@ export const CompetenceTab: React.FC<CompetenceTabProps> = ({
     peer: attr.scores.peer,
     self: attr.scores.self,
     weighted: attr.scores.weighted,
-    // Additional properties for tooltips
-    hasManagerEval: attr.evaluatorCoverage.hasManager,
-    hasPeerEval: attr.evaluatorCoverage.hasPeer,
-    hasSelfEval: attr.evaluatorCoverage.hasSelf
+    // Additional properties for tooltips (match ClusteredBarChart types)
+    hasManager: attr.evaluatorCoverage.hasManager,
+    hasPeer: attr.evaluatorCoverage.hasPeer,
+    hasSelf: attr.evaluatorCoverage.hasSelf,
+    completion: 0
   })) || [];
 
   if (loading) {

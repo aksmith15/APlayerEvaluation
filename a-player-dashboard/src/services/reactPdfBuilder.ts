@@ -235,14 +235,14 @@ export async function generateEmployeeReportReact(
 
     // Create React-PDF document
     console.log('🔄 Creating React-PDF document...');
-    const blob = await pdf(
-      React.createElement(ReportDocument, {
-        data: data,
-        aiReview: aiReview,
-        quarterName: quarterName,
-        coachingReport: coachingReport
-      })
-    ).toBlob();
+    const element = React.createElement(ReportDocument as unknown as React.FC<any>, {
+      data: data,
+      aiReview: aiReview,
+      quarterName: quarterName,
+      coachingReport: coachingReport
+    } as any);
+
+    const blob = await pdf(element as any).toBlob();
 
     // Download the PDF using file-saver
     saveAs(blob, filename);
