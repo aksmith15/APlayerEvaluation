@@ -245,6 +245,7 @@ const drawCompactClusteredBarChart = (
 /**
  * Draw compact score summary cards  
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const drawCompactScoreSummaryCards = (
   pdf: jsPDF,
   scores: CoreGroupScore[],
@@ -265,6 +266,7 @@ const drawCompactScoreSummaryCards = (
 /**
  * Reusable component: Draw compact bar chart
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const drawCompactBarChart = (
   pdf: jsPDF,
   data: { label: string; value: number; color?: string }[],
@@ -355,6 +357,7 @@ const drawScoreCard = (
 /**
  * Reusable component: Draw data table
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const drawDataTable = (
   pdf: jsPDF,
   headers: string[],
@@ -539,8 +542,7 @@ const generateExecutiveSummaryPage = (
   const drawCoreGroupDefinitions = (
     pdfInst: jsPDF,
     x: number,
-    y: number,
-    width: number
+    y: number
   ): number => {
     const lineHeight = 5; // compact
     applyTypography(pdfInst, 'body'); // 8pt
@@ -559,7 +561,7 @@ const generateExecutiveSummaryPage = (
     return 4 + cgText.length * lineHeight;
   };
 
-  const defUsedHeight = drawCoreGroupDefinitions(pdf, margin, yPosition, contentWidth);
+  const defUsedHeight = drawCoreGroupDefinitions(pdf, margin, yPosition);
   yPosition += defUsedHeight + 4; // small spacer
 
   // 4. Detailed Attribute Analysis - with smaller table (slightly reduced sizes to fit one page)
