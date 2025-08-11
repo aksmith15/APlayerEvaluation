@@ -6,11 +6,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { fetchCompetenceAnalysis } from '../../services/coreGroupService';
+import { generateCompetenceAnalysisFromData } from '../../services/competencePatternAnalysis';
 import { ClusteredBarChart } from './ClusteredBarChart';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ErrorMessage } from './ErrorMessage';
 import { Card } from './Card';
 import type { DetailedCoreGroupAnalysis, CoreGroupTabProps, CoreGroupInsight } from '../../types/evaluation';
+import type { CompetenceAnalysisResult } from '../../services/competencePatternAnalysis';
 
 interface CompetenceTabProps extends CoreGroupTabProps {}
 
@@ -25,6 +27,7 @@ export const CompetenceTab: React.FC<CompetenceTabProps> = ({
   const [data, setData] = useState<DetailedCoreGroupAnalysis | null>(initialData);
   const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState<string | null>(null);
+  const [patternAnalysis, setPatternAnalysis] = useState<CompetenceAnalysisResult | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -37,6 +40,17 @@ export const CompetenceTab: React.FC<CompetenceTabProps> = ({
         
         setData(analysisData);
         onDataLoad?.(analysisData);
+
+        // Generate pattern analysis
+        if (analysisData && employeeName) {
+          try {
+            const pattern = generateCompetenceAnalysisFromData(analysisData, employeeName);
+            setPatternAnalysis(pattern);
+            console.log('✅ Competence pattern analysis generated:', pattern?.title);
+          } catch (patternError) {
+            console.warn('⚠️ Could not generate competence pattern analysis:', patternError);
+          }
+        }
       } catch (err) {
         console.error('Error loading competence analysis:', err);
         setError(err instanceof Error ? err.message : 'Failed to load competence analysis');
@@ -98,7 +112,7 @@ export const CompetenceTab: React.FC<CompetenceTabProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="competence-tab-content space-y-6">
       {/* Header */}
       <div className="border-b border-gray-200 pb-4">
         <div className="flex items-center">
@@ -212,6 +226,83 @@ export const CompetenceTab: React.FC<CompetenceTabProps> = ({
           )}
         </Card>
       </div>
+
+      {/* Pattern Analysis Section */}
+      {patternAnalysis && (
+        <Card className="p-6">
+          <div className="mb-4">
+            <h3 className="text-lg font-medium text-secondary-800 flex items-center">
+              <span className="mr-2">{patternAnalysis.riskIcon}</span>
+              Competence Pattern Analysis
+            </h3>
+            <p className="text-sm text-secondary-600">
+              Intelligent analysis of accountability, quality, and reliability patterns
+            </p>
+          </div>
+
+          {/* Pattern Title */}
+          <div className={`mb-4 p-4 rounded-lg border-l-4 ${
+            patternAnalysis.riskLevel === 'low' ? 'bg-green-50 border-l-green-400' :
+            patternAnalysis.riskLevel === 'medium' ? 'bg-yellow-50 border-l-yellow-400' :
+            patternAnalysis.riskLevel === 'high' ? 'bg-orange-50 border-l-orange-400' :
+            'bg-red-50 border-l-red-400'
+          }`}>
+            <h4 className="text-lg font-semibold text-secondary-800 mb-2">
+              {patternAnalysis.title} ({patternAnalysis.pattern})
+            </h4>
+            <p className="text-secondary-700 leading-relaxed">
+              {patternAnalysis.insight}
+            </p>
+          </div>
+
+          {/* Perception Gaps */}
+          {patternAnalysis.perceptionGaps.length > 0 && (
+            <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <h5 className="font-semibold text-amber-800 mb-2">⚠️ Perception Insights</h5>
+              <div className="space-y-2">
+                {patternAnalysis.perceptionGaps.map((gap, index) => (
+                  <div key={index} className="text-sm text-amber-700">
+                    {gap.type === 'overconfident' ? '📈' : '📉'} {' '}
+                    {gap.type === 'overconfident' 
+                      ? `May be overconfident in ${gap.attribute} (self-rates ${gap.gap} points higher)`
+                      : `Undervalues their ${gap.attribute} (self-rates ${gap.gap} points lower)`
+                    }
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Recommendations */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <h5 className="font-semibold text-blue-800 mb-2">🎯 Immediate</h5>
+              <p className="text-sm text-blue-700">{patternAnalysis.recommendations.immediate}</p>
+            </div>
+            <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
+              <h5 className="font-semibold text-purple-800 mb-2">📚 Development</h5>
+              <p className="text-sm text-purple-700">{patternAnalysis.recommendations.development}</p>
+            </div>
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <h5 className="font-semibold text-green-800 mb-2">🤝 Coaching</h5>
+              <p className="text-sm text-green-700">{patternAnalysis.recommendations.coaching}</p>
+            </div>
+          </div>
+
+          {/* Risk Level */}
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span className="text-sm font-medium text-secondary-700">Performance Risk Level:</span>
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+              patternAnalysis.riskLevel === 'low' ? 'bg-green-100 text-green-800' :
+              patternAnalysis.riskLevel === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+              patternAnalysis.riskLevel === 'high' ? 'bg-orange-100 text-orange-800' :
+              'bg-red-100 text-red-800'
+            }`}>
+              {patternAnalysis.riskIcon} {patternAnalysis.riskLevel.charAt(0).toUpperCase() + patternAnalysis.riskLevel.slice(1)}
+            </span>
+          </div>
+        </Card>
+      )}
 
       {/* Metadata Footer */}
       <div className="text-xs text-secondary-400 border-t border-gray-100 pt-4">

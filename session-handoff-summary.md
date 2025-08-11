@@ -4,9 +4,11 @@
 ## 🎯 **CURRENT PROJECT STATUS**
 
 ### **📊 Overall Progress**
-- ✅ **Stage 1-4**: 100% Complete (Foundation, Pages, Features, Polish)
-- 🎯 **Stage 5**: 50% Complete (Testing & Launch - Unit testing ✅, Integration testing ⏳)
-- ⏳ **Stage 6**: Planned (Peer Self-Access Enhancement)
+- ✅ **Stages 1–4**: 100% Complete (Foundation, Pages, Features, Polish)
+- ✅ **Stage 5**: 95% Complete (Testing & Launch)
+- ✅ **Stage 6**: 90% Complete (Peer Self-Access; docs pending)
+- ✅ **Stage 7**: 100% Complete (Survey Assignment System)
+- 🖨️ **React-PDF Migration**: Stages 1–6 implemented behind feature flag; QA rollout pending
 
 ### **🎉 MAJOR RECENT ACHIEVEMENT**
 **100% Unit Test Pass Rate**: 41/41 tests passing across all core components
@@ -46,6 +48,17 @@ C:\Users\kolbe\OneDrive\Desktop\A-Player Evaluation2\a-player-dashboard
 - **Development**: `npm run dev` (server fully operational)
 - **Testing**: `npm run test` (CLI) or `npm run test:ui` (browser interface)
 - **Build**: `npm run build` (production-ready)
+- **TypeScript Check**: `npx tsc --noEmit`
+
+### **React-PDF Feature Flag**
+- Enable: `window.devTools.enableReactPdf()`
+- Disable: `window.devTools.disableReactPdf()`
+- URL override: add `?reactpdf=true`
+
+### **Dev Live Preview (HMR)**
+- Route: `/dev/pdf-preview?employeeId=<uuid>&quarterId=<uuid>`
+- Use when iterating on React-PDF components to see changes instantly
+- Toolbar includes Refresh + “Open in New Tab” (blob) buttons
 
 ### **Testing Infrastructure Status**
 - ✅ **Framework**: Vitest + React Testing Library + JSDOM
@@ -63,11 +76,10 @@ C:\Users\kolbe\OneDrive\Desktop\A-Player Evaluation2\a-player-dashboard
 5. **User Acceptance Testing**: Stakeholder validation
 
 ### **Immediate Next Steps**
-1. Create integration tests for user workflows
-2. Implement E2E testing for critical paths
-3. Set up performance monitoring
-4. Prepare production deployment
-5. User documentation and training materials
+1. QA the React-PDF report vs. Employee Analytics data for multiple users/quarters
+2. Add logo asset to CoverPage and finalize Descriptive Review logic rules
+3. Minor spacing/typography polish on SummaryPage per stakeholder feedback
+4. Plan staged rollout of feature flag and update user documentation
 
 ## 📁 **KEY REFERENCE FILES**
 

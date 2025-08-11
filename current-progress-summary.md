@@ -1,5 +1,5 @@
 # A-Player Evaluation: Current Progress Summary
-*Last Updated: January 25, 2025 - Stage 8.6 & 8.7: Current Quarter Defaulting & Coverage Dashboard Fixes COMPLETED*
+*Last Updated: February 1, 2025 - React-PDF Renderer (Stages 1–6) Implemented Behind Feature Flag*
 
 ## 🎯 **LATEST ACCOMPLISHMENTS (Stage 7: Survey Assignment System)**
 
@@ -69,6 +69,31 @@
 - **Architecture**: Clean separation of concerns, reusable components, consistent error handling
 
 **Result**: Professional-grade assignment management system operational, seamlessly integrated with existing A-Player Dashboard infrastructure.
+
+---
+
+## 🖨️ PDF Report Generator Migration (React-PDF)
+
+### ✅ What’s Live (behind feature flag)
+- New React-PDF renderer with Culture Base brand styling
+- Central theme (COLORS, TYPOGRAPHY, LAYOUT) shared across legacy and new systems
+- Pages: Cover, Evaluation Summary, Strengths (per core group), Descriptive Review (scaffold)
+- SummaryPage uses real-time data from `coreGroupBreakdown` (same as Analytics page)
+- Visual polish: compact layout, rounded progress bars, branded teal gradient, section backgrounds, pill score labels
+- Feature flag toggles via `localStorage` and `?reactpdf=true`; `window.devTools` helpers
+
+### 🧰 Compatibility
+- React downgraded to 18.3.x for `@react-pdf/renderer` compatibility
+- Legacy jsPDF generator preserved as `generateEmployeeReportLegacy`
+
+### ⏭️ Next
+- QA pass and rollout plan (enable flag progressively)
+- Add logo asset on CoverPage and finalize Descriptive Review logic
+- Minor spacing and typography tweaks from stakeholder review
+
+### 🧪 Dev Experience
+- Added dev-only live preview at `/dev/pdf-preview` with embedded `PDFViewer` and an “Open in New Tab” action using `BlobProvider`.
+- Accepts `employeeId` and `quarterId` via query params; supports HMR for rapid iteration.
 
 ---
 

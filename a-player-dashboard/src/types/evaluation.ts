@@ -448,6 +448,7 @@ export interface DetailedCoreGroupAnalysis {
     quarterId: string;
     calculatedAt: string;
     attributeCount: number;
+    submissionIds?: string[];
   };
 }
 

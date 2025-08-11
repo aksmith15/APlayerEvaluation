@@ -114,7 +114,7 @@ export const EvaluationConsensusCard: React.FC<EvaluationConsensusCardProps> = (
   const overallConsensus = getConsensusLevel(avgGap, 1.0);
 
   return (
-    <Card className={`${className}`}>
+    <Card className={`evaluation-consensus-card ${className}`}>
       {/* Card Header */}
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-secondary-800 mb-2">

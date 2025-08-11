@@ -42,6 +42,98 @@ This implementation follows the established Development Agent Workflow documente
 
 ## 🏆 **LATEST MAJOR ACHIEVEMENTS (January 25-31, 2025)**
 
+### ✅ React-PDF Report Renderer Migration (February 1, 2025) — Stages 1–6 Completed
+- Implemented new Culture Base–styled PDF system using `@react-pdf/renderer` behind a feature flag, keeping legacy `jsPDF` generator intact for safe rollout
+- Centralized theme system in `src/lib/theme.ts` (COLORS, TYPOGRAPHY, LAYOUT, helpers, feature flags, font weight utility)
+- Built PDF primitives: `ScoreCard`, `ValueBar` (rounded bars, brand backgrounds), `PageWrapper` (footer, width fix)
+- Created page components: `CoverPage`, `SummaryPage`, `StrengthsPage`, `DescriptiveReviewPage`
+- Composed `ReportDocument` to orchestrate pages and pagination
+- Added React builder `generateEmployeeReportReact()` with blob download and robust error handling
+- Feature flag integration in `GeneratePDFButton.tsx` with runtime flags via localStorage + URL param; `window.devTools` helpers
+- Downgraded to React 18 to resolve `@react-pdf/renderer` compatibility issues
+- Data correctness: SummaryPage now sources attribute scores from `coreGroupBreakdown` (same as Employee Analytics) with defensive access
+- Visual polish: standardized spacing, thicker rounded bars, compact layout, section backgrounds, branded teal gradient for core groups
+
+Pending (Stage 7 – QA rollout):
+- Formal QA, flag default evaluation and staged rollout
+- Descriptive review logic rules and logo asset placement
+- Final spacing/typography tweaks based on stakeholder review
+
+### ✅ Descriptive Review via AI (Edge Function) — Implemented
+- Added Supabase Edge Function `ai-descriptive-review` design to securely generate group narratives
+- Client builds compact payload (employeeName + per-group attributes {score, grade})
+- Server calls AI provider with secrets stored in function env; returns `{ competence|character|curiosity: { gradeLine, paragraph } }`
+- Integrated into `reactPdfBuilder.ts` to fetch AI review before PDF creation and pass to `ReportDocument`
+- `DescriptiveReviewPage.tsx` prefers AI output; falls back to local `profileDescriptions.ts` when unavailable
+- Maintains layout spec (teal headers, grade line, justified paragraph, 15px spacing, no group splits)
+
+#### ℹ️ Update (Aug 8, 2025)
+- Dev live preview now invokes the AI function and passes `aiReview` into `ReportDocument` (see `src/pages/react-pdf/DevPdfPreview.tsx`)
+- Supabase Edge Function updated with robust CORS handling (OPTIONS + Access-Control-Allow-* headers) to enable browser calls from `http://localhost:3005`
+- Verified end-to-end: OPTIONS preflight returns 200 with ACAO, and Descriptive Review page renders AI content in preview
+
+### 🚀 Coaching Report (AI) — v2 Implemented per workflow
+
+Status (Aug 11, 2025):
+- v2 implemented and deployed. Edge Function prompts hardened, client orchestration stabilized, and PDF rendering refined.
+
+What’s implemented (aligns to workflow.mdc):
+1) Data Preprocessing (client)
+   - Attribute name normalization; gap metrics (self vs others, mgr vs peer)
+   - Multi-select aggregates (top values + counts)
+   - Deterministic question intent tagging via `src/constants/questionTags.ts`
+
+2) Prompt Strategy (server)
+   - Sectioned calls: `strengths_dev`, `gaps_incidents`, `questions` with strict JSON schemas
+   - Evidence rules: short quotes (≤140), rater labels, attributes, SMART interventions
+   - Output rules: “no JSON inside strings”; arrays of objects only; omit items without evidence
+   - Provider fallback (Anthropic⇄OpenAI) and reduced tokens to mitigate 429 limits
+
+3) Coverage & Logic
+   - Perception gaps (threshold |self_vs_others| ≥ 1.5) with numeric diffs + quotes
+   - Critical incidents (score ≤ 7) formatted as Situation/Behavior/Impact/Recommendation; allow 0 when no evidence
+   - Equal rater weighting; no recency bias for current quarter
+
+4) PDF Formatting
+   - `CoachingReportPage.tsx`: clean bullets with evidence lines; incidents render as SBIR bullets
+   - Increased vertical spacing for readability; unique keys to silence React warnings
+   - Summary page includes Core Group Definitions prior to per-attribute totals
+
+Acceptance Criteria (v2)
+- Grounded in real quotes; numeric gaps included; ≥3 strengths & ≥3 development areas; SMART interventions; no raw JSON — Met in current previews.
+
+Operational notes
+- Env: `a-player-dashboard/.env` must define `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
+- Secrets: Project Edge Function secrets must include a valid `OPENAI_API_KEY` (and optional `ANTHROPIC_API_KEY`)
+- Deploy: `supabase functions deploy ai-coaching-report` and `ai-descriptive-review` with the correct `--project-ref`
+
+Tasks
+- [x] Client preprocessing (responses, gaps, tagging, aggregates)
+- [x] Sectioned Edge Function prompts + output rules
+- [x] Provider fallback + token tuning (429 resilience)
+- [x] Header auth on function calls (apikey + Authorization)
+- [x] PDF rendering fixes (incidents, spacing, keys)
+- [x] Core Group Definitions added to summary page
+- [ ] Broaden `questionTags.ts` coverage as new question_ids appear (ongoing)
+- [ ] Formal QA on at least 2 real employees; prompt polish if needed
+
+#### 🧪 Dev Live Preview with HMR (Added)
+- Added dev-only React-PDF live preview route: `/dev/pdf-preview`
+- Renders `ReportDocument` inside `@react-pdf/renderer` `PDFViewer` for hot reload during development
+- Accepts query params: `?employeeId=<uuid>&quarterId=<uuid>&quarterName=<name>` and also reads NavigationContext state when present
+- Top toolbar includes:
+  - Inputs for Employee ID and Quarter ID
+  - Refresh button to refetch data
+  - “Open in New Tab” button using `BlobProvider` for a blob URL
+- Guarded with `import.meta.env.DEV`; not included in production builds
+
+Usage (dev):
+1) `npm run dev`
+2) Authenticate
+3) Navigate to `/dev/pdf-preview?employeeId=<uuid>&quarterId=<uuid>`
+4) Edit React-PDF components; Vite HMR reloads the embedded viewer automatically
+
+
 ### **✅ Stage 9: Core Group Scoring System - 100% COMPLETED**
 **Revolutionary Analytics Enhancement Delivered:**
 - ✅ **Strategic Performance Overview**: Implemented 3-tier core group system (Competence, Character, Curiosity)
@@ -59,6 +151,8 @@ This implementation follows the established Development Agent Workflow documente
 - ✅ **Dynamic Classification**: Real-time persona assignment based on H/M/L core group performance
 - ✅ **Rich Tooltips**: Comprehensive persona descriptions with development paths
 - ✅ **Employee Analytics Integration**: Positioned prominently between profile and quarterly notes
+
+
 
 ### **✅ Major UI/UX Enhancement: Hierarchical Analytics View**
 **Two-Tier Information Architecture Successfully Implemented:**
@@ -266,7 +360,7 @@ Deployment:        ✅ PRODUCTION READY
 - ✅ **Consensus Metrics**: Multi-evaluator agreement analysis and bias detection
 - ✅ **Development Planning**: Persona-based growth recommendations and coaching insights
 - ✅ **Quarter Management**: Automatic current quarter detection with smart defaults
-- ✅ **Data Export**: PDF generation and analytics data export capabilities
+- ✅ **Data Export**: Analytics data export capabilities
 
 **E2E Testing Achievement Details:**
 - ✅ **Framework**: Playwright selected over Cypress (23% faster, better TypeScript support, cross-browser)
@@ -358,13 +452,13 @@ The system visualizes weighted evaluation scores calculated from Manager (55%), 
 - **Database & Auth:** Supabase (PostgreSQL) - Full-stack platform with existing evaluation data
 - **Documentation:** https://supabase.com/docs
 - **Project URL:** https://tufjnccktzcbmaemekiz.supabase.co
-- **Workflow Automation:** n8n - For external AI analysis and PDF generation
+- **Workflow Automation:** n8n - For external AI analysis
 - **Documentation:** https://docs.n8n.io/
 
 ### AI & PDF Services (External via n8n):
 - **AI Analysis:** OpenAI GPT-4 - For bias detection and insights via n8n workflows
 - **Documentation:** https://platform.openai.com/docs
-- **PDF Generation:** PDFShift - HTML to PDF conversion via n8n workflows
+
 - **Documentation:** https://pdfshift.io/documentation
 - **Individual Meta-Analysis Webhook:** Retrieved from app_config table (key: "n8n_webhook_url") - generates individual employee meta-analysis
 
@@ -3539,3 +3633,227 @@ When ready for true multi-tenancy (Stage 10):
 ---
 
 **🚀 Recommendation:** Start with **Option A (Separate Deployment)** to safely support American Fabricators immediately, then consider **Stage 10 (True Multi-Tenancy)** once both companies are stable and satisfied with the system.
+
+---
+
+## **🎯 STAGE 13: Professional PDF Report Generation System** 📄 **MEDIUM PRIORITY - REPORTING ENHANCEMENT**
+
+**Date Added:** February 1, 2025  
+*Pre-req*: Complete Stage 9 Core Group Scoring System ✅ **MET**  
+*Complexity*: Medium | *Priority*: **Medium** | *Impact*: **Professional Reporting** - Executive Summary Generation
+
+### **🎯 Objective:** 
+Create a comprehensive PDF report generation system that produces professional 5-page quarterly evaluation reports with Culture Base inspired styling for executives, managers, and stakeholders.
+
+### **💡 Strategic Vision:** 
+*"Transform employee evaluation data into professional, shareable reports that executives and stakeholders can easily consume and act upon, enhancing the value proposition of the A-Player evaluation system."*
+
+### **📋 Implementation Scope:**
+
+#### **Page 1: Executive Summary**
+- **Header Block**: Employee name, quarter, email, department
+- **Core Group Performance Bar Chart**: Professional clustered bars showing Manager/Peer/Self scores with opacity variations
+  - Competence: Deep navy blue (#1e3a8a)
+  - Character: Forest green (#059669) 
+  - Curiosity: Warm orange (#ea580c)
+- **Score Summary Cards**: Individual core group scores with letter grades and submission counts
+- **Overall Average Hero**: Teal gradient background (#14b8a6) with overall score and grade
+
+#### **Page 2: Evaluation Consensus Analysis**
+- **Triangular Radar Chart**: Manager/Peer/Self consensus visualization
+- **Consensus Metrics Panel**: Self vs Others Gap, Manager vs Peer Gap, Overall Variance
+- **Consensus Level Badge**: Colored pill (teal/orange/red) with consensus description
+
+#### **Culture Base Design System:**
+- **Typography**: Inter font stack with generous white space (32px minimum)
+- **Layout**: Card-based design with subtle shadows and 8px rounded corners
+- **Color Palette**: Teal primary (#14b8a6), category-specific colors, clean white backgrounds
+- **Visual Hierarchy**: Bold headers, lighter body text, grade letters 1.5x numeric size
+
+### **📋 Pre-Implementation Checklist:**
+- [x] Review project structure guidelines in `/Docs/project_structure.md`
+- [x] Understand UI/UX requirements from `/Docs/UI_UX_doc.md`
+- [x] Check for any PDF-related issues in `/Docs/Bug_tracking.md`
+
+### **📚 Documentation Links for Stage 13:**
+- [jsPDF Documentation](https://github.com/parallax/jsPDF) - PDF generation library
+- [html2canvas Documentation](https://html2canvas.hertzen.com/) - Canvas rendering for charts
+- [Culture Base Design System](https://culturebase.com) - Design inspiration reference
+
+### **🔧 Sub-steps with Workflow Compliance:**
+
+#### **13.1: PDF Data Service Infrastructure** ⚪ **SIMPLE SUBTASK**
+**Complexity:** Simple | **Duration:** 2-3 hours
+**Requirements:** 
+- [x] Create comprehensive PDF data fetching service (`pdfDataService.ts`)
+- [x] Implement core group data aggregation and consensus metrics calculation
+- [x] Add submission count calculation by evaluation type
+- [x] Create TypeScript interfaces for PDF data structures
+
+#### **13.2: Culture Base Styled PDF Generator** ⚪ **MEDIUM SUBTASK**
+**Complexity:** Medium | **Duration:** 4-6 hours
+**Requirements:**
+- [x] Implement Culture Base color palette and design system
+- [x] Create professional clustered bar chart with opacity variations
+- [x] Design score summary cards with shadows and rounded corners  
+- [x] Build teal gradient overall average hero section
+- [x] Add modern typography and generous white space
+
+#### **13.3: Consensus Analysis Page** ⚪ **MEDIUM SUBTASK**
+**Complexity:** Medium | **Duration:** 3-4 hours
+**Requirements:**
+- [x] Create triangular radar chart visualization
+- [x] Design consensus metrics panel with checkmarks for good alignment
+- [x] Implement colored consensus level badges (high/medium/low)
+- [x] Add detailed consensus descriptions and recommendations
+
+#### **13.4: UI Integration and Testing** ⚪ **SIMPLE SUBTASK**
+**Complexity:** Simple | **Duration:** 2-3 hours
+**Requirements:**
+- [x] Create GeneratePDFButton component with loading states
+- [x] Integrate PDF button into EmployeeAnalytics page header
+- [x] Add proper error handling and user feedback
+- [x] Test with real employee data across different quarters
+
+### **🎯 Completion Criteria:**
+- ✅ Professional 2-page PDF reports generate successfully
+- ✅ Culture Base styling implemented with proper colors and typography
+- ✅ Bar charts show Manager/Peer/Self data with opacity variations
+- ✅ Consensus analysis provides actionable insights
+- ✅ Integration seamless with existing EmployeeAnalytics page
+- ✅ Error handling provides clear user feedback
+- ✅ No linting errors or TypeScript issues
+- ✅ Tested with multiple employee scenarios
+
+### **🚀 Current Status:** ✅ **STAGE 13 COMPLETED** 
+**Date Completed:** February 1, 2025  
+**Implementation Quality:** Production-ready with Culture Base styling
+
+### **✅ Successfully Delivered:**
+- **PDF Data Service**: Comprehensive data fetching with consensus metrics calculation
+- **Culture Base Styling**: Professional design system with teal accents and category colors  
+- **Executive Summary Page**: Hero sections, clustered bar charts, and score summary cards
+- **Consensus Analysis Page**: Radar charts, metrics panels, and colored level badges
+- **UI Integration**: Seamless PDF button integration in EmployeeAnalytics header
+- **Error Handling**: Proper user feedback and loading states
+
+### **🔧 Known Issues Resolved:**
+- **Issue #1**: `secondaryColor is not defined` error in PDF generator
+  - **Root Cause**: Variable scoping issue in consensus analysis function
+  - **Resolution**: Properly defined secondaryColor variable in all chart functions
+  - **Status**: ✅ **RESOLVED**
+
+## **🎯 STAGE 13.5: Core Group Breakdown Analysis** 📊 **HIGH PRIORITY - PDF REPORTING ENHANCEMENT**
+
+**Date Added:** February 1, 2025  
+*Pre-req*: Complete Stage 13 Professional PDF Report Generation System ✅ **MET**  
+*Complexity*: Medium | *Priority*: **High** | *Impact*: **Professional Reporting** - Individual Attribute Analysis
+
+### **🎯 Objective:** 
+Extend the 2-page PDF report to a comprehensive 5-page report by adding detailed breakdowns for each core group (Competence, Character, Curiosity) with individual attribute analysis, clustered bar charts, and intelligent pattern recognition.
+
+### **💡 Strategic Vision:** 
+*"Transform high-level core group insights into actionable individual attribute analysis, providing managers and employees with specific development areas and performance patterns for targeted improvement."*
+
+### **📋 Implementation Scope:**
+
+#### **Page 3: Competence Breakdown (Execution and Delivery)**
+- **Header Block**: "Competence (Execution and Delivery)" with category styling (#1e3a8a)
+- **Clustered Bar Chart**: Manager/Peer/Self scores for each competence attribute (Accountability, Quality, Reliability)
+- **A/B/C/D Pattern Analysis**: 27 competence patterns with personalized insights
+- **Player Categories**: A-Player (8-10), B-Player (7-7.9), C-Player (6-6.9), D-Player (<6)
+- **Risk Indicators**: Elite ✅, Warning 🚨, Critical 🔴 pattern classification
+
+#### **Page 4: Character Breakdown (Leadership and Interpersonal Skills)**  
+- **Header Block**: "Character (Leadership and Interpersonal Skills)" with category styling (#059669)
+- **Clustered Bar Chart**: Manager/Peer/Self scores for each character attribute
+- **Profile Summary**: Leadership capabilities and interpersonal effectiveness assessment
+- **Development Focus**: Character-specific growth recommendations
+
+#### **Page 5: Curiosity Breakdown (Growth and Innovation)**
+- **Header Block**: "Curiosity (Growth and Innovation)" with category styling (#ea580c)  
+- **Clustered Bar Chart**: Manager/Peer/Self scores for each curiosity attribute
+- **Innovation Assessment**: Growth mindset and learning agility evaluation
+- **Opportunity Identification**: Learning and development recommendations
+
+### **📋 Pre-Implementation Checklist:**
+- [x] Review existing PDF generation system in Stage 13
+- [x] Understand individual attribute data structure from core group services
+- [x] Check competence pattern analysis engine in `/src/services/competencePatternAnalysis.ts`
+
+### **📚 Documentation Links for Stage 13.5:**
+- [Stage 13 PDF Report Generation](/Docs/Implementation.md#stage-13) - Base PDF system
+- [Competence Pattern Analysis](/a-player-dashboard/src/services/competencePatternAnalysis.ts) - 27-pattern framework
+- [Core Group Services](/a-player-dashboard/src/services/coreGroupService.ts) - Individual attribute data
+
+### **🔧 Sub-steps with Workflow Compliance:**
+
+#### **13.5.1: Extend PDF Data Service** ✅ **COMPLETED**
+**Complexity:** Simple | **Duration:** 1-2 hours
+**Requirements:** 
+- [x] Extend `pdfDataService.ts` to fetch individual core group breakdowns
+- [x] Add `CoreGroupBreakdown` interface with competence/character/curiosity data
+- [x] Implement parallel fetching with `Promise.allSettled` for error resilience
+- [x] Update `PDFEmployeeData` interface to include breakdown data
+
+#### **13.5.2: Competence Pattern Analysis Integration** ✅ **COMPLETED** 
+**Complexity:** Simple | **Duration:** 1 hour
+**Requirements:**
+- [x] Import existing competence pattern analysis engine
+- [x] Integrate 27-pattern A/B/C/D framework into PDF generation
+- [x] Add risk indicators and personalized insights
+- [x] Implement pattern-based recommendations
+
+#### **13.5.3: Core Group Breakdown Pages** ✅ **COMPLETED**
+**Complexity:** Medium | **Duration:** 4-5 hours
+**Requirements:**
+- [x] Implement `generateCompetenceBreakdownPage` with clustered charts and pattern analysis
+- [x] Implement `generateCharacterBreakdownPage` with leadership assessment
+- [x] Implement `generateCuriosityBreakdownPage` with innovation evaluation
+- [x] Create reusable `drawAttributeClusteredBarChart` function
+- [x] Add player categorization badges and profile summaries
+
+#### **13.5.4: PDF Generator Integration** ✅ **COMPLETED**
+**Complexity:** Simple | **Duration:** 1 hour  
+**Requirements:**
+- [x] Update main PDF generation function to include Pages 3-5
+- [x] Add proper page breaks between sections
+- [x] Maintain consistent Culture Base styling across all pages
+- [x] Test complete 5-page report generation
+
+### **🎯 Completion Criteria:**
+- ✅ 5-page PDF reports generate successfully with all core group breakdowns
+- ✅ Competence pattern analysis provides actionable insights with risk classification
+- ✅ Character and curiosity breakdowns include player categorization
+- ✅ Professional clustered bar charts show Manager/Peer/Self data with opacity variations
+- ✅ Consistent Culture Base styling maintained across all new pages
+- ✅ Error handling provides graceful fallbacks for missing data
+- ✅ No linting errors or TypeScript issues
+
+### **🚀 Current Status:** ✅ **STAGE 13.5 COMPLETED** 
+**Date Completed:** February 1, 2025  
+**Implementation Quality:** Production-ready with comprehensive core group breakdown analysis
+
+### **✅ Successfully Delivered:**
+- **Extended PDF Data Service**: Fetches individual attribute data for all three core groups
+- **Page 3 - Competence Breakdown**: Professional analysis with 27-pattern framework and risk indicators  
+- **Page 4 - Character Breakdown**: Leadership and interpersonal skills assessment with player badges
+- **Page 5 - Curiosity Breakdown**: Growth mindset and innovation capability evaluation
+- **Professional Chart System**: Clustered bars with Manager (100%), Peer (75%), Self (50%) opacity
+- **Intelligent Pattern Recognition**: A/B/C/D framework with personalized insights
+- **Error Resilience**: Graceful handling of missing core group data
+- **Complete 5-Page System**: Seamless integration with existing PDF infrastructure
+
+### **🔧 Files Modified/Created:**
+- **Modified**: `/src/services/pdfDataService.ts` - Extended data fetching capabilities
+- **Modified**: `/src/services/pdfReportGenerator.ts` - Added 3 new page generation functions
+- **Leveraged**: `/src/services/competencePatternAnalysis.ts` - Existing 27-pattern engine
+- **Updated**: `/Docs/Implementation.md` - Stage 13.5 documentation
+
+### **📍 Future Enhancement Opportunities:**
+- **Email Integration**: Automated report distribution to stakeholders
+- **Batch Generation**: Multi-employee report generation for managers
+- **Custom Branding**: Company-specific logos and color schemes
+- **Advanced Patterns**: Character and Curiosity pattern frameworks (similar to competence)
+
+---

@@ -98,7 +98,7 @@ export const CuriosityTab: React.FC<CuriosityTabProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="curiosity-tab-content space-y-6">
       {/* Header */}
       <div className="border-b border-gray-200 pb-4">
         <div className="flex items-center">

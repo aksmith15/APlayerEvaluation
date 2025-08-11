@@ -198,7 +198,7 @@ export const PersonaQuickGlanceWidget: React.FC<PersonaQuickGlanceWidgetProps> =
   };
 
   return (
-    <div className="relative">
+    <div className="relative persona-quick-glance-widget">
       {/* Main Widget Badge */}
       <button
         ref={buttonRef}

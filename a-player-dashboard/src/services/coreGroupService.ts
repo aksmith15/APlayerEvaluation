@@ -417,6 +417,9 @@ export const fetchCompetenceAnalysis = async (
       throw responsesError;
     }
 
+    // Collect unique submission IDs
+    const submissionIds = Array.from(new Set((responses || []).map((r: any) => r.submission_id))).filter(Boolean) as string[];
+
     // Generate insights using the existing algorithm
     const insights = generateCompetenceInsights(attributeScores || [], responses || []);
 
@@ -428,7 +431,8 @@ export const fetchCompetenceAnalysis = async (
         employeeId,
         quarterId,
         calculatedAt: new Date().toISOString(),
-        attributeCount: attributeScores?.length || 0
+        attributeCount: attributeScores?.length || 0,
+        submissionIds
       }
     };
 
@@ -493,6 +497,9 @@ export const fetchCharacterAnalysis = async (
       throw responsesError;
     }
 
+    // Collect unique submission IDs
+    const submissionIds = Array.from(new Set((responses || []).map((r: any) => r.submission_id))).filter(Boolean) as string[];
+
     // Generate insights using the existing algorithm
     const insights = generateCharacterInsights(attributeScores || [], responses || []);
 
@@ -504,7 +511,8 @@ export const fetchCharacterAnalysis = async (
         employeeId,
         quarterId,
         calculatedAt: new Date().toISOString(),
-        attributeCount: attributeScores?.length || 0
+        attributeCount: attributeScores?.length || 0,
+        submissionIds
       }
     };
 
@@ -569,6 +577,9 @@ export const fetchCuriosityAnalysis = async (
       throw responsesError;
     }
 
+    // Collect unique submission IDs
+    const submissionIds = Array.from(new Set((responses || []).map((r: any) => r.submission_id))).filter(Boolean) as string[];
+
     // Generate insights using the existing algorithm
     const insights = generateCuriosityInsights(attributeScores || [], responses || []);
 
@@ -580,7 +591,8 @@ export const fetchCuriosityAnalysis = async (
         employeeId,
         quarterId,
         calculatedAt: new Date().toISOString(),
-        attributeCount: attributeScores?.length || 0
+        attributeCount: attributeScores?.length || 0,
+        submissionIds
       }
     };
 

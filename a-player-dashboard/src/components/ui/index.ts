@@ -44,4 +44,9 @@ export { CharacterTab } from './CharacterTab';
 export { CuriosityTab } from './CuriosityTab';
 
 // Persona Classification Components
-export { PersonaQuickGlanceWidget, PersonaQuickBadge } from './PersonaQuickGlanceWidget'; 
+export { PersonaQuickGlanceWidget, PersonaQuickBadge } from './PersonaQuickGlanceWidget';
+
+// PDF Report Generation Components
+export { GeneratePDFButton } from './GeneratePDFButton';
+
+ 

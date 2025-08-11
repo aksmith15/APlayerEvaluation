@@ -6,6 +6,9 @@ import { ErrorBoundary, LoadingSpinner } from './components/ui';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ROUTES } from './constants/config';
 
+// Initialize development tools for feature flag testing
+import './utils/devTools';
+
 // Lazy load components for better code splitting
 const Login = React.lazy(() => import('./pages/Login').then(module => ({ default: module.Login })));
 const EmployeeSelection = React.lazy(() => import('./pages/EmployeeSelection').then(module => ({ default: module.EmployeeSelection })));
@@ -13,6 +16,8 @@ const EmployeeAnalytics = React.lazy(() => import('./pages/EmployeeAnalytics').t
 const AssignmentManagement = React.lazy(() => import('./pages/AssignmentManagement'));
 const MyAssignments = React.lazy(() => import('./pages/MyAssignments'));
 const EvaluationSurvey = React.lazy(() => import('./components/ui').then(module => ({ default: module.EvaluationSurvey })));
+// Dev-only React-PDF live preview
+const DevPdfPreview = React.lazy(() => import('./pages/react-pdf/DevPdfPreview'));
 
 const App: React.FC = () => {
   return (
@@ -80,6 +85,18 @@ const App: React.FC = () => {
                       </ProtectedRoute>
                     } 
                   />
+
+                  {/* Dev-only: React-PDF live preview with HMR (guarded by NODE_ENV) */}
+                  {import.meta && import.meta.env && import.meta.env.DEV ? (
+                    <Route 
+                      path="/dev/pdf-preview" 
+                      element={
+                        <ProtectedRoute>
+                          <DevPdfPreview />
+                        </ProtectedRoute>
+                      } 
+                    />
+                  ) : null}
                   
                   {/* Default route - redirect to employee selection */}
                   <Route path="/dashboard" element={<Navigate to={ROUTES.EMPLOYEE_SELECTION} replace />} />

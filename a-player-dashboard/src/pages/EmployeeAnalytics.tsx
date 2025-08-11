@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { fetchEmployeeData, fetchQuarters, fetchEvaluationScores, fetchQuarterlyTrendData, fetchEnhancedTrendData, fetchHistoricalEvaluationScores, fetchAvailableQuarters, generateAIMetaAnalysis, pollAnalysisCompletion, checkExistingAnalysis } from '../services/dataFetching';
 import { fetchCoreGroupAnalytics, checkCoreGroupDataAvailability } from '../services/coreGroupService';
 import { subscribeToEmployeeEvaluations, subscribeToQuarterlyScores, subscribeToEvaluationCycles, realtimeManager } from '../services/realtimeService';
-import { LoadingSpinner, ErrorMessage, Card, RadarChart, ClusteredBarChart, HistoricalClusteredBarChart, TrendLineChart, ChartSkeleton, NoEvaluationData, Breadcrumb, useBreadcrumbs, KeyboardShortcuts, PDFViewer, DownloadAnalyticsButton, EmployeeProfile, QuarterlyNotes, TopAnalyticsGrid, CoreGroupAnalysisTabs } from '../components/ui';
+import { LoadingSpinner, ErrorMessage, Card, RadarChart, ClusteredBarChart, HistoricalClusteredBarChart, TrendLineChart, ChartSkeleton, NoEvaluationData, Breadcrumb, useBreadcrumbs, KeyboardShortcuts, PDFViewer, DownloadAnalyticsButton, EmployeeProfile, QuarterlyNotes, TopAnalyticsGrid, CoreGroupAnalysisTabs, GeneratePDFButton } from '../components/ui';
 import { useNavigation, useKeyboardNavigation } from '../contexts/NavigationContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useChartHeight } from '../utils/useResponsive';
@@ -709,6 +709,19 @@ export const EmployeeAnalytics: React.FC = () => {
                   disabled={!employee || loading}
                 />
               </div>
+
+              {/* Generate PDF Report Button */}
+              <div className="no-print">
+                <label className="block text-sm font-medium text-secondary-700 mb-1 opacity-0">
+                  PDF Report
+                </label>
+                <GeneratePDFButton
+                  employee={employee!}
+                  selectedQuarter={selectedQuarter}
+                  quarterName={selectedQuarterInfo?.name || 'Current Quarter'}
+                  disabled={!employee || !selectedQuarter || loading}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -815,7 +828,7 @@ export const EmployeeAnalytics: React.FC = () => {
           </Card>
 
           {/* Trend Analysis */}
-          <Card className="chart-container">
+          <Card className="chart-container trend-chart-container">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-secondary-800 chart-title">Performance Trend</h2>
               {dataLoading && <LoadingSpinner size="sm" />}
@@ -831,7 +844,7 @@ export const EmployeeAnalytics: React.FC = () => {
           </Card>
 
           {/* Historical Comparison */}
-          <Card className="chart-container">
+          <Card className="chart-container historical-chart-container">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-secondary-800 chart-title">Historical Comparison</h2>
               {historicalLoading && <LoadingSpinner size="sm" />}
@@ -934,6 +947,8 @@ export const EmployeeAnalytics: React.FC = () => {
           />
         </Card>
         </div>
+
+
       </main>
       
       {/* Keyboard Shortcuts Helper */}

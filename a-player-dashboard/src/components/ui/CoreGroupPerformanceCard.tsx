@@ -98,7 +98,7 @@ export const CoreGroupPerformanceCard: React.FC<CoreGroupPerformanceCardProps> =
   ) / 3;
 
   return (
-    <Card className={`${className}`}>
+    <Card className={`core-group-performance-card ${className}`}>
       {/* Card Header */}
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-secondary-800 mb-2">
