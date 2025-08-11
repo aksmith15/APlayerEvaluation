@@ -4,11 +4,11 @@
  */
 
 import { supabase } from './supabase';
-import { fetchCoreGroupAnalytics, fetchCompetenceAnalysis, fetchCharacterAnalysis, fetchCuriosityAnalysis } from './coreGroupService';
+import { fetchCompetenceAnalysis, fetchCharacterAnalysis, fetchCuriosityAnalysis } from './coreGroupService';
 import { fetchPersonaClassification } from './personaService';
 import { getSubmissionCount } from './submissionCountService';
 import type { Person } from '../types/database';
-import type { CoreGroupAnalyticsResponse, PersonaClassification, DetailedCoreGroupAnalysis } from '../types/evaluation';
+import type { PersonaClassification, DetailedCoreGroupAnalysis } from '../types/evaluation';
 
 export interface CoreGroupScore {
   core_group: string;

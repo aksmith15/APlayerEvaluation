@@ -6,7 +6,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import { PageWrapper } from '../../components/pdf';
-import { COLORS, TYPOGRAPHY, LAYOUT, getFontWeight } from '../../lib/theme';
+import { COLORS, LAYOUT, getFontWeight } from '../../lib/theme';
 import { profileDescriptions, DEFAULT_MISSING_PROFILE_MESSAGE } from './profileDescriptions';
 import type { PDFEmployeeData } from '../../services/pdfDataService';
 import type { AIReviewOut } from '../../services/aiReviewService';

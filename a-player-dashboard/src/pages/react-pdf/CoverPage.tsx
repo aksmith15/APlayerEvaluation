@@ -110,31 +110,21 @@ export const CoverPage: React.FC<CoverPageProps> = ({ data, quarterName }) => {
     }
   });
 
-  // Calculate ratings using the same logic as legacy system
+  // Calculate simple evaluator averages for display
   const calculateOverallRatings = (scores: any[]) => {
     if (!scores || scores.length === 0) {
-      return { managerRating: 0, peerRating: 0, selfRating: 0, finalScore: 0 };
+      return { managerRating: 0, peerRating: 0, selfRating: 0 };
     }
-
-    let managerSum = 0, peerSum = 0, selfSum = 0;
-    let managerCount = 0, peerCount = 0, selfCount = 0;
-
-    scores.forEach(score => {
-      if (score.manager_score) { managerSum += score.manager_score; managerCount++; }
-      if (score.peer_score) { peerSum += score.peer_score; peerCount++; }
-      if (score.self_score) { selfSum += score.self_score; selfCount++; }
-    });
-
-    const managerRating = managerCount > 0 ? managerSum / managerCount : 0;
-    const peerRating = peerCount > 0 ? peerSum / peerCount : 0;
-    const selfRating = selfCount > 0 ? selfSum / selfCount : 0;
-    
-    // Weighted average: Manager 55%, Peer 35%, Self 10%
-    const finalScore = (managerRating * 0.55) + (peerRating * 0.35) + (selfRating * 0.10);
-
-    return { managerRating, peerRating, selfRating, finalScore };
+    const mgrVals = scores.map((s: any) => s.manager_avg_score || 0);
+    const peerVals = scores.map((s: any) => s.peer_avg_score || 0);
+    const selfVals = scores.map((s: any) => s.self_avg_score || 0);
+    const avg = (arr: number[]) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+    return {
+      managerRating: avg(mgrVals),
+      peerRating: avg(peerVals),
+      selfRating: avg(selfVals)
+    };
   };
-
   const { managerRating, peerRating, selfRating } = calculateOverallRatings(data.coreGroupScores || []);
 
   return (
@@ -153,7 +143,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ data, quarterName }) => {
               {data.employee.name || 'Unknown Employee'}
             </Text>
             <Text style={styles.employeeTitle}>
-              {data.employee.title || data.employee.department || 'No Title'}
+              {data.employee.department || data.employee.role || 'No Title'}
             </Text>
             <Text style={styles.completedDate}>
               Completed {new Date().toLocaleDateString('en-US', { 
@@ -164,6 +154,15 @@ export const CoverPage: React.FC<CoverPageProps> = ({ data, quarterName }) => {
             </Text>
             <Text style={styles.employeeEmail}>
               {data.employee.email || 'No email'}
+            </Text>
+            <Text style={styles.employeeEmail}>
+              Quarter: {quarterName}
+            </Text>
+            <Text style={styles.employeeEmail}>
+              Category: {categoryText}
+            </Text>
+            <Text style={styles.employeeEmail}>
+              M/P/S: {managerRating.toFixed(1)} / {peerRating.toFixed(1)} / {selfRating.toFixed(1)}
             </Text>
           </View>
         </View>

@@ -635,7 +635,7 @@ function transformAttributeScores(scores: any[]): DetailedAttributeScore[] {
 /**
  * Generate competence-specific insights
  */
-function generateCompetenceInsights(scores: any[], responses: any[]): CoreGroupInsight[] {
+function generateCompetenceInsights(scores: any[]): CoreGroupInsight[] {
   const insights: CoreGroupInsight[] = [];
 
   // Analyze strengths (scores >= 8.0)
@@ -688,7 +688,7 @@ function generateCompetenceInsights(scores: any[], responses: any[]): CoreGroupI
 /**
  * Generate character-specific insights
  */
-function generateCharacterInsights(scores: any[], responses: any[]): CoreGroupInsight[] {
+function generateCharacterInsights(scores: any[]): CoreGroupInsight[] {
   const insights: CoreGroupInsight[] = [];
 
   // Analyze leadership strengths
@@ -738,7 +738,7 @@ function generateCharacterInsights(scores: any[], responses: any[]): CoreGroupIn
 /**
  * Generate curiosity-specific insights
  */
-function generateCuriosityInsights(scores: any[], responses: any[]): CoreGroupInsight[] {
+function generateCuriosityInsights(scores: any[]): CoreGroupInsight[] {
   const insights: CoreGroupInsight[] = [];
 
   // Analyze innovation strengths

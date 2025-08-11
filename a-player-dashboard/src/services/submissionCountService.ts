@@ -136,8 +136,7 @@ export const getSimpleSubmissionCount = async (
  */
 export const getSubmissionCount = async (
   evaluateeId: string, 
-  quarterId: string,
-  coreGroup?: string
+  quarterId: string
 ): Promise<number> => {
   try {
     const counts = await getSubmissionCounts(evaluateeId, quarterId);
