@@ -422,7 +422,7 @@ export const fetchCompetenceAnalysis = async (
     const submissionIds = Array.from(new Set((responses || []).map((r: any) => r.submission_id))).filter(Boolean) as string[];
 
     // Generate insights using the existing algorithm
-    const insights = generateCompetenceInsights(attributeScores || [], responses || []);
+    const insights = generateCompetenceInsights(attributeScores || []);
 
     return {
       coreGroup: 'competence',
@@ -502,7 +502,7 @@ export const fetchCharacterAnalysis = async (
     const submissionIds = Array.from(new Set((responses || []).map((r: any) => r.submission_id))).filter(Boolean) as string[];
 
     // Generate insights using the existing algorithm
-    const insights = generateCharacterInsights(attributeScores || [], responses || []);
+    const insights = generateCharacterInsights(attributeScores || []);
 
     return {
       coreGroup: 'character',
@@ -582,7 +582,7 @@ export const fetchCuriosityAnalysis = async (
     const submissionIds = Array.from(new Set((responses || []).map((r: any) => r.submission_id))).filter(Boolean) as string[];
 
     // Generate insights using the existing algorithm
-    const insights = generateCuriosityInsights(attributeScores || [], responses || []);
+    const insights = generateCuriosityInsights(attributeScores || []);
 
     return {
       coreGroup: 'curiosity',

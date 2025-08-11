@@ -30,11 +30,7 @@ interface GenerateEmployeeReportOptions {
 
 // COLORS imported from theme.ts
 
-const CATEGORY_DESCRIPTIONS = {
-  competence: "Execution & Delivery Excellence",
-  character: "Leadership & Interpersonal Skills", 
-  curiosity: "Growth & Innovation Mindset"
-};
+// Category descriptions kept in documentation; not used directly in generator
 
 // hexToRgb imported from theme.ts
 

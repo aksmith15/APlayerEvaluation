@@ -176,7 +176,7 @@ export const fetchPDFEmployeeData = async (
 
     if (coreGroupData && coreGroupData.length > 0) {
       for (const scoreData of coreGroupData) {
-        const submissionCount = await getSubmissionCount(employeeId, quarterId, scoreData.core_group);
+        const submissionCount = await getSubmissionCount(employeeId, quarterId);
         
         coreGroupScores.push({
           core_group: scoreData.core_group,
@@ -204,7 +204,8 @@ export const fetchPDFEmployeeData = async (
     // Fetch persona classification
     let personaClassification: PersonaClassification | null = null;
     try {
-      personaClassification = await fetchPersonaClassification(employeeId, quarterId);
+      const personaResponse = await fetchPersonaClassification(employeeId, quarterId);
+      personaClassification = personaResponse?.persona ?? null;
     } catch (err) {
       console.warn('Failed to fetch persona classification:', err);
     }
