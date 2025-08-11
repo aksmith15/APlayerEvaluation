@@ -242,78 +242,7 @@ const drawCompactClusteredBarChart = (
   pdf.text('M/P/S', x + 2, y + 5);
 };
 
-/**
- * Draw compact score summary cards  
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const drawCompactScoreSummaryCards = (
-  pdf: jsPDF,
-  scores: CoreGroupScore[],
-  x: number,
-  y: number,
-  width: number,
-  height: number = 25
-): void => {
-  const cardWidth = width / 3 - 8;
-  const categoryColors = [COLORS.competence, COLORS.character, COLORS.curiosity];
-  
-  scores.forEach((score, index) => {
-    const cardX = x + index * (cardWidth + 12);
-    drawScoreCard(pdf, score.weighted_score, ['COMP', 'CHAR', 'CUR'][index], cardX, y, cardWidth, height);
-  });
-};
-
-/**
- * Reusable component: Draw compact bar chart
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const drawCompactBarChart = (
-  pdf: jsPDF,
-  data: { label: string; value: number; color?: string }[],
-  x: number,
-  y: number,
-  width: number,
-  height: number = 50
-): void => {
-  const barWidth = 8;
-  const maxValue = 10;
-  const barSpacing = (width - (data.length * barWidth)) / (data.length + 1);
-  
-  // Draw background
-  const bgColor = hexToRgb(COLORS.ui.surface);
-  pdf.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
-  pdf.rect(x, y, width, height, 'F');
-  
-  // Draw grid lines
-  const gridColor = hexToRgb(COLORS.ui.surfaceAlt);
-  pdf.setDrawColor(gridColor[0], gridColor[1], gridColor[2]);
-  pdf.setLineWidth(0.1);
-  for (let i = 0; i <= 10; i += 2) {
-    const gridY = y + height - (i / maxValue) * height;
-    pdf.line(x, gridY, x + width, gridY);
-  }
-  
-  // Draw bars
-  data.forEach((item, index) => {
-    const barX = x + barSpacing + index * (barWidth + barSpacing);
-    const barHeight = (item.value / maxValue) * height;
-    const barY = y + height - barHeight;
-    
-    const barColor = hexToRgb(item.color || getPerformanceColor(item.value));
-    pdf.setFillColor(barColor[0], barColor[1], barColor[2]);
-    pdf.rect(barX, barY, barWidth, barHeight, 'F');
-    
-    // Value label
-    applyTypography(pdf, 'caption');
-    const textColor = hexToRgb(COLORS.ui.textPrimary);
-    pdf.setTextColor(textColor[0], textColor[1], textColor[2]);
-    pdf.text(item.value.toFixed(1), barX + barWidth/2 - 3, barY - 2);
-    
-    // Label
-    applyTypography(pdf, 'caption');
-    pdf.text(item.label, barX + barWidth/2 - 8, y + height + 8);
-  });
-};
+// Removed unused helper functions: drawCompactScoreSummaryCards and drawCompactBarChart
 
 /**
  * Reusable component: Draw score card
@@ -354,58 +283,7 @@ const drawScoreCard = (
   pdf.text(label, x + (width - labelWidth) / 2, y + height - 3);
 };
 
-/**
- * Reusable component: Draw data table
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const drawDataTable = (
-  pdf: jsPDF,
-  headers: string[],
-  rows: string[][],
-  x: number,
-  y: number,
-  width: number,
-  rowHeight: number = 7
-): void => {
-  const headerHeight = 8;
-  const columnWidths = headers.map(() => width / headers.length);
-  
-  // Header background
-  const headerColor = hexToRgb(COLORS.ui.surfaceAlt);
-  pdf.setFillColor(headerColor[0], headerColor[1], headerColor[2]);
-  pdf.rect(x, y, width, headerHeight, 'F');
-  
-  // Header text
-  applyTypography(pdf, 'caption');
-  const textColor = hexToRgb(COLORS.ui.textPrimary);
-  pdf.setTextColor(textColor[0], textColor[1], textColor[2]);
-  
-  let headerX = x + 2;
-  headers.forEach((header, index) => {
-    pdf.text(header, headerX, y + 6);
-    headerX += columnWidths[index];
-  });
-  
-  // Rows
-  rows.forEach((row, rowIndex) => {
-    const rowY = y + headerHeight + (rowIndex * rowHeight);
-    
-    // Alternating background
-    if (rowIndex % 2 === 0) {
-      const altColor = hexToRgb('#fafafa');
-      pdf.setFillColor(altColor[0], altColor[1], altColor[2]);
-      pdf.rect(x, rowY, width, rowHeight, 'F');
-    }
-    
-    // Row data
-    applyTypography(pdf, 'caption');
-    let cellX = x + 2;
-    row.forEach((cell, cellIndex) => {
-      pdf.text(cell, cellX, rowY + 5);
-      cellX += columnWidths[cellIndex];
-    });
-  });
-};
+// Removed unused helper function: drawDataTable
 
 /**
  * Reusable component: Draw insight box
