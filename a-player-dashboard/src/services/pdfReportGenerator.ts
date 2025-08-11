@@ -244,44 +244,7 @@ const drawCompactClusteredBarChart = (
 
 // Removed unused helper functions: drawCompactScoreSummaryCards and drawCompactBarChart
 
-/**
- * Reusable component: Draw score card
- */
-const drawScoreCard = (
-  pdf: jsPDF,
-  score: number,
-  label: string,
-  x: number,
-  y: number,
-  width: number,
-  height: number = 18 // Reduced default from 20
-): void => {
-  // Card background
-  const bgColor = hexToRgb(COLORS.ui.background);
-  pdf.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
-  pdf.roundedRect(x, y, width, height, 2, 2, 'F');
-  
-  // Border based on performance
-  const borderColor = hexToRgb(getPerformanceColor(score));
-  pdf.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
-  pdf.setLineWidth(0.5);
-  pdf.roundedRect(x, y, width, height, 2, 2, 'S');
-  
-  // Score - adjust for smaller cards
-  applyTypography(pdf, 'dataSmall'); // Use 10pt instead of 14pt for score
-  const scoreColor = hexToRgb(COLORS.ui.textPrimary);
-  pdf.setTextColor(scoreColor[0], scoreColor[1], scoreColor[2]);
-  const scoreText = score.toFixed(1);
-  const scoreWidth = pdf.getTextWidth(scoreText);
-  pdf.text(scoreText, x + (width - scoreWidth) / 2, y + height/2 + 1);
-  
-  // Label with smaller font
-  applyTypography(pdf, 'caption'); // 7pt
-  const labelColor = hexToRgb(COLORS.ui.textSecondary);
-  pdf.setTextColor(labelColor[0], labelColor[1], labelColor[2]);
-  const labelWidth = pdf.getTextWidth(label);
-  pdf.text(label, x + (width - labelWidth) / 2, y + height - 3);
-};
+// Removed unused helper function: drawScoreCard
 
 // Removed unused helper function: drawDataTable
 
