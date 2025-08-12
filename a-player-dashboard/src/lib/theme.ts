@@ -1,6 +1,6 @@
 /**
  * PDF Theme System
- * Extracted from pdfReportGenerator.ts for reuse across legacy and React-PDF renderers
+ * Unified theme system for React-PDF renderers with color psychology optimizations
  */
 
 // Standardized Typography Scale
@@ -33,11 +33,52 @@ export const LAYOUT = {
 
 // Unified Color System
 export const COLORS = {
-  // Core identity colors - The Culture Base brand teal gradient
+  // Core identity colors - Color psychology optimized for each group
   primary: '#14B8A6',        // The Culture Base primary teal
-  competence: '#0F766E',      // Darkest teal - most foundational
-  character: '#14B8A6',       // Medium teal - interpersonal skills
-  curiosity: '#2DD4BF',       // Lightest teal - growth mindset
+  competence: '#1E88E5',      // Blue - Trust, reliability, competence
+  character: '#D4AF37',       // Gold - Leadership, wisdom, character
+  curiosity: '#2E7D32',       // Green - Growth, learning, curiosity
+  
+  // Sub-colors for each core group for attribute differentiation
+  competenceSubColors: {
+    dark: '#0D1B2A',        // Dark navy - Deep competence
+    medium: '#1565C0',      // Medium blue - Core competence
+    light: '#4682B4'        // Steel blue - Developing competence
+  },
+  characterSubColors: {
+    dark: '#B8860B',        // Dark goldenrod - Strong character
+    medium: '#FFBF00',      // Amber - Core character
+    light: '#FFA500'        // Orange - Emerging character
+  },
+  curiositySubColors: {
+    darkest: '#50C878',     // Emerald - Deep curiosity
+    medium: '#A8E10C',      // Lime - Active curiosity  
+    light: '#008080',       // Teal - Learning curiosity
+    lightest: '#DFFF00'     // Electric lime - Bright curiosity
+  },
+
+  // Specific attribute color mapping using color psychology
+  attributeColors: {
+    // Competence - Blue Palette (Harmonized) - trust, professionalism, stability
+    'quality of work': '#243B53',      // Indigo Navy - Deep but softer than previous
+    'quality_of_work': '#243B53',      // Alternative underscore format
+    'accountability': '#1E6091',       // Sapphire Blue - Strong, classic blue with depth
+    'reliability': '#4A6FA5',          // Slate Blue - Calming mid-tone blue
+    
+    // Character - Warm Gold Palette (integrity, optimism, leadership)
+    'leadership': '#B8860B',           // Rich Gold - authority, inspiration
+    'teamwork': '#FFBF00',             // Warm Amber - inclusiveness, positive energy
+    'communication': '#FFA500',        // Golden Orange - openness, clarity
+    
+    // Curiosity - Harmonized Green/Blue-Green Palette (growth, adaptability, innovation)
+    'adaptability': '#4B8B3B',         // Olive Green - Warm, grounded green
+    'continuous improvement': '#7BB661', // Spring Green - Fresh but not neon
+    'continuous_improvement': '#7BB661', // Alternative underscore format
+    'problem solving': '#2A8C82',      // Deep Teal - Balanced teal, less saturated
+    'problem_solving': '#2A8C82',      // Alternative underscore format
+    'taking initiative': '#C5D86D',   // Soft Chartreuse - Muted yellow-green for subtle energy
+    'taking_initiative': '#C5D86D'    // Alternative underscore format
+  },
   
   // Evaluator colors - clearly differentiated
   evaluators: {
@@ -97,6 +138,109 @@ export const getEvaluatorColor = (evaluator: 'manager' | 'peer' | 'self'): strin
 };
 
 /**
+ * Get core group color
+ */
+export const getCoreGroupColor = (coreGroup: 'competence' | 'character' | 'curiosity'): string => {
+  return COLORS[coreGroup];
+};
+
+/**
+ * Get sub-color for a specific core group and intensity
+ */
+export const getCoreGroupSubColor = (
+  coreGroup: 'competence' | 'character' | 'curiosity', 
+  intensity: string
+): string => {
+  switch (coreGroup) {
+    case 'competence':
+      return COLORS.competenceSubColors[intensity as keyof typeof COLORS.competenceSubColors] || COLORS.competence;
+    case 'character':
+      return COLORS.characterSubColors[intensity as keyof typeof COLORS.characterSubColors] || COLORS.character;
+    case 'curiosity':
+      return COLORS.curiositySubColors[intensity as keyof typeof COLORS.curiositySubColors] || COLORS.curiosity;
+    default:
+      return COLORS.primary;
+  }
+};
+
+/**
+ * Get an array of sub-colors for a core group (for attribute differentiation)
+ */
+export const getCoreGroupSubColorArray = (coreGroup: 'competence' | 'character' | 'curiosity'): string[] => {
+  switch (coreGroup) {
+    case 'competence':
+      return [COLORS.competenceSubColors.dark, COLORS.competenceSubColors.medium, COLORS.competenceSubColors.light];
+    case 'character':
+      return [COLORS.characterSubColors.dark, COLORS.characterSubColors.medium, COLORS.characterSubColors.light];
+    case 'curiosity':
+      return [COLORS.curiositySubColors.darkest, COLORS.curiositySubColors.medium, COLORS.curiositySubColors.light, COLORS.curiositySubColors.lightest];
+    default:
+      return [COLORS.primary];
+  }
+};
+
+/**
+ * Get core group color for an attribute (simplified color system)
+ * Maps attributes directly to their core group colors: Competence (Blue), Character (Gold), Curiosity (Green)
+ */
+export const getAttributeColor = (attributeName: string): string => {
+  // Normalize the attribute name (lowercase, handle spaces and underscores)
+  const normalizedName = attributeName.toLowerCase().trim()
+    .replace(/\s+/g, ' ')  // normalize spaces
+    .replace(/_/g, ' ');   // replace underscores with spaces
+
+  // Competence attributes (Blue)
+  const competenceAttributes = [
+    'quality of work',
+    'accountability', 
+    'accountability for action',
+    'reliability'
+  ];
+
+  // Character attributes (Gold)
+  const characterAttributes = [
+    'leadership',
+    'teamwork', 
+    'communication',
+    'communication skills'
+  ];
+
+  // Curiosity attributes (Green)
+  const curiosityAttributes = [
+    'problem solving',
+    'problem solving ability',
+    'adaptability',
+    'taking initiative',
+    'continuous improvement'
+  ];
+
+  // Check for exact matches first
+  if (competenceAttributes.includes(normalizedName)) {
+    return COLORS.competence;
+  }
+  if (characterAttributes.includes(normalizedName)) {
+    return COLORS.character;
+  }
+  if (curiosityAttributes.includes(normalizedName)) {
+    return COLORS.curiosity;
+  }
+
+  // Fallback based on keywords for any variations
+  if (normalizedName.includes('quality') || normalizedName.includes('accountability') || normalizedName.includes('reliability')) {
+    return COLORS.competence;
+  }
+  if (normalizedName.includes('leadership') || normalizedName.includes('teamwork') || normalizedName.includes('communication')) {
+    return COLORS.character;
+  }
+  if (normalizedName.includes('adaptability') || normalizedName.includes('improvement') || normalizedName.includes('problem') || normalizedName.includes('initiative')) {
+    return COLORS.curiosity;
+  }
+  
+  // Final fallback to primary color
+  return COLORS.primary;
+};
+
+/**
  * Truncate text helper
  */
 export const truncateText = (text: string, maxLength: number): string => {
@@ -128,7 +272,7 @@ export const wrapText = (pdf: any, text: string, maxWidth: number): string[] => 
   return lines;
 };
 
-// Re-export calculateLetterGrade from pdfDataService to maintain single source of truth
+// Re-export calculateLetterGrade from pdfDataService
 export { calculateLetterGrade } from '../services/pdfDataService';
 
 /**

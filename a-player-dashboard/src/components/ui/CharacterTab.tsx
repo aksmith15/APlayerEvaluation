@@ -120,7 +120,7 @@ export const CharacterTab: React.FC<CharacterTabProps> = ({
         <div className="mt-4 flex flex-wrap gap-4 text-sm">
           {data.attributes.map(attr => (
             <div key={attr.attributeName} className="flex items-center">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+              <div className="w-2 h-2 rounded-full mr-2" style={{backgroundColor: '#D4AF37'}}></div>
               <span className="text-secondary-600">{attr.attributeName}</span>
             </div>
           ))}

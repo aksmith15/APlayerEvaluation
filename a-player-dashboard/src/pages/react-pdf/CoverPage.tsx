@@ -4,10 +4,11 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet } from '@react-pdf/renderer';
+import { View, Text, StyleSheet, Image } from '@react-pdf/renderer';
 import { PageWrapper } from '../../components/pdf';
 import { COLORS, TYPOGRAPHY, LAYOUT, getPerformanceColor, getFontWeight } from '../../lib/theme';
 import type { PDFEmployeeData } from '../../services/pdfDataService';
+import logoImage from '../../assets/logos/culture-base-logo.png';
 
 interface CoverPageProps {
   data: PDFEmployeeData;
@@ -21,35 +22,49 @@ export const CoverPage: React.FC<CoverPageProps> = ({ data, quarterName }) => {
                       overallScore >= 7.0 ? 'B-Player' : 
                       overallScore >= 6.0 ? 'C-Player' : 'D-Player';
 
+  // Logo configuration - currently using text fallback
+  // TODO: Implement proper logo import when PNG file is available
+  const hasLogo = true; // Will be enabled when logo is properly imported
+
   const styles = StyleSheet.create({
     container: {
       width: '100%',
       backgroundColor: COLORS.ui.background,
       justifyContent: 'center',
       flex: 1,
-      paddingLeft: 120
+      paddingLeft: 80
     },
     logoSection: {
       alignItems: 'flex-start',
-      marginBottom: 40
+      marginBottom: 12
+    },
+    logoImage: {
+      width: 200,
+      height: 60,
+      objectFit: 'contain',
+      marginLeft: -20
     },
     logoText: {
       fontSize: 20,
       fontWeight: 'bold',
       color: COLORS.ui.textPrimary,
-      marginBottom: 4
+      marginBottom: 4,
+      textAlign: 'center'
     },
     logoSubtext: {
       fontSize: 10,
       color: COLORS.ui.textSecondary,
-      letterSpacing: 0.5
+      letterSpacing: 0.5,
+      marginTop: 4,
+      textAlign: 'center'
     },
     header: {
       alignItems: 'flex-start',
-      marginBottom: 40
+      marginBottom: 20
     },
     employeeInfo: {
-      alignItems: 'flex-start'
+      alignItems: 'flex-start',
+      marginTop: 8
     },
     employeeName: {
       fontSize: TYPOGRAPHY.pageTitle.size,
@@ -64,21 +79,23 @@ export const CoverPage: React.FC<CoverPageProps> = ({ data, quarterName }) => {
     employeeTitle: {
       fontSize: TYPOGRAPHY.body.size,
       color: COLORS.ui.textSecondary,
-      marginBottom: 4
+      marginBottom: 8
     },
     completedDate: {
       fontSize: TYPOGRAPHY.body.size,
       color: COLORS.ui.textSecondary,
-      marginTop: 6
+      marginTop: 12,
+      marginBottom: 4
     },
     employeeEmail: {
       fontSize: TYPOGRAPHY.body.size,
       color: COLORS.ui.textSecondary,
-      marginBottom: 2
+      marginBottom: 4
     },
     employeePhone: {
       fontSize: TYPOGRAPHY.body.size,
-      color: COLORS.ui.textSecondary
+      color: COLORS.ui.textSecondary,
+      marginBottom: 6
     },
     performanceSection: {
       marginBottom: LAYOUT.sectionSpacing * 2
@@ -132,7 +149,14 @@ export const CoverPage: React.FC<CoverPageProps> = ({ data, quarterName }) => {
       <View style={styles.container}>
         {/* Logo and Branding */}
         <View style={styles.logoSection}>
-          <Text style={styles.logoText}>The Culture Base</Text>
+          {hasLogo ? (
+            <Image 
+              src={logoImage}
+              style={styles.logoImage}
+            />
+          ) : (
+            <Text style={styles.logoText}>The Culture Base</Text>
+          )}
           <Text style={styles.logoSubtext}>A-Player Evaluation</Text>
         </View>
 

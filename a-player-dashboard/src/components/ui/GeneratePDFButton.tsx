@@ -1,16 +1,14 @@
 /**
  * Generate PDF Button Component
  * Provides PDF report generation functionality for employee evaluations
- * Integrates with comprehensive PDFReportGenerator service
+ * Uses React-PDF renderer for modern, styled evaluation reports
  */
 
 import React, { useState } from 'react';
 import { Button } from './Button';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ErrorMessage } from './ErrorMessage';
-import { generateEmployeeReport } from '../../services/pdfReportGenerator';
 import { generateEmployeeReportReact } from '../../services/reactPdfBuilder';
-import { getFeatureFlags } from '../../lib/featureFlags';
 import type { Person } from '../../types/database';
 
 interface GeneratePDFButtonProps {
@@ -39,25 +37,12 @@ export const GeneratePDFButton: React.FC<GeneratePDFButtonProps> = ({
       // Small delay to allow UI to update and show loading state
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Feature flag integration - non-breaking A/B testing
-      const currentFlags = getFeatureFlags();
-      console.log('🎛️ PDF Generation flags:', currentFlags);
-      
-      if (currentFlags.useReactPdf) {
-        console.log('🚀 Using React-PDF renderer');
-        await generateEmployeeReportReact({
-          employee,
-          selectedQuarter,
-          quarterName
-        });
-      } else {
-        console.log('📄 Using legacy jsPDF renderer');
-        await generateEmployeeReport({
-          employee,
-          selectedQuarter,
-          quarterName
-        });
-      }
+      console.log('🚀 Generating React-PDF report...');
+      await generateEmployeeReportReact({
+        employee,
+        selectedQuarter,
+        quarterName
+      });
 
       console.log('✅ PDF report generated successfully');
 

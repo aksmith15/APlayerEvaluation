@@ -6,7 +6,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import { PageWrapper, ValueBar } from '../../components/pdf';
-import { COLORS, TYPOGRAPHY, LAYOUT, getFontWeight } from '../../lib/theme';
+import { COLORS, TYPOGRAPHY, LAYOUT, getFontWeight, getAttributeColor } from '../../lib/theme';
 import type { PDFEmployeeData } from '../../services/pdfDataService';
 
 interface SummaryPageProps {
@@ -79,21 +79,21 @@ export const SummaryPage: React.FC<SummaryPageProps> = ({
       borderLeft: '3px solid #dee2e6'
     },
     competenceSection: {
-      backgroundColor: '#F0FDFA',
+      backgroundColor: '#E3F2FD',  // Light blue background for competence
       padding: LAYOUT.elementSpacing * 0.7,
       marginBottom: LAYOUT.elementSpacing * 0.8,
       borderRadius: 4,
       borderLeft: `3px solid ${COLORS.competence}`
     },
     characterSection: {
-      backgroundColor: '#F0FDFA',
+      backgroundColor: '#FFF8E1',  // Light gold background for character
       padding: LAYOUT.elementSpacing * 0.7,
       marginBottom: LAYOUT.elementSpacing * 0.8,
       borderRadius: 4,
       borderLeft: `3px solid ${COLORS.character}`
     },
     curiositySection: {
-      backgroundColor: '#F0FDFA',
+      backgroundColor: '#E8F5E8',  // Light green background for curiosity
       padding: LAYOUT.elementSpacing * 0.7,
       marginBottom: LAYOUT.elementSpacing * 0.8,
       borderRadius: 4,
@@ -102,7 +102,7 @@ export const SummaryPage: React.FC<SummaryPageProps> = ({
     coreGroupTitle: {
       fontSize: TYPOGRAPHY.body.size + 1,
       fontWeight: getFontWeight('bold'),
-      color: '#0F766E',
+      color: COLORS.ui.textPrimary,  // Use standardized text color
       marginBottom: LAYOUT.elementSpacing * 0.8,
       textTransform: 'uppercase',
       letterSpacing: 0.5
@@ -128,12 +128,12 @@ export const SummaryPage: React.FC<SummaryPageProps> = ({
     scoreLabel: {
       fontSize: TYPOGRAPHY.body.size - 2,
       fontWeight: getFontWeight('bold'),
-      color: '#0F766E',
-      backgroundColor: '#F0FDFA',
+      color: COLORS.ui.textPrimary,
+      backgroundColor: COLORS.ui.surface,
       padding: '1 3',
       borderRadius: 2,
       marginLeft: LAYOUT.elementSpacing * 0.5,
-      border: '1px solid #B2F5EA'
+      border: `1px solid ${COLORS.ui.border}`
     },
     progressBarContainer: {
       position: 'relative',
@@ -238,7 +238,7 @@ export const SummaryPage: React.FC<SummaryPageProps> = ({
                 maxValue={10}
                 width={LAYOUT.contentWidth - 200}
                 height={12}
-                color={COLORS.competence}
+                color={getAttributeColor('quality of work')}
               />
             </View>
           </View>
@@ -254,7 +254,7 @@ export const SummaryPage: React.FC<SummaryPageProps> = ({
                 maxValue={10}
                 width={LAYOUT.contentWidth - 200}
                 height={12}
-                color={COLORS.competence}
+                color={getAttributeColor('accountability')}
               />
             </View>
           </View>
@@ -270,7 +270,7 @@ export const SummaryPage: React.FC<SummaryPageProps> = ({
                 maxValue={10}
                 width={LAYOUT.contentWidth - 200}
                 height={12}
-                color={COLORS.competence}
+                color={getAttributeColor('reliability')}
               />
             </View>
           </View>
@@ -291,7 +291,7 @@ export const SummaryPage: React.FC<SummaryPageProps> = ({
                 maxValue={10}
                 width={LAYOUT.contentWidth - 200}
                 height={12}
-                color={COLORS.character}
+                color={getAttributeColor('leadership')}
               />
             </View>
           </View>
@@ -307,7 +307,7 @@ export const SummaryPage: React.FC<SummaryPageProps> = ({
                 maxValue={10}
                 width={LAYOUT.contentWidth - 200}
                 height={12}
-                color={COLORS.character}
+                color={getAttributeColor('teamwork')}
               />
             </View>
           </View>
@@ -323,7 +323,7 @@ export const SummaryPage: React.FC<SummaryPageProps> = ({
                 maxValue={10}
                 width={LAYOUT.contentWidth - 200}
                 height={12}
-                color={COLORS.character}
+                color={getAttributeColor('communication')}
               />
             </View>
           </View>
@@ -344,7 +344,7 @@ export const SummaryPage: React.FC<SummaryPageProps> = ({
                 maxValue={10}
                 width={LAYOUT.contentWidth - 200}
                 height={12}
-                color={COLORS.curiosity}
+                color={getAttributeColor('adaptability')}
               />
             </View>
           </View>
@@ -360,7 +360,7 @@ export const SummaryPage: React.FC<SummaryPageProps> = ({
                 maxValue={10}
                 width={LAYOUT.contentWidth - 200}
                 height={12}
-                color={COLORS.curiosity}
+                color={getAttributeColor('continuous improvement')}
               />
             </View>
           </View>
@@ -376,7 +376,7 @@ export const SummaryPage: React.FC<SummaryPageProps> = ({
                 maxValue={10}
                 width={LAYOUT.contentWidth - 200}
                 height={12}
-                color={COLORS.curiosity}
+                color={getAttributeColor('problem solving')}
               />
             </View>
           </View>
@@ -392,7 +392,7 @@ export const SummaryPage: React.FC<SummaryPageProps> = ({
                 maxValue={10}
                 width={LAYOUT.contentWidth - 200}
                 height={12}
-                color={COLORS.curiosity}
+                color={getAttributeColor('taking initiative')}
               />
             </View>
           </View>

@@ -1,17 +1,21 @@
 /**
  * React-PDF StrengthsPage Component (New unified Strengths section)
  * Replaces core-group breakdown pages. Shows attributes with weighted scores 8–10,
- * sorted alphabetically, maximum 2 pages.
+ * sorted by attribute weight (highest first), then by score, maximum 2 pages.
  */
 
 import React from 'react';
 import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import { PageWrapper, ValueBar } from '../../components/pdf';
-import { COLORS, TYPOGRAPHY, LAYOUT, getFontWeight } from '../../lib/theme';
+import { COLORS, TYPOGRAPHY, LAYOUT, getFontWeight, getAttributeColor } from '../../lib/theme';
+import { getDefaultCompanyWeights } from '../../services/attributeWeightsService';
+import { getInsightForAttribute } from '../../services/aiInsightsService';
 import type { PDFEmployeeData } from '../../services/pdfDataService';
+import type { AIInsightsResponse } from '../../services/aiInsightsService';
 
 interface StrengthsPageProps {
   data: PDFEmployeeData;
+  aiInsights?: AIInsightsResponse | null;
   pageNumber: number;
   totalPages: number;
   pageIndex: number; // 0-based index within the strengths section
@@ -22,10 +26,12 @@ type StrengthItem = {
   name: string;
   score: number;
   description: string;
+  coachingRecommendation?: string;
 };
 
 export const StrengthsPage: React.FC<StrengthsPageProps> = ({
   data,
+  aiInsights,
   pageNumber,
   totalPages,
   pageIndex,
@@ -66,8 +72,8 @@ export const StrengthsPage: React.FC<StrengthsPageProps> = ({
       marginBottom: LAYOUT.sectionSpacing
     },
     attributeBlock: {
-      marginBottom: LAYOUT.elementSpacing * 1.2,
-      paddingBottom: LAYOUT.elementSpacing * 0.6,
+      marginBottom: LAYOUT.elementSpacing * 1.5,
+      paddingBottom: LAYOUT.elementSpacing * 0.8,
       borderBottom: `1px solid ${COLORS.ui.border}`
     },
     firstRow: {
@@ -95,11 +101,26 @@ export const StrengthsPage: React.FC<StrengthsPageProps> = ({
       minWidth: 50,
       textAlign: 'right'
     },
-    description: {
+    strengthDescription: {
       fontSize: TYPOGRAPHY.body.size,
       color: COLORS.ui.textPrimary,
       lineHeight: LAYOUT.lineHeight.normal,
-      marginLeft: 10
+      marginLeft: 10,
+      marginBottom: 8
+    },
+    coachingSubheader: {
+      fontSize: TYPOGRAPHY.body.size - 1,
+      fontWeight: getFontWeight('bold'),
+      color: COLORS.performance.excellent,
+      marginLeft: 10,
+      marginBottom: 4
+    },
+    coachingRecommendation: {
+      fontSize: TYPOGRAPHY.body.size,
+      color: COLORS.ui.textPrimary,
+      lineHeight: LAYOUT.lineHeight.normal,
+      marginLeft: 10,
+      fontStyle: 'italic'
     },
     noDataText: {
       fontSize: TYPOGRAPHY.subsectionTitle.size,
@@ -127,6 +148,10 @@ export const StrengthsPage: React.FC<StrengthsPageProps> = ({
         if (score >= 8.0 && name) {
           const key = name.toLowerCase().replace(/\s+/g, ' ').trim();
           if (!seen.has(key)) {
+            // Get AI coaching recommendation
+            const aiInsight = getInsightForAttribute(name, aiInsights || undefined);
+            
+            // Use static templates for "what they're doing right"
             const template = DESCRIPTION_MAP[name] ||
               DESCRIPTION_MAP[name.replace(' Ability', '')] ||
               DESCRIPTION_MAP[name.replace(' for Action', '')] || '';
@@ -134,15 +159,43 @@ export const StrengthsPage: React.FC<StrengthsPageProps> = ({
               ? template.replace(/\{\{evaluatee\}\}/g, employeeName)
               : `${employeeName} consistently demonstrates excellence in ${name.toLowerCase()}.`;
 
-            items.push({ name, score, description });
+            items.push({ 
+              name, 
+              score, 
+              description,
+              coachingRecommendation: aiInsight || undefined
+            });
             seen.add(key);
           }
         }
       }
     }
 
-    // Sort alphabetically by attribute name
-    items.sort((a, b) => a.name.localeCompare(b.name));
+    // Sort by attribute weight (highest weight first), then by score
+    const attributeWeights = getDefaultCompanyWeights();
+    const weightMap = attributeWeights.reduce((map, item) => {
+      map[item.attribute_name] = item.weight;
+      return map;
+    }, {} as Record<string, number>);
+
+    items.sort((a, b) => {
+      const weightA = weightMap[a.name] || 1.0;
+      const weightB = weightMap[b.name] || 1.0;
+      
+      // Primary sort: by weight (highest first)
+      if (Math.abs(weightA - weightB) > 0.05) {
+        return weightB - weightA;
+      }
+      
+      // Secondary sort: by score (highest first)
+      if (Math.abs(a.score - b.score) > 0.1) {
+        return b.score - a.score;
+      }
+      
+      // Tertiary sort: alphabetical
+      return a.name.localeCompare(b.name);
+    });
+    
     return items;
   };
 
@@ -154,9 +207,9 @@ export const StrengthsPage: React.FC<StrengthsPageProps> = ({
     <PageWrapper pageNumber={pageNumber} totalPages={totalPages}>
       <View style={styles.container}>
         {/* Header */}
-        <Text style={styles.pageTitle}>Strengths</Text>
+        <Text style={styles.pageTitle}>High-Performance Areas</Text>
         <Text style={styles.pageSubtitle}>
-          This section highlights {employeeName}'s strongest attributes based on combined feedback from managers, peers, and self-evaluation. These strengths represent areas where {employeeName} consistently demonstrates exceptional performance across multiple perspectives.
+          This section highlights {employeeName}'s strongest attributes based on combined feedback from managers, peers, and self-evaluation. These high-performance areas represent where {employeeName} consistently demonstrates exceptional performance across multiple perspectives.
         </Text>
 
         {pageItems.length === 0 ? (
@@ -173,7 +226,7 @@ export const StrengthsPage: React.FC<StrengthsPageProps> = ({
                     maxValue={10}
                     width={130}
                     height={9}
-                    color="#4A9B8E"
+                    color={getAttributeColor(item.name)}
                     backgroundColor="#E0E0E0"
                     rounded
                   />
@@ -181,8 +234,16 @@ export const StrengthsPage: React.FC<StrengthsPageProps> = ({
                 </View>
               </View>
 
-              {/* Second row: full-width description */}
-              <Text style={styles.description}>{item.description}</Text>
+              {/* What they're doing right */}
+              <Text style={styles.strengthDescription}>{item.description}</Text>
+
+              {/* AI Coaching Recommendations (if available) */}
+              {item.coachingRecommendation && (
+                <>
+                  <Text style={styles.coachingSubheader}>Coaching Recommendations:</Text>
+                  <Text style={styles.coachingRecommendation}>{item.coachingRecommendation}</Text>
+                </>
+              )}
             </View>
           ))
         )}

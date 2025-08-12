@@ -13,6 +13,8 @@ import { ReportDocument } from '../pages/react-pdf/ReportDocument';
 import { fetchDescriptiveReview } from './aiReviewService';
 import { fetchCoachingReport, type AICoachingPayload } from './aiCoachingService';
 import { fetchAttributeResponses } from './attributeResponsesService';
+import { fetchStrengthsInsights, fetchDevelopmentInsights, transformAttributesForAI } from './aiInsightsService';
+import type { AIInsightsResponse } from './aiInsightsService';
 import type { Person } from '../types/database';
 import { getTagsForQuestionId } from '../constants/questionTags';
 
@@ -84,6 +86,63 @@ export async function generateEmployeeReportReact(
       });
     } catch (e) {
       console.warn('AI descriptive review unavailable, falling back to static profiles:', e);
+    }
+
+    // Fetch AI insights for strengths and development areas
+    let strengthsInsights: AIInsightsResponse | null = null;
+    let developmentInsights: AIInsightsResponse | null = null;
+    
+    console.log('🔍 About to start AI insights section...');
+    try {
+      console.log('🔄 Fetching AI insights for strengths and development areas...');
+      
+      // Transform attributes for AI processing
+      const strengthsAttributes = transformAttributesForAI(data.coreGroupBreakdown, 8.0, true);
+      const developmentAttributes = transformAttributesForAI(data.coreGroupBreakdown, 8.0, false);
+      
+      console.log('🔍 Transformed attributes:', {
+        strengthsCount: strengthsAttributes.length,
+        strengthsAttributes: strengthsAttributes.map(a => ({ name: a.name, score: a.score })),
+        developmentCount: developmentAttributes.length,
+        developmentAttributes: developmentAttributes.map(a => ({ name: a.name, score: a.score }))
+      });
+      
+      // Prepare employee data for AI insights
+      const aiEmployee = {
+        name: data.employee.name || 'Employee',
+        department: data.employee.department || 'Unknown',
+        tenure_category: data.employee.tenure_category,
+        role: data.employee.role || 'Team Member',
+        id: data.employee.id
+      };
+
+      // Fetch insights sequentially with delays to avoid rate limiting
+      console.log('🕒 Adding 2-second delay before AI insights to avoid rate limiting...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      if (strengthsAttributes.length > 0) {
+        try {
+          strengthsInsights = await fetchStrengthsInsights(aiEmployee, strengthsAttributes);
+          console.log(`✅ Fetched ${strengthsInsights.insights.length} strengths insights`);
+        } catch (error) {
+          console.warn('Strengths insights failed:', error);
+        }
+        
+        // Add delay between AI calls to avoid rate limiting
+        console.log('🕒 Adding 1-second delay between insights calls...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
+      if (developmentAttributes.length > 0) {
+        try {
+          developmentInsights = await fetchDevelopmentInsights(aiEmployee, developmentAttributes);
+          console.log(`✅ Fetched ${developmentInsights.insights.length} development insights`);
+        } catch (error) {
+          console.warn('Development insights failed:', error);
+        }
+      }
+    } catch (e) {
+      console.warn('AI insights unavailable, falling back to static descriptions:', e);
     }
 
       // Build Coaching Report payload(s) and fetch report via three-section strategy
@@ -239,7 +298,9 @@ export async function generateEmployeeReportReact(
       data: data,
       aiReview: aiReview,
       quarterName: quarterName,
-      coachingReport: coachingReport
+      coachingReport: coachingReport,
+      strengthsInsights: strengthsInsights,
+      developmentInsights: developmentInsights
     } as any);
 
     const blob = await pdf(element as any).toBlob();

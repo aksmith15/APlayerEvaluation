@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render } from '../../test-utils';
+import { screen } from '@testing-library/dom';
 import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 import { AuthProvider } from '../../contexts/AuthContext';

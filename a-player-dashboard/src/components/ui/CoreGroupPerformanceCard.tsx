@@ -27,7 +27,7 @@ export const CoreGroupPerformanceCard: React.FC<CoreGroupPerformanceCardProps> =
       peer: data.coreGroups.competence.peer,
       manager: data.coreGroups.competence.manager,
       emoji: '🎯',
-      color: '#3B82F6', // Blue
+      color: '#1E88E5', // Blue - Competence psychology
       attributes: data.coreGroups.competence.attribute_count,
       completion: data.coreGroups.competence.completion_percentage
     },
@@ -38,7 +38,7 @@ export const CoreGroupPerformanceCard: React.FC<CoreGroupPerformanceCardProps> =
       peer: data.coreGroups.character.peer,
       manager: data.coreGroups.character.manager,
       emoji: '👥',
-      color: '#10B981', // Green
+      color: '#D4AF37', // Gold - Character psychology
       attributes: data.coreGroups.character.attribute_count,
       completion: data.coreGroups.character.completion_percentage
     },
@@ -49,7 +49,7 @@ export const CoreGroupPerformanceCard: React.FC<CoreGroupPerformanceCardProps> =
       peer: data.coreGroups.curiosity.peer,
       manager: data.coreGroups.curiosity.manager,
       emoji: '🚀',
-      color: '#8B5CF6', // Purple
+      color: '#2E7D32', // Green - Curiosity psychology
       attributes: data.coreGroups.curiosity.attribute_count,
       completion: data.coreGroups.curiosity.completion_percentage
     }

@@ -82,6 +82,8 @@ A-Player Evaluation2/
 │   │   │   ├── attributes.ts               # Performance attributes definitions
 │   │   │   └── config.ts                   # Configuration constants
 │   │   ├── assets/                         # Static assets and styles
+│   │   │   ├── logos/                      # Company logos and branding assets
+│   │   │   │   └── culture-base-logo.png   # The Culture Base logo for PDF reports
 │   │   │   └── react.svg                   # React logo
 │   │   ├── tests/                          # Test infrastructure
 │   │   │   └── integration/                # Integration tests

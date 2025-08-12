@@ -7,8 +7,10 @@ import { supabase } from './supabase';
 import { fetchCompetenceAnalysis, fetchCharacterAnalysis, fetchCuriosityAnalysis } from './coreGroupService';
 import { fetchPersonaClassification } from './personaService';
 import { getSubmissionCount } from './submissionCountService';
+import { getTenureCategory, getTenureDescription } from '../utils/calculations';
 import type { Person } from '../types/database';
 import type { PersonaClassification, DetailedCoreGroupAnalysis } from '../types/evaluation';
+import type { TenureCategory } from '../utils/calculations';
 
 export interface CoreGroupScore {
   core_group: string;
@@ -34,7 +36,10 @@ export interface CoreGroupBreakdown {
 }
 
 export interface PDFEmployeeData {
-  employee: Person;
+  employee: Person & {
+    tenure_category: TenureCategory;
+    tenure_description: string;
+  };
   quarter: {
     id: string;
     name: string;
@@ -224,10 +229,18 @@ export const fetchPDFEmployeeData = async (
       curiosity: curiosityData.status === 'fulfilled' ? curiosityData.value : null
     };
 
-    console.log('✅ PDF employee data fetched successfully with core group breakdowns');
+    // Calculate tenure information
+    const tenureCategory = employee.hire_date ? getTenureCategory(employee.hire_date) : 'new';
+    const tenureDescription = getTenureDescription(tenureCategory);
+
+    console.log('✅ PDF employee data fetched successfully with core group breakdowns and tenure calculation');
     
     return {
-      employee,
+      employee: {
+        ...employee,
+        tenure_category: tenureCategory,
+        tenure_description: tenureDescription
+      },
       quarter: {
         id: quarter.id,
         name: quarter.name,

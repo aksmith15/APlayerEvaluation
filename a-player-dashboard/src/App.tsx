@@ -6,9 +6,6 @@ import { ErrorBoundary, LoadingSpinner } from './components/ui';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ROUTES } from './constants/config';
 
-// Initialize development tools for feature flag testing
-import './utils/devTools';
-
 // Lazy load components for better code splitting
 const Login = React.lazy(() => import('./pages/Login').then(module => ({ default: module.Login })));
 const EmployeeSelection = React.lazy(() => import('./pages/EmployeeSelection').then(module => ({ default: module.EmployeeSelection })));

@@ -20,6 +20,39 @@ export const formatScore = (score: number): string => {
   return score.toFixed(1);
 };
 
+// Tenure calculation utilities for AI insights
+export type TenureCategory = 'new' | 'growing' | 'established' | 'advanced';
+
+export const getMonthsSinceHire = (hireDate: string): number => {
+  const hire = new Date(hireDate);
+  const now = new Date();
+  
+  // Calculate difference in months
+  const yearDiff = now.getFullYear() - hire.getFullYear();
+  const monthDiff = now.getMonth() - hire.getMonth();
+  
+  return yearDiff * 12 + monthDiff;
+};
+
+export const getTenureCategory = (hireDate: string): TenureCategory => {
+  const monthsEmployed = getMonthsSinceHire(hireDate);
+  
+  if (monthsEmployed <= 6) return 'new';          // ≤ 6 months
+  if (monthsEmployed <= 12) return 'growing';     // 6-12 months  
+  if (monthsEmployed <= 36) return 'established'; // 1-3 years
+  return 'advanced';                              // 3+ years
+};
+
+export const getTenureDescription = (tenureCategory: TenureCategory): string => {
+  switch (tenureCategory) {
+    case 'new': return 'new team member';
+    case 'growing': return 'developing employee';
+    case 'established': return 'experienced team member';
+    case 'advanced': return 'senior team member';
+    default: return 'team member';
+  }
+};
+
 export const calculateOverallScore = (scores: WeightedEvaluationScore[]): number => {
   if (scores.length === 0) return 0;
   

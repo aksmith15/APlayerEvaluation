@@ -1,6 +1,6 @@
 /**
  * React-PDF ValueBar Component
- * Ported from legacy drawVisualBar function in pdfReportGenerator.ts
+ * Modern value bar visualization for React-PDF reports
  */
 
 import React from 'react';

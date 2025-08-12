@@ -1,6 +1,6 @@
 /**
  * React-PDF ScoreCard Component
- * Ported from legacy drawScoreCard function in pdfReportGenerator.ts
+ * Performance score card visualization for React-PDF reports
  */
 
 import React from 'react';
