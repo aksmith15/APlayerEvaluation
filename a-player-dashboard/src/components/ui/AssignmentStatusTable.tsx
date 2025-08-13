@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { Button } from './Button';
 import { LoadingSpinner } from './LoadingSpinner';
 import { EmptyState } from './EmptyState';
@@ -45,7 +45,7 @@ interface AssignmentStatusTableProps {
   loading?: boolean;
 }
 
-export const AssignmentStatusTable: React.FC<AssignmentStatusTableProps> = ({
+export const AssignmentStatusTable: React.FC<AssignmentStatusTableProps> = memo(({
   assignments,
   selectedAssignments,
   onSelectionChange,
@@ -516,4 +516,4 @@ export const AssignmentStatusTable: React.FC<AssignmentStatusTableProps> = ({
       </div>
     </div>
   );
-}; 
+}); 

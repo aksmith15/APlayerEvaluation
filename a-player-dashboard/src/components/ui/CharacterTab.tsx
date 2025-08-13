@@ -4,7 +4,7 @@
  * Attributes: Leadership, Communication Skills, Teamwork
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { fetchCharacterAnalysis } from '../../services/coreGroupService';
 import { ClusteredBarChart } from './ClusteredBarChart';
 import { LoadingSpinner } from './LoadingSpinner';
@@ -55,19 +55,21 @@ export const CharacterTab: React.FC<CharacterTabProps> = ({
     }
   }, [employeeId, quarterId, initialData]);
 
-  // Transform data for clustered bar chart
-  const chartData = data?.attributes.map(attr => ({
-    attribute: attr.attributeName,  // ClusteredBarChart expects 'attribute' not 'name'
-    manager: attr.scores.manager,
-    peer: attr.scores.peer,
-    self: attr.scores.self,
-    weighted: attr.scores.weighted,
-    // Additional properties for tooltips (match ClusteredBarChart types)
-    hasManager: attr.evaluatorCoverage.hasManager,
-    hasPeer: attr.evaluatorCoverage.hasPeer,
-    hasSelf: attr.evaluatorCoverage.hasSelf,
-    completion: 0
-  })) || [];
+  // Transform data for clustered bar chart - memoized to prevent unnecessary recalculations
+  const chartData = useMemo(() => {
+    return data?.attributes.map(attr => ({
+      attribute: attr.attributeName,  // ClusteredBarChart expects 'attribute' not 'name'
+      manager: attr.scores.manager,
+      peer: attr.scores.peer,
+      self: attr.scores.self,
+      weighted: attr.scores.weighted,
+      // Additional properties for tooltips (match ClusteredBarChart types)
+      hasManager: attr.evaluatorCoverage.hasManager,
+      hasPeer: attr.evaluatorCoverage.hasPeer,
+      hasSelf: attr.evaluatorCoverage.hasSelf,
+      completion: 0
+    })) || [];
+  }, [data?.attributes]);
 
   if (loading) {
     return (
@@ -145,6 +147,7 @@ export const CharacterTab: React.FC<CharacterTabProps> = ({
               height={320}
               showLegend={true}
               title=""
+              showHelperText={false}
             />
           </div>
           

@@ -18,6 +18,55 @@ import type { AIInsightsResponse } from './aiInsightsService';
 import type { Person } from '../types/database';
 import { getTagsForQuestionId } from '../constants/questionTags';
 
+// PDF-specific type definitions
+interface PDFAttribute {
+  attributeName?: string;
+  attribute?: string;
+  scores?: {
+    weighted?: number;
+    self?: number;
+    peer?: number;
+    manager?: number;
+  };
+  weighted?: number;
+}
+
+interface AIReviewGroup {
+  [attributeName: string]: {
+    score: number;
+    grade: 'A' | 'B' | 'C' | 'D';
+  };
+}
+
+// Removed unused interface AIReviewPayload
+
+// Coaching report type definitions
+interface AttributeMapEntry {
+  scores: {
+    self: number;
+    peer: number;
+    manager: number;
+    weighted: number;
+  };
+  gaps: {
+    self_vs_others: number;
+    manager_vs_peer: number;
+  };
+  aggregates: Record<string, any>;
+  responses: any[];
+}
+
+interface AttributeResponse {
+  attributeName?: string;
+  attribute?: string;
+  scores?: {
+    self?: number;
+    peer?: number;
+    manager?: number;
+    weighted?: number;
+  };
+}
+
 interface GenerateEmployeeReportOptions {
   employee: Person;
   selectedQuarter: string;
@@ -46,8 +95,6 @@ export async function generateEmployeeReportReact(
   }
 
   try {
-    console.log('🔄 Generating React-PDF styled report...');
-
     // Fetch all required data using existing service
     const data = await fetchPDFEmployeeData(employee.id, selectedQuarter);
     
@@ -65,11 +112,13 @@ export async function generateEmployeeReportReact(
 
     // Prepare compact AI payload (optional)
     const toLetter = (s: number) => (s >= 8 ? 'A' : s >= 7 ? 'B' : s >= 6 ? 'C' : 'D');
-    const toGroup = (attrs?: any[]) =>
-      attrs?.reduce((acc: any, a: any) => {
+    const toGroup = (attrs?: PDFAttribute[]): AIReviewGroup | undefined =>
+      attrs?.reduce((acc: AIReviewGroup, a: PDFAttribute) => {
         const name = a.attributeName || a.attribute;
         const score = a.scores?.weighted ?? a.weighted ?? 0;
-        acc[name] = { score, grade: toLetter(score) };
+        if (name) {
+          acc[name] = { score, grade: toLetter(score) };
+        }
         return acc;
       }, {}) || undefined;
 
@@ -85,27 +134,17 @@ export async function generateEmployeeReportReact(
         }
       });
     } catch (e) {
-      console.warn('AI descriptive review unavailable, falling back to static profiles:', e);
+      // AI descriptive review unavailable, fallback to static profiles
     }
 
     // Fetch AI insights for strengths and development areas
     let strengthsInsights: AIInsightsResponse | null = null;
     let developmentInsights: AIInsightsResponse | null = null;
     
-    console.log('🔍 About to start AI insights section...');
     try {
-      console.log('🔄 Fetching AI insights for strengths and development areas...');
-      
       // Transform attributes for AI processing
       const strengthsAttributes = transformAttributesForAI(data.coreGroupBreakdown, 8.0, true);
       const developmentAttributes = transformAttributesForAI(data.coreGroupBreakdown, 8.0, false);
-      
-      console.log('🔍 Transformed attributes:', {
-        strengthsCount: strengthsAttributes.length,
-        strengthsAttributes: strengthsAttributes.map(a => ({ name: a.name, score: a.score })),
-        developmentCount: developmentAttributes.length,
-        developmentAttributes: developmentAttributes.map(a => ({ name: a.name, score: a.score }))
-      });
       
       // Prepare employee data for AI insights
       const aiEmployee = {
@@ -117,32 +156,28 @@ export async function generateEmployeeReportReact(
       };
 
       // Fetch insights sequentially with delays to avoid rate limiting
-      console.log('🕒 Adding 2-second delay before AI insights to avoid rate limiting...');
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       if (strengthsAttributes.length > 0) {
         try {
           strengthsInsights = await fetchStrengthsInsights(aiEmployee, strengthsAttributes);
-          console.log(`✅ Fetched ${strengthsInsights.insights.length} strengths insights`);
         } catch (error) {
-          console.warn('Strengths insights failed:', error);
+          // Strengths insights failed, continue without them
         }
         
         // Add delay between AI calls to avoid rate limiting
-        console.log('🕒 Adding 1-second delay between insights calls...');
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
       
       if (developmentAttributes.length > 0) {
         try {
           developmentInsights = await fetchDevelopmentInsights(aiEmployee, developmentAttributes);
-          console.log(`✅ Fetched ${developmentInsights.insights.length} development insights`);
         } catch (error) {
-          console.warn('Development insights failed:', error);
+          // Development insights failed, continue without them
         }
       }
     } catch (e) {
-      console.warn('AI insights unavailable, falling back to static descriptions:', e);
+      // AI insights unavailable, falling back to static descriptions
     }
 
       // Build Coaching Report payload(s) and fetch report via three-section strategy
@@ -152,9 +187,9 @@ export async function generateEmployeeReportReact(
 
       const normalizeName = (s: string) => (s || '').toLowerCase().replace(/[\s_-]+/g, ' ').trim();
 
-      const toAttrMap = (group?: any[]) => {
-        const map: Record<string, any> = {};
-        (group || []).forEach((a: any) => {
+      const toAttrMap = (group?: AttributeResponse[]): Record<string, AttributeMapEntry> => {
+        const map: Record<string, AttributeMapEntry> = {};
+        (group || []).forEach((a: AttributeResponse) => {
           const key = normalizeName(a.attributeName || a.attribute || '');
           if (!key) return;
           const self = a.scores?.self ?? 0;
@@ -289,11 +324,10 @@ export async function generateEmployeeReportReact(
       // Optional: per-core-group depth can be added later with sequential throttling to avoid 429
       coachingReport = merged;
     } catch (e) {
-      console.warn('AI coaching report unavailable; continuing without it:', e);
+      // AI coaching report unavailable; continuing without it
     }
 
     // Create React-PDF document
-    console.log('🔄 Creating React-PDF document...');
     const element = React.createElement(ReportDocument as unknown as React.FC<any>, {
       data: data,
       aiReview: aiReview,
@@ -307,8 +341,6 @@ export async function generateEmployeeReportReact(
 
     // Download the PDF using file-saver
     saveAs(blob, filename);
-
-    console.log('✅ React-PDF styled report generated successfully');
 
   } catch (error) {
     console.error('❌ Failed to generate React-PDF styled report:', error);

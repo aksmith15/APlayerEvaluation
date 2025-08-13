@@ -4,10 +4,12 @@ export { ErrorMessage } from './ErrorMessage';
 export { SearchInput } from './SearchInput';
 export { Button } from './Button';
 export { Card } from './Card';
-export { RadarChart } from './RadarChart';
-export { ClusteredBarChart } from './ClusteredBarChart';
-export { HistoricalClusteredBarChart } from './HistoricalClusteredBarChart';
-export { TrendLineChart } from './TrendLineChart';
+// Chart components - REMOVED from main export to enable proper code splitting
+// Use LazyChart for dynamic loading or import directly for static usage
+export { LazyChart } from './LazyChart';
+
+// Direct chart exports for components that need static imports
+// Note: These should only be imported directly, not through index.ts, to enable code splitting
 export { QuarterRangeSelector } from './QuarterRangeSelector';
 export { AnalysisJobManager } from './AnalysisJobManager';
 export { PDFViewer } from './PDFViewer';

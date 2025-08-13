@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import { PageWrapper } from '../../components/pdf';
 import { COLORS, LAYOUT, getFontWeight } from '../../lib/theme';
+import { formatNameForPDF } from '../../utils/nameUtils';
 
 interface CoachingReportPageProps {
   data: any; // PDFEmployeeData
@@ -22,7 +23,7 @@ export const CoachingReportPage: React.FC<CoachingReportPageProps> = ({ data, re
     chip: { fontSize: 8, color: '#0F766E' },
   });
 
-  const employeeName = data?.employee?.name || 'This employee';
+  const employeeName = formatNameForPDF(data?.employee?.name);
 
   const bullets = (items?: any[]) => (items || []).slice(0, 5).map((it, idx) => {
     // Strings

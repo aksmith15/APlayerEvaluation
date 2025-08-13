@@ -7,6 +7,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Image } from '@react-pdf/renderer';
 import { PageWrapper } from '../../components/pdf';
 import { COLORS, TYPOGRAPHY, LAYOUT, getPerformanceColor, getFontWeight } from '../../lib/theme';
+import { formatNameForPDF } from '../../utils/nameUtils';
 import type { PDFEmployeeData } from '../../services/pdfDataService';
 import logoImage from '../../assets/logos/culture-base-logo.png';
 
@@ -22,9 +23,8 @@ export const CoverPage: React.FC<CoverPageProps> = ({ data, quarterName }) => {
                       overallScore >= 7.0 ? 'B-Player' : 
                       overallScore >= 6.0 ? 'C-Player' : 'D-Player';
 
-  // Logo configuration - currently using text fallback
-  // TODO: Implement proper logo import when PNG file is available
-  const hasLogo = true; // Will be enabled when logo is properly imported
+  // Logo configuration - using text fallback (logo implementation pending)
+  const hasLogo = true;
 
   const styles = StyleSheet.create({
     container: {
@@ -164,7 +164,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ data, quarterName }) => {
         <View style={styles.header}>
           <View style={styles.employeeInfo}>
             <Text style={styles.employeeName}>
-              {data.employee.name || 'Unknown Employee'}
+              {formatNameForPDF(data.employee.name, true)}
             </Text>
             <Text style={styles.employeeTitle}>
               {data.employee.department || data.employee.role || 'No Title'}

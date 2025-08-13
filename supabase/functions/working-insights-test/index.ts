@@ -74,3 +74,4 @@ serve(async (req) => {
     return jsonResponse({ error: (err as Error).message || 'Unknown error' }, 500);
   }
 });
+

@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import type { LoginCredentials, User } from '../types/auth';
 
-// Timeout helper function
+// Enhanced timeout helper function with retry capability
 const withTimeout = <T>(promise: Promise<T>, timeoutMs: number, errorMessage: string): Promise<T> => {
   return Promise.race([
     promise,
@@ -10,6 +10,27 @@ const withTimeout = <T>(promise: Promise<T>, timeoutMs: number, errorMessage: st
     )
   ]);
 };
+
+// Enhanced timeout helper function with better error reporting
+
+// Global state for ultra-aggressive caching to handle React StrictMode
+let currentSessionPromise: Promise<any> | null = null;
+let globalUserProfile: any = null;
+let globalAuthComplete = false;
+let lastSuccessfulAuthTime = 0;
+let authInitializationPhase = true; // Track if we're still in initialization
+const AUTH_CACHE_DURATION = 30000; // 30 seconds cache
+
+// Reset global state on hot module reload (development only)
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    currentSessionPromise = null;
+    globalUserProfile = null;
+    globalAuthComplete = false;
+    lastSuccessfulAuthTime = 0;
+    authInitializationPhase = true;
+  });
+}
 
 // Authentication service functions
 export const authService = {
@@ -83,6 +104,13 @@ export const authService = {
   // Sign out current user
   async signOut(): Promise<void> {
     try {
+      // Clear global auth cache
+      globalUserProfile = null;
+      globalAuthComplete = false;
+      currentSessionPromise = null;
+      lastSuccessfulAuthTime = 0;
+      authInitializationPhase = true;
+      
       const { error } = await withTimeout(
         supabase.auth.signOut(),
         5000,
@@ -95,7 +123,17 @@ export const authService = {
     }
   },
 
-  // Helper function to get user profile with timeout and JWT role
+  // Clear auth cache (for development/testing)
+  clearAuthCache(): void {
+    globalUserProfile = null;
+    globalAuthComplete = false;
+    currentSessionPromise = null;
+    lastSuccessfulAuthTime = 0;
+    authInitializationPhase = true;
+    console.log('🧹 Auth cache cleared');
+  },
+
+  // Helper function to get user profile with timeout and JWT role + smart caching
   async getUserProfile(email: string): Promise<{ 
     id: string;
     name: string; 
@@ -103,27 +141,68 @@ export const authService = {
     department: string; 
     jwtRole?: 'hr_admin' | 'super_admin' | null;
   } | null> {
+    // Check if we already have this profile cached (avoid redundant fetches)
+    if (globalUserProfile && globalUserProfile.email === email && 
+        (Date.now() - lastSuccessfulAuthTime) < AUTH_CACHE_DURATION) {
+      console.log('⚡ Returning cached profile for:', email);
+      return {
+        id: globalUserProfile.id,
+        name: globalUserProfile.name,
+        role: globalUserProfile.role,
+        department: globalUserProfile.department,
+        jwtRole: globalUserProfile.jwtRole
+      };
+    }
+    
     try {
-      console.log('Fetching profile for:', email);
+      console.log('🔍 Fetching fresh profile for:', email);
       console.log('Starting people table lookup...');
       
-      // Create a timeout promise that matches the query result type
-      const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
-        setTimeout(() => resolve({ data: null, error: new Error('Profile query timed out') }), 5000);
-      });
+      // Enhanced timeout and retry for database operations
+      let profile = null;
+      let profileError = null;
+      
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          console.log(`🔍 Profile lookup attempt ${attempt}/3...`);
+          
+          // Create timeout promise for this attempt
+          const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
+            setTimeout(() => resolve({ 
+              data: null, 
+              error: new Error(`Profile query timed out (attempt ${attempt})`) 
+            }), 15000);
+          });
 
-      // Execute the query - add jwt_role column if it exists
-      const queryPromise = supabase
-        .from('people')
-        .select('id, name, role, department, jwt_role')
-        .eq('email', email)
-        .eq('active', true)
-        .maybeSingle();
+          const queryPromise = supabase
+            .from('people')
+            .select('id, name, role, department, jwt_role')
+            .eq('email', email)
+            .eq('active', true)
+            .maybeSingle();
 
-      const { data: profile, error: profileError } = await Promise.race([
-        queryPromise,
-        timeoutPromise
-      ]);
+          const result = await Promise.race([queryPromise, timeoutPromise]);
+          
+          profile = result.data;
+          profileError = result.error;
+          
+          if (!profileError) {
+            console.log(`✅ Profile lookup successful on attempt ${attempt}`);
+            break;
+          }
+          
+        } catch (error) {
+          console.error(`❌ Profile lookup attempt ${attempt} failed:`, error);
+          profileError = error;
+        }
+        
+        // Wait before retry (except on last attempt)
+        if (attempt < 3 && profileError) {
+          const delay = 1500 * Math.pow(2, attempt - 1);
+          console.log(`⏳ Waiting ${delay}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
 
       if (profileError) {
         console.error('Profile lookup failed:', profileError);
@@ -174,16 +253,86 @@ export const authService = {
     }
   },
 
-  // Get current user session
+  // Get current user session with ultra-aggressive caching for React StrictMode
   async getCurrentUser(): Promise<User | null> {
+    const now = Date.now();
+    
+    // Ultra-fast cache check - return cached result if recent
+    if (globalAuthComplete && globalUserProfile && (now - lastSuccessfulAuthTime) < AUTH_CACHE_DURATION) {
+      console.log('⚡ Returning cached user profile (ultra-fast)...');
+      return globalUserProfile;
+    }
+
+    // Return existing promise if one is already running
+    if (currentSessionPromise) {
+      console.log('🔄 Reusing existing session check...');
+      return currentSessionPromise;
+    }
+
+    console.log('🔍 Performing new session check...');
+    
+    // Create and store the session promise
+    currentSessionPromise = this._performSessionCheck();
+    
     try {
-      console.log('Checking current session...');
+      const result = await currentSessionPromise;
+      if (result) {
+        globalUserProfile = result;
+        globalAuthComplete = true;
+        lastSuccessfulAuthTime = now;
+        authInitializationPhase = false; // Mark initialization as complete
+        console.log('✅ Session check successful - cached for 30s');
+        console.log('💾 Global profile cached:', { email: result.email, id: result.id });
+        console.log('🔧 Global state after cache:', { 
+          hasGlobalProfile: !!globalUserProfile,
+          globalAuthComplete,
+          lastSuccessfulAuthTime 
+        });
+      }
+      return result;
+    } finally {
+      // Clear the promise when done (success or failure)
+      currentSessionPromise = null;
+    }
+  },
+
+  // Internal method to perform the actual session check
+  async _performSessionCheck(): Promise<User | null> {
+    try {
+      // Enhanced session check with timeout and retry
+      let session = null;
+      let error = null;
       
-      const { data: { session }, error } = await withTimeout(
-        supabase.auth.getSession(),
-        5000,
-        'Session check timed out'
-      );
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          console.log(`🔍 Session check attempt ${attempt}/3...`);
+          
+          const result = await withTimeout(
+            supabase.auth.getSession(),
+            15000, // Increased timeout to 15 seconds
+            `Session check timed out (attempt ${attempt})`
+          );
+          
+          session = result.data.session;
+          error = result.error;
+          
+          if (!error) {
+            console.log(`✅ Session check successful on attempt ${attempt}`);
+            break;
+          }
+          
+        } catch (err) {
+          console.error(`❌ Session check attempt ${attempt} failed:`, err);
+          error = err;
+        }
+        
+        // Wait before retry (except on last attempt)
+        if (attempt < 3 && error) {
+          const delay = 1000 * Math.pow(2, attempt - 1);
+          console.log(`⏳ Waiting ${delay}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
       
       if (error) {
         console.error('Session check error:', error);
@@ -230,15 +379,111 @@ export const authService = {
     }
   },
 
-  // Subscribe to auth state changes (simplified to avoid loops)
+  // Subscribe to auth state changes with initialization-aware logic
   onAuthStateChange(callback: (user: User | null) => void) {
     return supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change event:', event, !!session);
+      console.log('🔄 Auth state change event:', event, !!session);
       
       if (session?.user) {
+        // During initialization phase, defer to our main auth flow to avoid race conditions
+        if (authInitializationPhase && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN')) {
+          console.log('⏳ Deferring auth state change during initialization phase');
+          return;
+        }
+        
         // Transform session user directly instead of calling getCurrentUser to avoid loops
         try {
-          const profile = await this.getUserProfile(session.user.email!);
+          // Enhanced cache logic for auth state changes
+          const cacheAge = Date.now() - lastSuccessfulAuthTime;
+          const cacheValid = globalUserProfile && 
+                           globalAuthComplete && 
+                           globalUserProfile.email === session.user.email &&
+                           cacheAge < AUTH_CACHE_DURATION;
+          
+          // Debug logging for cache conditions
+          if (event === 'USER_UPDATED') {
+            console.log('🔍 USER_UPDATED cache check:', {
+              hasGlobalProfile: !!globalUserProfile,
+              globalEmail: globalUserProfile?.email,
+              sessionEmail: session.user.email,
+              cacheAge,
+              cacheLimit: AUTH_CACHE_DURATION,
+              globalAuthComplete,
+              cacheValid
+            });
+          }
+          
+          // For token refreshes and user updates, ALWAYS use cached profile if valid
+          if ((event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') && cacheValid) {
+            console.log('⚡ Using cached profile for', event, {
+              cacheAge,
+              email: globalUserProfile.email
+            });
+            const user: User = {
+              id: globalUserProfile.id,
+              email: globalUserProfile.email,
+              name: globalUserProfile.name,
+              role: globalUserProfile.role,
+              department: globalUserProfile.department,
+              jwtRole: globalUserProfile.jwtRole
+            };
+            callback(user);
+            return;
+          }
+          
+          // Enhanced USER_UPDATED handling with timeout protection
+          if (event === 'USER_UPDATED' && !cacheValid) {
+            console.log('⚠️ USER_UPDATED with invalid cache - using safe fallback', {
+              reason: !globalUserProfile ? 'no profile' : 
+                      !globalAuthComplete ? 'auth incomplete' :
+                      globalUserProfile.email !== session.user.email ? 'email mismatch' :
+                      cacheAge >= AUTH_CACHE_DURATION ? 'cache expired' : 'unknown'
+            });
+            
+            // For USER_UPDATED events, always use session fallback to prevent database timeouts
+            const user: User = {
+              id: session.user.id,
+              email: session.user.email!,
+              name: session.user.user_metadata?.full_name || session.user.email!,
+              role: globalUserProfile?.role || 'user', 
+              department: globalUserProfile?.department || 'Unknown',
+              jwtRole: globalUserProfile?.jwtRole || session.user.user_metadata?.jwt_role || 'user'
+            };
+            
+            // Update cache with session-based user data to prevent future lookups
+            globalUserProfile = user;
+            globalAuthComplete = true;
+            lastSuccessfulAuthTime = Date.now();
+            
+            callback(user);
+            return;
+          }
+
+          // For USER_UPDATED events, if profile fetch fails, use session data as safe fallback
+          let profile = null;
+          try {
+            console.log('🔍 Attempting profile fetch for', event, {
+              globalProfileExists: !!globalUserProfile,
+              globalAuthComplete,
+              email: session.user.email
+            });
+            profile = await this.getUserProfile(session.user.email!);
+          } catch (error) {
+            if (event === 'USER_UPDATED') {
+              console.log('⚠️ USER_UPDATED profile fetch failed, using session fallback');
+              const user: User = {
+                id: session.user.id,
+                email: session.user.email!,
+                name: session.user.user_metadata?.name || 'User',
+                role: 'Manager', 
+                department: 'Department',
+                jwtRole: session.user.user_metadata?.role || null
+              };
+              callback(user);
+              return;
+            }
+            throw error; // Re-throw for other events
+          }
           
           const user: User = {
             id: profile?.id || session.user.id, // Use people table ID if available, fallback to JWT ID  
@@ -251,8 +496,33 @@ export const authService = {
           
           callback(user);
         } catch (error) {
-          console.error('Error building user object on auth state change:', error);
-          callback(null);
+          console.warn('⚠️ Profile fetch failed during auth state change, using cached or fallback:', error);
+          
+          // Try to use cached profile as fallback
+          if (globalUserProfile && globalUserProfile.email === session.user.email) {
+            console.log('🔄 Using cached profile as fallback');
+            const user: User = {
+              id: globalUserProfile.id,
+              email: globalUserProfile.email,
+              name: globalUserProfile.name,
+              role: globalUserProfile.role,
+              department: globalUserProfile.department,
+              jwtRole: globalUserProfile.jwtRole
+            };
+            callback(user);
+          } else {
+            // Ultimate fallback using session data
+            console.log('🔄 Using session data as ultimate fallback');
+            const user: User = {
+              id: session.user.id,
+              email: session.user.email!,
+              name: session.user.user_metadata?.name || 'Test User',
+              role: 'Manager',
+              department: 'Test Department',
+              jwtRole: session.user.user_metadata?.role || null
+            };
+            callback(user);
+          }
         }
       } else {
         callback(null);

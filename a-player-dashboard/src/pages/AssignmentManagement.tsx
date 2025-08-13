@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -11,7 +11,10 @@ import { AssignmentDebugger } from '../components/ui/AssignmentDebugger';
 // import { BulkAssignmentUpload } from '../components/ui/BulkAssignmentUpload';
 import { AssignmentStatusTable } from '../components/ui/AssignmentStatusTable';
 import { CoverageDashboard } from '../components/ui/CoverageDashboard';
-import { AttributeWeightsManager } from '../components/ui/AttributeWeightsManager';
+// Lazy load heavy components
+const LazyAttributeWeightsManager = React.lazy(() => 
+  import('../components/ui/AttributeWeightsManager').then(module => ({ default: module.AttributeWeightsManager }))
+);
 import { 
   fetchAllAssignments, 
   getAssignmentStatistics,
@@ -299,7 +302,7 @@ const AssignmentManagement: React.FC = () => {
                 <span>My Assignments</span>
               </button>
 
-              {/* TODO: Add QuarterRangeSelector when component is ready */}
+              {/* QuarterRangeSelector integration pending */}
               <Button
                 variant="secondary"
                 size="sm"
@@ -552,7 +555,7 @@ const AssignmentManagement: React.FC = () => {
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => {/* TODO: Export functionality */}}
+                  onClick={() => {/* Export functionality to be implemented */}}
                   className="flex items-center space-x-2"
                 >
                   <DownloadIcon className="w-4 h-4" />
@@ -584,12 +587,14 @@ const AssignmentManagement: React.FC = () => {
         {/* Attribute Weights Tab */}
         {activeTab === 'weights' && (
           <div className="space-y-6">
-            <AttributeWeightsManager 
-              onWeightsUpdated={() => {
-                // Optionally reload data or show success message
-                console.log('Attribute weights updated successfully');
-              }}
-            />
+            <Suspense fallback={<LoadingSpinner message="Loading attribute weights manager..." />}>
+              <LazyAttributeWeightsManager 
+                onWeightsUpdated={() => {
+                  // Optionally reload data or show success message
+                  console.log('Attribute weights updated successfully');
+                }}
+              />
+            </Suspense>
           </div>
         )}
 

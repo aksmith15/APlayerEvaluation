@@ -66,21 +66,24 @@ export const getCoverageAnalysis = async (quarterId: string): Promise<CoverageDa
   try {
     console.log('📊 Fetching dual coverage analysis (assignments + completions) for quarter:', quarterId);
 
-    // Try stored procedure first
+    // Note: get_dual_coverage_analysis stored procedure not available in current schema
+    // Using manual query implementation which provides the same functionality
+    console.log('📋 Using manual dual coverage analysis query...');
+    return await getFallbackDualCoverageAnalysis(quarterId);
+
+    /* Future: When get_dual_coverage_analysis function is created in database, uncomment:
     const { data, error } = await supabase.rpc('get_dual_coverage_analysis', {
       quarter_id: quarterId
     });
 
     if (error) {
       console.error('Error fetching dual coverage analysis:', error);
-      
-      // Fallback to manual query
-      console.log('📋 Falling back to manual dual coverage analysis query...');
       return await getFallbackDualCoverageAnalysis(quarterId);
     }
 
     console.log('✅ Dual coverage analysis data:', data);
     return data || [];
+    */
   } catch (error) {
     console.error('Error in getCoverageAnalysis:', error);
     throw error;

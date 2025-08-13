@@ -6,36 +6,142 @@ import path from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@features': path.resolve(__dirname, './src/features'),
+      '@shared': path.resolve(__dirname, './src/shared'),
+      '@auth': path.resolve(__dirname, './src/features/auth'),
+      '@survey': path.resolve(__dirname, './src/features/survey'),
+      '@assignments': path.resolve(__dirname, './src/features/assignments'),
+      '@analytics': path.resolve(__dirname, './src/features/analytics'),
+      '@pages': path.resolve(__dirname, './src/pages'),
+      '@services': path.resolve(__dirname, './src/services'),
+      '@types': path.resolve(__dirname, './src/types'),
+      '@utils': path.resolve(__dirname, './src/utils'),
+      '@contexts': path.resolve(__dirname, './src/contexts'),
+      '@hooks': path.resolve(__dirname, './src/hooks'),
+      '@constants': path.resolve(__dirname, './src/constants'),
     },
   },
   build: {
-    // Optimize chunk sizes and enable code splitting
+    // Advanced code splitting and optimization
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Split vendor libraries into separate chunks
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'chart-vendor': ['recharts'],
-          'supabase-vendor': ['@supabase/supabase-js'],
-          'ui-vendor': ['date-fns'],
-          'pdf-vendor': ['jspdf', 'html2canvas', 'react-pdf']
+        manualChunks: (id) => {
+          // Split node_modules into specific vendor chunks
+          if (id.includes('node_modules')) {
+            // React ecosystem
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'react-vendor';
+            }
+            // Chart libraries
+            if (id.includes('recharts') || id.includes('d3-')) {
+              return 'chart-vendor';
+            }
+            // PDF generation libraries
+            if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('@react-pdf') || id.includes('file-saver')) {
+              return 'pdf-vendor';
+            }
+            // Supabase ecosystem
+            if (id.includes('@supabase') || id.includes('supabase')) {
+              return 'supabase-vendor';
+            }
+            // Utility libraries
+            if (id.includes('date-fns') || id.includes('lodash') || id.includes('uuid')) {
+              return 'utils-vendor';
+            }
+            // UI libraries (smaller utilities)
+            if (id.includes('clsx') || id.includes('class-variance-authority')) {
+              return 'ui-vendor';
+            }
+            // All other node_modules
+            return 'vendor';
+          }
+          
+          // Split application code by feature
+          // Pages - lazy loaded, so they'll be separate chunks automatically
+          if (id.includes('/pages/')) {
+            if (id.includes('react-pdf')) {
+              return 'pdf-pages';
+            }
+            // Other pages will be separate chunks due to lazy loading
+          }
+          
+          // Large components
+          if (id.includes('/components/ui/')) {
+            // Heavy chart components
+            if (id.includes('Chart') || id.includes('Radar') || id.includes('Trend')) {
+              return 'chart-components';
+            }
+            // PDF-related components
+            if (id.includes('PDF') || id.includes('Download') || id.includes('Generate')) {
+              return 'pdf-components';
+            }
+            // Assignment management components
+            if (id.includes('Assignment') || id.includes('Coverage') || id.includes('Weights')) {
+              return 'assignment-components';
+            }
+          }
+          
+          // Services
+          if (id.includes('/services/')) {
+            if (id.includes('pdf') || id.includes('download')) {
+              return 'pdf-services';
+            }
+            if (id.includes('ai') || id.includes('insights') || id.includes('coaching')) {
+              return 'ai-services';
+            }
+            if (id.includes('assignment') || id.includes('coverage')) {
+              return 'assignment-services';
+            }
+            // Core services remain in main bundle
+          }
+        },
+        // Optimize chunk file names for caching
+        chunkFileNames: (chunkInfo) => {
+          if (chunkInfo.name === 'vendor') {
+            return 'assets/vendor-[hash].js';
+          }
+          return 'assets/[name]-[hash].js';
+        },
+        // Optimize asset file names
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name?.endsWith('.css')) {
+            return 'assets/styles-[hash].css';
+          }
+          return 'assets/[name]-[hash][extname]';
         }
       }
     },
-    // Increase chunk size warning limit to 1000kb (from default 500kb)
-    chunkSizeWarningLimit: 1000,
-    // Enable source maps for production debugging
-    sourcemap: true,
-    // Optimize bundle size
-    minify: 'esbuild'
+    // Reduce chunk size warning to encourage better splitting
+    chunkSizeWarningLimit: 800,
+    // Enable source maps for production debugging (smaller than default)
+    sourcemap: 'hidden',
+    // Advanced minification
+    minify: 'esbuild',
+    target: 'esnext',
+    // Optimize asset handling
+    assetsInlineLimit: 4096, // Inline small assets
+    cssCodeSplit: true, // Split CSS into separate files
+    // Enable advanced optimizations
+    reportCompressedSize: true,
+    write: true
   },
-  // Optimize dev server
+  // Optimize dev server for better performance
   server: {
     port: 3000,
-    host: true
+    host: true,
+    // Enable faster HMR
+    hmr: {
+      overlay: true
+    },
+    // Optimize file watching
+    watch: {
+      usePolling: false,
+      ignored: ['**/node_modules/**', '**/dist/**', '**/coverage/**']
+    }
   },
   // Configure preview server for production hosting
   preview: {
@@ -47,18 +153,30 @@ export default defineConfig({
       '.onrender.com' // Allow all Render subdomains
     ]
   },
-  // Enable dependency pre-bundling for faster dev builds
+  // Basic dependency optimization - let Vite handle PDF libs naturally
   optimizeDeps: {
     include: [
+      // Core dependencies
       'react',
       'react-dom',
       'react-router-dom',
+      'react/jsx-runtime',
+      
+      // Backend services
       '@supabase/supabase-js',
-      'recharts',
+      
+      // Commonly used utilities
       'date-fns',
-      'jspdf',
-      'html2canvas'
+      'clsx',
+      'class-variance-authority',
+      
+      // Chart libraries (pre-bundle for faster dev)
+      'recharts',
+      
+      // Frequently used UI components dependencies
+      'react-dom/client'
     ]
+    // Removed exclude list - let Vite handle all dependencies naturally
   },
   // Vitest configuration
   test: {
@@ -66,6 +184,13 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
     css: true,
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    exclude: [
+      'node_modules/**',
+      'dist/**', 
+      'tests/e2e/**', // Exclude E2E tests (use Playwright)
+      '**/*.e2e.{test,spec}.{ts,tsx}'
+    ],
     coverage: {
       reporter: ['text', 'json', 'html'],
       exclude: [
@@ -73,7 +198,8 @@ export default defineConfig({
         'src/setupTests.ts',
         '**/*.d.ts',
         'dist/',
-        'coverage/'
+        'coverage/',
+        'tests/e2e/**'
       ]
     }
   }

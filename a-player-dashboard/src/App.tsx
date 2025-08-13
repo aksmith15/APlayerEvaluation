@@ -1,10 +1,11 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import { ErrorBoundary, LoadingSpinner } from './components/ui';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ROUTES } from './constants/config';
+import { initializePerformanceMonitoring } from './services/performanceMonitor';
 
 // Lazy load components for better code splitting
 const Login = React.lazy(() => import('./pages/Login').then(module => ({ default: module.Login })));
@@ -17,6 +18,16 @@ const EvaluationSurvey = React.lazy(() => import('./components/ui').then(module 
 const DevPdfPreview = React.lazy(() => import('./pages/react-pdf/DevPdfPreview'));
 
 const App: React.FC = () => {
+  // Initialize performance monitoring on app startup
+  useEffect(() => {
+    initializePerformanceMonitoring({
+      enableCoreWebVitals: true,
+      enableCustomMetrics: true,
+      sampleRate: process.env.NODE_ENV === 'development' ? 1.0 : 0.1, // 100% in dev, 10% in prod
+      debugMode: process.env.NODE_ENV === 'development'
+    });
+  }, []);
+
   return (
     <ErrorBoundary>
       <AuthProvider>

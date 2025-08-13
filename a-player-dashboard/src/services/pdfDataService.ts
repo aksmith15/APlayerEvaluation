@@ -140,7 +140,7 @@ export const fetchPDFEmployeeData = async (
   quarterId: string
 ): Promise<PDFEmployeeData> => {
   try {
-    console.log('🔄 Fetching comprehensive PDF data for employee:', employeeId);
+
     
     // Fetch employee data
     const { data: employee, error: employeeError } = await supabase
@@ -172,7 +172,7 @@ export const fetchPDFEmployeeData = async (
       .eq('quarter_id', quarterId);
 
     if (coreGroupError) {
-      console.warn('Failed to fetch core group scores:', coreGroupError);
+      // Failed to fetch core group scores, using fallback
     }
 
     // Transform core group data and calculate submission counts
@@ -212,11 +212,10 @@ export const fetchPDFEmployeeData = async (
       const personaResponse = await fetchPersonaClassification(employeeId, quarterId);
       personaClassification = personaResponse?.persona ?? null;
     } catch (err) {
-      console.warn('Failed to fetch persona classification:', err);
+      // Failed to fetch persona classification, using null
     }
 
     // Fetch individual core group breakdowns
-    console.log('🔄 Fetching core group breakdowns...');
     const [competenceData, characterData, curiosityData] = await Promise.allSettled([
       fetchCompetenceAnalysis(employeeId, quarterId),
       fetchCharacterAnalysis(employeeId, quarterId),
@@ -233,7 +232,7 @@ export const fetchPDFEmployeeData = async (
     const tenureCategory = employee.hire_date ? getTenureCategory(employee.hire_date) : 'new';
     const tenureDescription = getTenureDescription(tenureCategory);
 
-    console.log('✅ PDF employee data fetched successfully with core group breakdowns and tenure calculation');
+
     
     return {
       employee: {
@@ -257,7 +256,7 @@ export const fetchPDFEmployeeData = async (
     };
     
   } catch (error) {
-    console.error('❌ Error fetching PDF employee data:', error);
+    console.error('Error fetching PDF employee data:', error);
     throw new Error('Failed to fetch employee data for PDF generation');
   }
 };

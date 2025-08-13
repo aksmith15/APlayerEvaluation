@@ -8,6 +8,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import { PageWrapper, ValueBar } from '../../components/pdf';
 import { COLORS, TYPOGRAPHY, LAYOUT, getFontWeight, getAttributeColor } from '../../lib/theme';
+import { formatNameForPDF } from '../../utils/nameUtils';
 import { getDefaultCompanyWeights } from '../../services/attributeWeightsService';
 import { getInsightForAttribute } from '../../services/aiInsightsService';
 import type { PDFEmployeeData } from '../../services/pdfDataService';
@@ -37,7 +38,7 @@ export const StrengthsPage: React.FC<StrengthsPageProps> = ({
   pageIndex,
   itemsPerPage
 }) => {
-  const employeeName = data.employee.name || 'the employee';
+  const employeeName = formatNameForPDF(data.employee.name);
 
   // Description templates with {{evaluatee}} placeholder
   const DESCRIPTION_MAP: Record<string, string> = {

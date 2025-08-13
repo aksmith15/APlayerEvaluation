@@ -26,7 +26,20 @@
     /* Path mapping */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@features/*": ["./src/features/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@auth/*": ["./src/features/auth/*"],
+      "@survey/*": ["./src/features/survey/*"],
+      "@assignments/*": ["./src/features/assignments/*"],
+      "@analytics/*": ["./src/features/analytics/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@services/*": ["./src/services/*"],
+      "@types/*": ["./src/types/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@contexts/*": ["./src/contexts/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@constants/*": ["./src/constants/*"]
     }
   },
   "include": ["src"],

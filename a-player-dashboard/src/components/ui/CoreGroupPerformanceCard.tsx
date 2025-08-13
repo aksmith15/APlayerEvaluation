@@ -4,10 +4,28 @@
  * Displays: Competence, Character, Curiosity scores with visual indicators
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card } from './Card';
 import type { CoreGroupAnalyticsResponse } from '../../types/evaluation';
+
+// Recharts tooltip props interface
+interface TooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    payload: {
+      name: string;
+      emoji: string;
+      score: number;
+      manager: number;
+      peer: number;
+      self: number;
+      attributes: number;
+      completion: number;
+    };
+  }>;
+  label?: string;
+}
 
 interface CoreGroupPerformanceCardProps {
   data: CoreGroupAnalyticsResponse;
@@ -18,8 +36,8 @@ export const CoreGroupPerformanceCard: React.FC<CoreGroupPerformanceCardProps> =
   data,
   className = ''
 }) => {
-  // Transform data for the bar chart
-  const chartData = [
+  // Transform data for the bar chart - memoized to prevent unnecessary recalculations
+  const chartData = useMemo(() => [
     {
       name: 'Competence',
       score: data.coreGroups.competence.overall,
@@ -53,10 +71,10 @@ export const CoreGroupPerformanceCard: React.FC<CoreGroupPerformanceCardProps> =
       attributes: data.coreGroups.curiosity.attribute_count,
       completion: data.coreGroups.curiosity.completion_percentage
     }
-  ];
+  ], [data.coreGroups]);
 
   // Custom tooltip for the bar chart
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (

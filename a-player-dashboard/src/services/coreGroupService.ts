@@ -11,6 +11,81 @@ import type {
   DetailedAttributeScore,
   CoreGroupInsight
 } from '../types/evaluation';
+// Smart caching integration
+// import { CoreGroupCacheService } from './dataCacheManager'; // Disabled temporarily
+
+// Supabase response type definitions for core group queries
+interface CoreGroupScoreRow {
+  core_group: 'competence' | 'character' | 'curiosity';
+  weighted_score: number;
+  self_avg_score: number;
+  peer_avg_score: number;
+  manager_avg_score: number;
+  attribute_count: number;
+  completion_percentage: number;
+}
+
+interface ConsensusMetricRow {
+  core_group: 'competence' | 'character' | 'curiosity';
+  self_vs_others_gap: number;
+  manager_vs_peer_gap: number;
+  consensus_variance: number;
+}
+
+interface TrendDataRow {
+  core_group: 'competence' | 'character' | 'curiosity';
+  quarter_id: string;
+  quarter_name: string;
+  quarter_start_date: string;
+  current_score: number;
+  weighted_score: number;
+  self_avg_score: number;
+  peer_avg_score: number;
+  manager_avg_score: number;
+}
+
+interface PerformanceDataRow {
+  evaluatee_id: string;
+  evaluatee_name: string;
+  quarter_id: string;
+  quarter_name: string;
+  core_group: 'competence' | 'character' | 'curiosity';
+  overall_weighted_score: number;
+  overall_manager_score: number;
+  overall_peer_score: number;
+  overall_self_score: number;
+  competence_score: number;
+  character_score: number;
+  curiosity_score: number;
+  completion_percentage: number;
+  overall_completion_percentage: number;
+  total_attributes_evaluated: number;
+  core_groups_evaluated: number;
+}
+
+interface AttributeScoreRow {
+  attribute_name: string;
+  manager_score: number;
+  peer_score: number;
+  self_score: number;
+  weighted_final_score: number;
+  has_manager_eval: boolean;
+  has_peer_eval: boolean;
+  has_self_eval: boolean;
+  completion_percentage: number;
+}
+
+interface AttributeResponseDataRow {
+  attribute_name: string;
+  question_text: string;
+  response_value: string;
+  score_context: string;
+  submission_id: string;
+  submissions: Array<{
+    evaluatee_id: string;
+    quarter_id: string;
+  }>;
+}
 
 /**
  * Fetch core group analytics data for a specific employee and quarter
@@ -21,8 +96,6 @@ export const fetchCoreGroupAnalytics = async (
   quarterId: string
 ): Promise<CoreGroupAnalyticsResponse> => {
   try {
-    console.log(`Fetching core group analytics for employee ${employeeId} in quarter ${quarterId}`);
-
     // Fetch core group scores
     const { data: coreGroupScores, error: scoresError } = await supabase
       .from('core_group_scores')
@@ -32,7 +105,6 @@ export const fetchCoreGroupAnalytics = async (
       .order('core_group');
 
     if (scoresError) {
-      console.error('Error fetching core group scores:', scoresError);
       throw scoresError;
     }
 
@@ -45,7 +117,6 @@ export const fetchCoreGroupAnalytics = async (
       .order('core_group');
 
     if (consensusError) {
-      console.error('Error fetching consensus data:', consensusError);
       throw consensusError;
     }
 
@@ -86,7 +157,7 @@ export const fetchCoreGroupAnalytics = async (
     const peerScores: number[] = [];
     const managerScores: number[] = [];
 
-    coreGroupScores.forEach((score: any) => {
+    coreGroupScores.forEach((score: CoreGroupScoreRow) => {
       const coreGroup = score.core_group as 'competence' | 'character' | 'curiosity';
       
       response.coreGroups[coreGroup] = {
@@ -119,7 +190,7 @@ export const fetchCoreGroupAnalytics = async (
 
     // Process consensus metrics if available
     if (consensusData && consensusData.length > 0) {
-      consensusData.forEach((consensus: any) => {
+      consensusData.forEach((consensus: ConsensusMetricRow) => {
         const coreGroup = consensus.core_group as 'competence' | 'character' | 'curiosity';
         
         response.evaluatorConsensus.consensusMetrics[coreGroup] = {
@@ -130,11 +201,9 @@ export const fetchCoreGroupAnalytics = async (
       });
     }
 
-    console.log(`Successfully fetched core group analytics for ${response.metadata.evaluatee_name}`);
     return response;
 
   } catch (error) {
-    console.error('Error in fetchCoreGroupAnalytics:', error);
     throw error;
   }
 };
@@ -147,8 +216,6 @@ export const fetchCoreGroupSummary = async (
   quarterId: string
 ): Promise<CoreGroupPerformance> => {
   try {
-    console.log(`Fetching core group summary for employee ${employeeId} in quarter ${quarterId}`);
-
     const { data: summaryData, error } = await supabase
       .from('core_group_summary')
       .select('*')
@@ -157,7 +224,6 @@ export const fetchCoreGroupSummary = async (
       .single();
 
     if (error) {
-      console.error('Error fetching core group summary:', error);
       throw error;
     }
 
@@ -189,11 +255,10 @@ export const fetchCoreGroupSummary = async (
       performance_level: performanceLevel
     };
 
-    console.log(`Successfully fetched core group summary for ${performance.evaluatee_name}`);
+
     return performance;
 
   } catch (error) {
-    console.error('Error in fetchCoreGroupSummary:', error);
     throw error;
   }
 };
@@ -212,35 +277,26 @@ export const fetchCoreGroupTrends = async (
   quarter_start_date: string;
 }>> => {
   try {
-    console.log(`Fetching core group trends for employee ${employeeId}`);
-
     const { data: trendsData, error } = await supabase
       .from('quarter_core_group_trends')
       .select('*')
       .eq('evaluatee_id', employeeId)
       .order('quarter_start_date');
-      
-    console.log('🔍 Database query result:', { trendsData, error });
 
     if (error) {
-      console.error('Error fetching core group trends:', error);
       throw error;
     }
 
     if (!trendsData || trendsData.length === 0) {
-      console.warn(`No trend data found for employee ${employeeId}`);
       return [];
     }
 
     // Group by quarter and aggregate core group scores
     const quarterMap = new Map();
     
-    console.log('🔍 Raw trends data from database:', trendsData);
-    
-    trendsData.forEach((trend: any) => {
+    trendsData.forEach((trend: TrendDataRow) => {
       // Use quarter_id as the key to match with individual trends
       const quarter = trend.quarter_id;
-      console.log('📋 Processing trend record:', trend);
       
       if (!quarterMap.has(quarter)) {
         quarterMap.set(quarter, {
@@ -256,18 +312,14 @@ export const fetchCoreGroupTrends = async (
       const quarterData = quarterMap.get(quarter);
       const scoreValue = Number(trend.current_score) || 0;
       quarterData[trend.core_group] = scoreValue;
-      
-      console.log(`📊 Updated quarter ${quarter} (${trend.quarter_name}) ${trend.core_group} = ${scoreValue}`);
     });
 
     const trends = Array.from(quarterMap.values())
       .sort((a, b) => new Date(a.quarter_start_date).getTime() - new Date(b.quarter_start_date).getTime());
 
-    console.log(`✅ Successfully fetched ${trends.length} quarters of trend data:`, trends);
     return trends;
 
   } catch (error) {
-    console.error('Error in fetchCoreGroupTrends:', error);
     throw error;
   }
 };
@@ -279,7 +331,7 @@ export const fetchAllCoreGroupScores = async (
   quarterId: string
 ): Promise<CoreGroupPerformance[]> => {
   try {
-    console.log(`Fetching all core group scores for quarter ${quarterId}`);
+
 
     const { data: allScores, error } = await supabase
       .from('core_group_summary')
@@ -288,16 +340,14 @@ export const fetchAllCoreGroupScores = async (
       .order('evaluatee_name');
 
     if (error) {
-      console.error('Error fetching all core group scores:', error);
       throw error;
     }
 
     if (!allScores || allScores.length === 0) {
-      console.warn(`No core group scores found for quarter ${quarterId}`);
       return [];
     }
 
-    const performances: CoreGroupPerformance[] = allScores.map((score: any) => {
+    const performances: CoreGroupPerformance[] = allScores.map((score: PerformanceDataRow) => {
       const overallScore = Number(score.overall_weighted_score) || 0;
       let performanceLevel: 'high' | 'medium' | 'low' = 'low';
       if (overallScore >= 8.0) performanceLevel = 'high';
@@ -322,11 +372,9 @@ export const fetchAllCoreGroupScores = async (
       };
     });
 
-    console.log(`Successfully fetched core group data for ${performances.length} employees`);
     return performances;
 
   } catch (error) {
-    console.error('Error in fetchAllCoreGroupScores:', error);
     throw error;
   }
 };
@@ -347,14 +395,13 @@ export const checkCoreGroupDataAvailability = async (
       .limit(1);
 
     if (error) {
-      console.error('Error checking core group data availability:', error);
+
       return false;
     }
 
     return data && data.length > 0;
 
   } catch (error) {
-    console.error('Error in checkCoreGroupDataAvailability:', error);
     return false;
   }
 };
@@ -372,7 +419,7 @@ export const fetchCompetenceAnalysis = async (
   quarterId: string
 ): Promise<DetailedCoreGroupAnalysis> => {
   try {
-    console.log(`Fetching competence analysis for employee ${employeeId} in quarter ${quarterId}`);
+
 
     // Fetch competence attribute scores
     const { data: attributeScores, error: scoresError } = await supabase
@@ -394,7 +441,6 @@ export const fetchCompetenceAnalysis = async (
       .order('attribute_name');
 
     if (scoresError) {
-      console.error('Error fetching competence scores:', scoresError);
       throw scoresError;
     }
 
@@ -414,12 +460,11 @@ export const fetchCompetenceAnalysis = async (
       .in('attribute_name', ['Reliability', 'Accountability for Action', 'Quality of Work']);
 
     if (responsesError) {
-      console.error('Error fetching competence responses:', responsesError);
       throw responsesError;
     }
 
     // Collect unique submission IDs
-    const submissionIds = Array.from(new Set((responses || []).map((r: any) => r.submission_id))).filter(Boolean) as string[];
+    const submissionIds = Array.from(new Set((responses || []).map((r: AttributeResponseDataRow) => r.submission_id))).filter(Boolean) as string[];
 
     // Generate insights using the existing algorithm
     const insights = generateCompetenceInsights(attributeScores || []);
@@ -438,7 +483,6 @@ export const fetchCompetenceAnalysis = async (
     };
 
   } catch (error) {
-    console.error('Error in fetchCompetenceAnalysis:', error);
     throw error;
   }
 };
@@ -452,7 +496,7 @@ export const fetchCharacterAnalysis = async (
   quarterId: string
 ): Promise<DetailedCoreGroupAnalysis> => {
   try {
-    console.log(`Fetching character analysis for employee ${employeeId} in quarter ${quarterId}`);
+
 
     // Fetch character attribute scores
     const { data: attributeScores, error: scoresError } = await supabase
@@ -474,7 +518,6 @@ export const fetchCharacterAnalysis = async (
       .order('attribute_name');
 
     if (scoresError) {
-      console.error('Error fetching character scores:', scoresError);
       throw scoresError;
     }
 
@@ -494,12 +537,11 @@ export const fetchCharacterAnalysis = async (
       .in('attribute_name', ['Leadership', 'Communication Skills', 'Teamwork']);
 
     if (responsesError) {
-      console.error('Error fetching character responses:', responsesError);
       throw responsesError;
     }
 
     // Collect unique submission IDs
-    const submissionIds = Array.from(new Set((responses || []).map((r: any) => r.submission_id))).filter(Boolean) as string[];
+    const submissionIds = Array.from(new Set((responses || []).map((r: AttributeResponseDataRow) => r.submission_id))).filter(Boolean) as string[];
 
     // Generate insights using the existing algorithm
     const insights = generateCharacterInsights(attributeScores || []);
@@ -518,7 +560,6 @@ export const fetchCharacterAnalysis = async (
     };
 
   } catch (error) {
-    console.error('Error in fetchCharacterAnalysis:', error);
     throw error;
   }
 };
@@ -532,7 +573,7 @@ export const fetchCuriosityAnalysis = async (
   quarterId: string
 ): Promise<DetailedCoreGroupAnalysis> => {
   try {
-    console.log(`Fetching curiosity analysis for employee ${employeeId} in quarter ${quarterId}`);
+
 
     // Fetch curiosity attribute scores (4 attributes)
     const { data: attributeScores, error: scoresError } = await supabase
@@ -554,7 +595,6 @@ export const fetchCuriosityAnalysis = async (
       .order('attribute_name');
 
     if (scoresError) {
-      console.error('Error fetching curiosity scores:', scoresError);
       throw scoresError;
     }
 
@@ -574,12 +614,11 @@ export const fetchCuriosityAnalysis = async (
       .in('attribute_name', ['Problem Solving Ability', 'Adaptability', 'Taking Initiative', 'Continuous Improvement']);
 
     if (responsesError) {
-      console.error('Error fetching curiosity responses:', responsesError);
       throw responsesError;
     }
 
     // Collect unique submission IDs
-    const submissionIds = Array.from(new Set((responses || []).map((r: any) => r.submission_id))).filter(Boolean) as string[];
+    const submissionIds = Array.from(new Set((responses || []).map((r: AttributeResponseDataRow) => r.submission_id))).filter(Boolean) as string[];
 
     // Generate insights using the existing algorithm
     const insights = generateCuriosityInsights(attributeScores || []);
@@ -598,7 +637,6 @@ export const fetchCuriosityAnalysis = async (
     };
 
   } catch (error) {
-    console.error('Error in fetchCuriosityAnalysis:', error);
     throw error;
   }
 };
@@ -610,7 +648,7 @@ export const fetchCuriosityAnalysis = async (
 /**
  * Transform raw attribute scores into structured format for charts
  */
-function transformAttributeScores(scores: any[]): DetailedAttributeScore[] {
+function transformAttributeScores(scores: AttributeScoreRow[]): DetailedAttributeScore[] {
   return scores.map(score => ({
     attributeName: score.attribute_name,
     scores: {
@@ -635,7 +673,7 @@ function transformAttributeScores(scores: any[]): DetailedAttributeScore[] {
 /**
  * Generate competence-specific insights
  */
-function generateCompetenceInsights(scores: any[]): CoreGroupInsight[] {
+function generateCompetenceInsights(scores: AttributeScoreRow[]): CoreGroupInsight[] {
   const insights: CoreGroupInsight[] = [];
 
   // Analyze strengths (scores >= 8.0)
@@ -688,7 +726,7 @@ function generateCompetenceInsights(scores: any[]): CoreGroupInsight[] {
 /**
  * Generate character-specific insights
  */
-function generateCharacterInsights(scores: any[]): CoreGroupInsight[] {
+function generateCharacterInsights(scores: AttributeScoreRow[]): CoreGroupInsight[] {
   const insights: CoreGroupInsight[] = [];
 
   // Analyze leadership strengths
@@ -738,7 +776,7 @@ function generateCharacterInsights(scores: any[]): CoreGroupInsight[] {
 /**
  * Generate curiosity-specific insights
  */
-function generateCuriosityInsights(scores: any[]): CoreGroupInsight[] {
+function generateCuriosityInsights(scores: AttributeScoreRow[]): CoreGroupInsight[] {
   const insights: CoreGroupInsight[] = [];
 
   // Analyze innovation strengths

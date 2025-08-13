@@ -2,12 +2,19 @@ import { supabase } from './supabase';
 import { API_ENDPOINTS } from '../constants/config';
 import type { WeightedEvaluationScore, Person, QuarterlyTrendData, QuarterOption } from '../types/database';
 import type { Employee, Quarter, WebhookPayload, AIAnalysisResult, EnhancedTrendResponse } from '../types/evaluation';
+// Smart caching integration
+import { 
+  EmployeeCacheService, 
+  QuarterCacheService, 
+  EvaluationCacheService,
+  // CoreGroupCacheService // Disabled temporarily 
+} from './dataCacheManager';
 
 // Data fetching utilities
 
 export const fetchEmployees = async (): Promise<Employee[]> => {
-  try {
-    console.log('Fetching employees from people table...');
+  return EmployeeCacheService.getEmployeeList(async () => {
+    console.log('🔍 Fetching fresh employees from people table...');
     
     // Get all active employees (simplified version)
     const { data: people, error: peopleError } = await supabase
@@ -26,7 +33,7 @@ export const fetchEmployees = async (): Promise<Employee[]> => {
       return [];
     }
 
-    console.log(`Found ${people.length} people in database`);
+    console.log(`✅ Found ${people.length} people in database`);
 
     // Convert to Employee format with basic data
     const employees: Employee[] = people.map((person) => ({
@@ -35,15 +42,13 @@ export const fetchEmployees = async (): Promise<Employee[]> => {
       latestQuarter: undefined
     }));
 
+    console.log('💾 Employees data cached with smart cache');
     return employees;
-  } catch (error) {
-    console.error('Error fetching employees:', error);
-    throw error;
-  }
+  });
 };
 
 export const fetchEmployeeData = async (employeeId: string): Promise<Person | null> => {
-  try {
+  return EmployeeCacheService.getEmployee(employeeId, async () => {
     const { data, error } = await supabase
       .from('people')
       .select('*')
@@ -52,55 +57,52 @@ export const fetchEmployeeData = async (employeeId: string): Promise<Person | nu
 
     if (error) throw error;
     return data;
-  } catch (error) {
-    console.error('Error fetching employee data:', error);
-    throw error;
-  }
+  });
 };
 
 export const fetchQuarters = async (): Promise<Quarter[]> => {
-  try {
+  return QuarterCacheService.getQuarters(async () => {
     const { data, error } = await supabase
       .from('evaluation_cycles')
       .select('*')
       .order('start_date', { ascending: false });
 
     if (error) throw error;
-
+    
     return data.map(cycle => ({
       id: cycle.id,
       name: cycle.name,
       startDate: cycle.start_date,
       endDate: cycle.end_date
     }));
-  } catch (error) {
-    console.error('Error fetching quarters:', error);
-    throw error;
-  }
+  });
 };
 
 export const fetchEvaluationScores = async (
   employeeId: string,
   quarterId?: string
 ): Promise<WeightedEvaluationScore[]> => {
-  try {
-    let query = supabase
-      .from('weighted_evaluation_scores')
-      .select('*')
-      .eq('evaluatee_id', employeeId);
+  const cacheKey = quarterId || 'all-quarters';
+  
+  return EvaluationCacheService.getEvaluationScores(
+    employeeId,
+    cacheKey,
+    async () => {
+      let query = supabase
+        .from('weighted_evaluation_scores')
+        .select('*')
+        .eq('evaluatee_id', employeeId);
 
-    if (quarterId) {
-      query = query.eq('quarter_id', quarterId);
+      if (quarterId) {
+        query = query.eq('quarter_id', quarterId);
+      }
+
+      const { data, error } = await query.order('attribute_name');
+
+      if (error) throw error;
+      return data || [];
     }
-
-    const { data, error } = await query.order('attribute_name');
-
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error('Error fetching evaluation scores:', error);
-    throw error;
-  }
+  );
 };
 
 export const fetchAppConfig = async (key: string): Promise<string | null> => {

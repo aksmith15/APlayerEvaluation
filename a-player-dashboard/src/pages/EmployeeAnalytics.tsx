@@ -1,9 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, useMemo } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { fetchEmployeeData, fetchQuarters, fetchEvaluationScores, fetchQuarterlyTrendData, fetchEnhancedTrendData, fetchHistoricalEvaluationScores, fetchAvailableQuarters, generateAIMetaAnalysis, pollAnalysisCompletion, checkExistingAnalysis } from '../services/dataFetching';
 import { fetchCoreGroupAnalytics, checkCoreGroupDataAvailability } from '../services/coreGroupService';
 import { subscribeToEmployeeEvaluations, subscribeToQuarterlyScores, subscribeToEvaluationCycles, realtimeManager } from '../services/realtimeService';
-import { LoadingSpinner, ErrorMessage, Card, RadarChart, ClusteredBarChart, HistoricalClusteredBarChart, TrendLineChart, ChartSkeleton, NoEvaluationData, Breadcrumb, useBreadcrumbs, KeyboardShortcuts, PDFViewer, DownloadAnalyticsButton, EmployeeProfile, QuarterlyNotes, TopAnalyticsGrid, CoreGroupAnalysisTabs, GeneratePDFButton } from '../components/ui';
+import { LoadingSpinner, ErrorMessage, Card, ChartSkeleton, NoEvaluationData, Breadcrumb, useBreadcrumbs, KeyboardShortcuts, PDFViewer, DownloadAnalyticsButton, EmployeeProfile, QuarterlyNotes, TopAnalyticsGrid } from '../components/ui';
+// Direct chart imports for better code splitting
+import { RadarChart, ClusteredBarChart, HistoricalClusteredBarChart, TrendLineChart } from '../components/ui/charts';
+// Chart preloading for performance optimization
+import { preloadChartComponents } from '../services/chartLoader';
+
+// Lazy load heavy components to reduce initial bundle size
+const LazyGeneratePDFButton = React.lazy(() => 
+  import('../components/ui').then(module => ({ default: module.GeneratePDFButton }))
+);
+
+const LazyCoreGroupAnalysisTabs = React.lazy(() => 
+  import('../components/ui').then(module => ({ default: module.CoreGroupAnalysisTabs }))
+);
 import { useNavigation, useKeyboardNavigation } from '../contexts/NavigationContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useChartHeight } from '../utils/useResponsive';
@@ -92,6 +105,10 @@ export const EmployeeAnalytics: React.FC = () => {
       navigate(ROUTES.EMPLOYEE_SELECTION);
       return;
     }
+    
+    // Preload chart components for better performance
+    preloadChartComponents(['clustered-bar', 'historical-bar']).catch(console.warn);
+    
     loadInitialData();
   }, [employeeId, navigate]);
 
@@ -491,15 +508,15 @@ export const EmployeeAnalytics: React.FC = () => {
     }
   };
 
-  // Calculate overall score for selected quarter
-  const calculateOverallScore = () => {
+  // Calculate overall score for selected quarter - memoized
+  const overallScore = useMemo(() => {
     if (evaluationScores.length === 0) return null;
     const totalScore = evaluationScores.reduce((sum, score) => sum + score.weighted_final_score, 0);
     return totalScore / evaluationScores.length;
-  };
+  }, [evaluationScores]);
 
-  // Get performance attributes data for charts
-  const getAttributesData = () => {
+  // Get performance attributes data for charts - memoized
+  const attributesData = useMemo(() => {
     return evaluationScores.map(score => ({
       attribute: score.attribute_name,
       manager: score.manager_score,
@@ -511,10 +528,10 @@ export const EmployeeAnalytics: React.FC = () => {
       hasSelf: score.has_self_eval,
       completion: score.completion_percentage
     }));
-  };
+  }, [evaluationScores]);
 
-  // Enhanced trend data transformation with core group support (Stage 11)
-  const getTrendData = () => {
+  // Enhanced trend data transformation with core group support (Stage 11) - memoized
+  const trendData = useMemo(() => {
     if (!enhancedTrendData) {
       // Fallback to legacy trend data if enhanced data is not available
       if (!trendDataRaw || trendDataRaw.length === 0) return [];
@@ -568,13 +585,13 @@ export const EmployeeAnalytics: React.FC = () => {
     
     console.log('✅ Final trend data for chart:', result);
     return result;
-  };
+  }, [enhancedTrendData, trendDataRaw]);
 
-  // Get selected quarter info
-  const selectedQuarterInfo = quarters.find(q => q.id === selectedQuarter);
-  const overallScore = calculateOverallScore();
-  const attributesData = getAttributesData();
-  const trendData = getTrendData();
+  // Get selected quarter info - memoized
+  const selectedQuarterInfo = useMemo(() => 
+    quarters.find(q => q.id === selectedQuarter), 
+    [quarters, selectedQuarter]
+  );
 
   // Prepare analytics data for export
   const getAnalyticsDataForExport = () => {
@@ -715,12 +732,14 @@ export const EmployeeAnalytics: React.FC = () => {
                 <label className="block text-sm font-medium text-secondary-700 mb-1 opacity-0">
                   PDF Report
                 </label>
-                <GeneratePDFButton
-                  employee={employee!}
-                  selectedQuarter={selectedQuarter}
-                  quarterName={selectedQuarterInfo?.name || 'Current Quarter'}
-                  disabled={!employee || !selectedQuarter || loading}
-                />
+                <Suspense fallback={<LoadingSpinner message="Loading PDF generator..." />}>
+                  <LazyGeneratePDFButton
+                    employee={employee!}
+                    selectedQuarter={selectedQuarter}
+                    quarterName={selectedQuarterInfo?.name || 'Current Quarter'}
+                    disabled={!employee || !selectedQuarter || loading}
+                  />
+                </Suspense>
               </div>
             </div>
           </div>
@@ -772,13 +791,15 @@ export const EmployeeAnalytics: React.FC = () => {
 
         {/* Core Group Detailed Analysis Tabs - Drill-Down View */}
         <div className="page-break-avoid core-group-detailed-tabs">
-          <CoreGroupAnalysisTabs
-            employeeId={employeeId || ''}
-            quarterId={selectedQuarter}
-            employeeName={employee?.name}
-            quarterName={selectedQuarterInfo?.name}
-            className="mb-8"
-          />
+          <Suspense fallback={<LoadingSpinner message="Loading detailed analysis..." />}>
+            <LazyCoreGroupAnalysisTabs
+              employeeId={employeeId || ''}
+              quarterId={selectedQuarter}
+              employeeName={employee?.name}
+              quarterName={selectedQuarterInfo?.name}
+              className="mb-8"
+            />
+          </Suspense>
         </div>
 
         {/* Performance Overview (Radar Chart) - Full Width */}

@@ -4,7 +4,7 @@
  * Attributes: Reliability, Accountability for Action, Quality of Work
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { fetchCompetenceAnalysis } from '../../services/coreGroupService';
 import { generateCompetenceAnalysisFromData } from '../../services/competencePatternAnalysis';
 import { ClusteredBarChart } from './ClusteredBarChart';
@@ -69,19 +69,21 @@ export const CompetenceTab: React.FC<CompetenceTabProps> = ({
     }
   }, [employeeId, quarterId, initialData]);
 
-  // Transform data for clustered bar chart
-  const chartData = data?.attributes.map(attr => ({
-    attribute: attr.attributeName,  // ClusteredBarChart expects 'attribute' not 'name'
-    manager: attr.scores.manager,
-    peer: attr.scores.peer,
-    self: attr.scores.self,
-    weighted: attr.scores.weighted,
-    // Additional properties for tooltips (match ClusteredBarChart types)
-    hasManager: attr.evaluatorCoverage.hasManager,
-    hasPeer: attr.evaluatorCoverage.hasPeer,
-    hasSelf: attr.evaluatorCoverage.hasSelf,
-    completion: 0
-  })) || [];
+  // Transform data for clustered bar chart - memoized to prevent unnecessary recalculations
+  const chartData = useMemo(() => {
+    return data?.attributes.map(attr => ({
+      attribute: attr.attributeName,  // ClusteredBarChart expects 'attribute' not 'name'
+      manager: attr.scores.manager,
+      peer: attr.scores.peer,
+      self: attr.scores.self,
+      weighted: attr.scores.weighted,
+      // Additional properties for tooltips (match ClusteredBarChart types)
+      hasManager: attr.evaluatorCoverage.hasManager,
+      hasPeer: attr.evaluatorCoverage.hasPeer,
+      hasSelf: attr.evaluatorCoverage.hasSelf,
+      completion: 0
+    })) || [];
+  }, [data?.attributes]);
 
   if (loading) {
     return (
@@ -153,7 +155,7 @@ export const CompetenceTab: React.FC<CompetenceTabProps> = ({
             </p>
           </div>
           
-          <div className="h-80">
+          <div className="h-80 mb-6">
             <ClusteredBarChart
               data={chartData}
               height={320}
@@ -164,7 +166,7 @@ export const CompetenceTab: React.FC<CompetenceTabProps> = ({
           </div>
           
           {/* Score Summary Cards */}
-          <div className="mt-4 grid grid-cols-3 gap-3">
+          <div className="mt-2 grid grid-cols-3 gap-3">
             {data.attributes.map(attr => (
               <div key={attr.attributeName} className="bg-gray-50 rounded-lg p-3">
                 <div className="text-xs font-medium text-secondary-600 mb-1">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { 
   fetchAttributeWeights, 
   updateAttributeWeights, 
@@ -8,6 +8,20 @@ import {
 } from '../../services/attributeWeightsService';
 import type { AttributeWeight, AttributeWeightUpdate, WeightDistribution } from '../../types/database';
 import { Button, Card, LoadingSpinner } from './';
+
+// Default attribute ranking - Quality of Work, Reliability, Accountability for Action first
+const DEFAULT_ATTRIBUTE_RANKING = [
+  "Quality of Work",
+  "Reliability", 
+  "Accountability for Action",
+  "Communication Skills",
+  "Leadership",
+  "Problem Solving Ability",
+  "Teamwork",
+  "Taking Initiative",
+  "Adaptability",
+  "Continuous Improvement"
+];
 
 // Industry Templates for different business contexts
 interface IndustryTemplate {
@@ -23,15 +37,15 @@ const INDUSTRY_TEMPLATES: Record<string, IndustryTemplate> = {
     description: "Optimized for sales representatives and account managers",
     guidance: "Sales roles require strong communication skills and initiative to drive revenue. Leadership and accountability are critical for managing client relationships and hitting targets.",
     attributeRanking: [
+      "Quality of Work",
+      "Reliability",
+      "Accountability for Action",
       "Communication Skills",
       "Taking Initiative", 
       "Leadership",
-      "Accountability for Action",
       "Adaptability",
       "Problem Solving Ability",
-      "Reliability",
       "Teamwork",
-      "Quality of Work",
       "Continuous Improvement"
     ]
   },
@@ -40,8 +54,8 @@ const INDUSTRY_TEMPLATES: Record<string, IndustryTemplate> = {
     description: "Designed for operations managers and process specialists",
     guidance: "Operations roles prioritize reliability and process excellence. Quality of work and continuous improvement are essential for optimizing workflows and maintaining efficiency.",
     attributeRanking: [
-      "Reliability",
       "Quality of Work",
+      "Reliability",
       "Accountability for Action",
       "Continuous Improvement",
       "Problem Solving Ability",
@@ -57,9 +71,9 @@ const INDUSTRY_TEMPLATES: Record<string, IndustryTemplate> = {
     description: "Tailored for construction, electricians, and hands-on technical roles",
     guidance: "Field work demands accountability and reliability above all. Quality work and problem-solving are essential for safety and project success, while adaptability helps handle unexpected on-site challenges.",
     attributeRanking: [
-      "Accountability for Action",
       "Quality of Work",
-      "Reliability", 
+      "Reliability",
+      "Accountability for Action",
       "Adaptability",
       "Taking Initiative",
       "Problem Solving Ability",
@@ -74,16 +88,16 @@ const INDUSTRY_TEMPLATES: Record<string, IndustryTemplate> = {
     description: "Configured for C-level executives and senior leadership",
     guidance: "Executive roles require visionary leadership and strategic accountability. Taking initiative and adaptability are crucial for driving organizational change and growth.",
     attributeRanking: [
-      "Leadership",
+      "Quality of Work",
+      "Reliability",
       "Accountability for Action",
+      "Leadership",
       "Taking Initiative",
       "Adaptability", 
       "Communication Skills",
       "Problem Solving Ability",
       "Continuous Improvement",
-      "Teamwork",
-      "Quality of Work",
-      "Reliability"
+      "Teamwork"
     ]
   }
 };
@@ -92,7 +106,7 @@ interface AttributeWeightsManagerProps {
   onWeightsUpdated?: () => void;
 }
 
-export const AttributeWeightsManager: React.FC<AttributeWeightsManagerProps> = ({
+export const AttributeWeightsManager: React.FC<AttributeWeightsManagerProps> = memo(({
   onWeightsUpdated
 }) => {
   const [weights, setWeights] = useState<AttributeWeight[]>([]);
@@ -115,14 +129,7 @@ export const AttributeWeightsManager: React.FC<AttributeWeightsManagerProps> = (
   }, []);
 
   // Initialize ranking from current weights when data loads
-  useEffect(() => {
-    if (weights.length > 0 && attributeRanking.length === 0) {
-      const currentRanking = [...weights]
-        .sort((a, b) => (localWeights[b.attribute_name] || b.weight) - (localWeights[a.attribute_name] || a.weight))
-        .map(w => w.attribute_name);
-      setAttributeRanking(currentRanking);
-    }
-  }, [weights, localWeights, attributeRanking.length]);
+  // (Weight redistribution logic moved to loadWeights function for better timing)
 
   // Convert ranking to weights (top item gets 1.9, others scale down)
   const convertRankingToWeights = (ranking: string[]): Record<string, number> => {
@@ -154,12 +161,19 @@ export const AttributeWeightsManager: React.FC<AttributeWeightsManagerProps> = (
       setWeights(weightsData);
       setDistribution(distributionData);
       
-      // Initialize local weights state
-      const localState: Record<string, number> = {};
-      weightsData.forEach(weight => {
-        localState[weight.attribute_name] = weight.weight;
-      });
-      setLocalWeights(localState);
+      // Create default ranking with Quality of Work, Reliability, Accountability for Action as top 3
+      const attributeNames = weightsData.map(w => w.attribute_name);
+      const orderedRanking = DEFAULT_ATTRIBUTE_RANKING.filter(attr => attributeNames.includes(attr));
+      const remainingAttributes = attributeNames.filter(attr => !DEFAULT_ATTRIBUTE_RANKING.includes(attr));
+      const finalRanking = [...orderedRanking, ...remainingAttributes];
+      
+      // Set the ranking
+      setAttributeRanking(finalRanking);
+      
+      // Redistribute weights according to the new ranking
+      const redistributedWeights = convertRankingToWeights(finalRanking);
+      setLocalWeights(redistributedWeights);
+      setHasChanges(true); // Mark as having changes so user can save the new distribution
       
     } catch (err) {
       console.error('Error loading weights:', err);
@@ -615,4 +629,4 @@ export const AttributeWeightsManager: React.FC<AttributeWeightsManagerProps> = (
       </Card>
     </div>
   );
-}; 
+}); 

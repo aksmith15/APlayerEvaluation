@@ -38,6 +38,7 @@ export const GeneratePDFButton: React.FC<GeneratePDFButtonProps> = ({
       await new Promise(resolve => setTimeout(resolve, 100));
 
       console.log('🚀 Generating React-PDF report...');
+      
       await generateEmployeeReportReact({
         employee,
         selectedQuarter,

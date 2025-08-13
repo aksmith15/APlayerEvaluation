@@ -7,6 +7,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import { PageWrapper } from '../../components/pdf';
 import { COLORS, LAYOUT, getFontWeight } from '../../lib/theme';
+import { formatNameForPDF } from '../../utils/nameUtils';
 import { profileDescriptions, DEFAULT_MISSING_PROFILE_MESSAGE } from './profileDescriptions';
 import type { PDFEmployeeData } from '../../services/pdfDataService';
 import type { AIReviewOut } from '../../services/aiReviewService';
@@ -68,7 +69,7 @@ export const DescriptiveReviewPage: React.FC<DescriptiveReviewPageProps> = ({
     }
   });
 
-  const employeeName = data.employee.name || 'This employee';
+  const employeeName = formatNameForPDF(data.employee.name);
 
   const toLetter = (score: number): 'A' | 'B' | 'C' | 'D' => {
     if (score >= 8.0) return 'A';

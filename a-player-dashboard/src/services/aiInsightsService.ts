@@ -50,10 +50,7 @@ export async function fetchStrengthsInsights(
   employee: AIInsightsEmployee,
   attributes: AIInsightsAttribute[]
 ): Promise<AIInsightsResponse> {
-  console.log('🔍 fetchStrengthsInsights called, AI_INSIGHTS_ENABLED:', FEATURES.AI_INSIGHTS_ENABLED);
-  
   if (!FEATURES.AI_INSIGHTS_ENABLED) {
-    console.debug('AI insights disabled via feature flag; returning empty strengths insights');
     return { insights: [] };
   }
   if (!attributes || attributes.length === 0) {
@@ -69,8 +66,6 @@ export async function fetchStrengthsInsights(
   };
 
   try {
-    console.log('🔍 Calling ai-strengths-insights function');
-    
     // Get user session for proper authentication
     const { data: sess } = await supabase.auth.getSession();
     const jwt = sess?.session?.access_token;
@@ -81,20 +76,11 @@ export async function fetchStrengthsInsights(
     });
 
     if (error) {
-      console.error('❌ AI Strengths Insights failed:', {
-        error,
-        message: error.message,
-        details: error.details || 'No details available',
-        payload: insightsPayload
-      });
       return { insights: [] };
     }
 
-    console.log('✅ AI STRENGTHS INSIGHTS RESPONSE:', data);
-
     return data as AIInsightsResponse;
   } catch (error) {
-    console.error('Error fetching strengths insights (graceful fallback to empty):', error);
     return { insights: [] };
   }
 }
@@ -109,9 +95,7 @@ export async function fetchDevelopmentInsights(
   employee: AIInsightsEmployee,
   attributes: AIInsightsAttribute[]
 ): Promise<AIInsightsResponse> {
-  console.log('🔍 fetchDevelopmentInsights called, AI_INSIGHTS_ENABLED:', FEATURES.AI_INSIGHTS_ENABLED);
   if (!FEATURES.AI_INSIGHTS_ENABLED) {
-    console.debug('AI insights disabled via feature flag; returning empty development insights');
     return { insights: [] };
   }
   if (!attributes || attributes.length === 0) {
@@ -127,8 +111,6 @@ export async function fetchDevelopmentInsights(
   };
 
   try {
-    console.log('🔍 Calling ai-development-insights function');
-    
     // Get user session for proper authentication
     const { data: sess } = await supabase.auth.getSession();
     const jwt = sess?.session?.access_token;
@@ -139,20 +121,11 @@ export async function fetchDevelopmentInsights(
     });
 
     if (error) {
-      console.error('❌ AI Development Insights failed:', {
-        error,
-        message: error.message,
-        details: error.details || 'No details available',
-        payload: insightsPayload
-      });
       return { insights: [] };
     }
 
-    console.log('✅ AI DEVELOPMENT INSIGHTS RESPONSE:', data);
-
     return data as AIInsightsResponse;
   } catch (error) {
-    console.error('Error fetching development insights (graceful fallback to empty):', error);
     return { insights: [] };
   }
 }

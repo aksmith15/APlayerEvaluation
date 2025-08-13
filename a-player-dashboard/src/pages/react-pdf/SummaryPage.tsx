@@ -7,6 +7,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import { PageWrapper, ValueBar } from '../../components/pdf';
 import { COLORS, TYPOGRAPHY, LAYOUT, getFontWeight, getAttributeColor } from '../../lib/theme';
+import { formatNameForPDF } from '../../utils/nameUtils';
 import type { PDFEmployeeData } from '../../services/pdfDataService';
 
 interface SummaryPageProps {
@@ -20,7 +21,7 @@ export const SummaryPage: React.FC<SummaryPageProps> = ({
   pageNumber, 
   totalPages 
 }) => {
-  const employeeName = data.employee.name || 'the employee';
+  const employeeName = formatNameForPDF(data.employee.name);
 
   const styles = StyleSheet.create({
     container: {

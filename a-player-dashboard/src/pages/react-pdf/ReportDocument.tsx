@@ -8,6 +8,7 @@ import React from 'react';
 import { Document, StyleSheet } from '@react-pdf/renderer';
 import { CoverPage, SummaryPage, StrengthsPage, DevelopmentAreasPage, DescriptiveReviewPage, CoachingReportPage } from './index';
 import { getDefaultCompanyWeights } from '../../services/attributeWeightsService';
+import { formatNameForPDF } from '../../utils/nameUtils';
 import type { PDFEmployeeData } from '../../services/pdfDataService';
 import type { AIReviewOut } from '../../services/aiReviewService';
 import type { AIInsightsResponse } from '../../services/aiInsightsService';
@@ -150,7 +151,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
   return (
     <Document 
       style={styles.document}
-      title={`Performance Report - ${data.employee.name || 'Employee'} - ${quarterName}`}
+      title={`Performance Report - ${formatNameForPDF(data.employee.name, true)} - ${quarterName}`}
       author="Culture Base A-Player Evaluation System"
       subject={`Quarterly Performance Evaluation for ${quarterName}`}
       keywords="performance evaluation, 360 feedback, employee assessment"

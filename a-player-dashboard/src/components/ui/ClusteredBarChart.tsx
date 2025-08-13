@@ -1,5 +1,6 @@
 import React, { useState, memo, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useChartPerformance } from '../../hooks/usePerformanceMonitoring';
 
 interface TooltipProps {
   active?: boolean;
@@ -162,18 +163,22 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = memo(({
   showHelperText = true
 }) => {
   const [selectedType, setSelectedType] = useState<EvaluationType>('all');
+  
+  // Performance monitoring for chart rendering
+  const { measureChartOperation } = useChartPerformance('ClusteredBarChart', true);
 
-  // Memoize expensive data transformations
+  // Memoize expensive data transformations with performance tracking
   const chartData = useMemo(() => {
-    // Safety check for data
-    if (!data || !Array.isArray(data)) {
-      return [];
-    }
-    
-    // Transform data for chart - create smart labels and keep full names
-    const baseChartData = data.map(item => ({
-      ...item,
-      attribute: createSmartLabel(item?.attribute),
+    return measureChartOperation(() => {
+      // Safety check for data
+      if (!data || !Array.isArray(data)) {
+        return [];
+      }
+      
+      // Transform data for chart - create smart labels and keep full names
+      const baseChartData = data.map(item => ({
+        ...item,
+        attribute: createSmartLabel(item?.attribute),
       fullAttribute: item?.attribute ? item.attribute.replace(/_/g, ' ').replace(/\b\w+/g, word => 
         word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
       ) : 'Unknown Attribute'
@@ -181,7 +186,8 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = memo(({
 
     // Filter data based on selected evaluation type
     return selectedType === 'all' ? baseChartData : baseChartData;
-  }, [data, selectedType]);
+    });
+  }, [data, selectedType, measureChartOperation]);
 
   const selectedEvaluation = useMemo(() => 
     evaluationTypes.find(type => type.value === selectedType)!,
