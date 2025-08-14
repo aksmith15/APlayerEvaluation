@@ -6,7 +6,7 @@
 ## 🎯 **Current Configuration Details**
 
 ### **Resend Account Settings**
-- **API Key**: `re_jiGEM9YN_A94SoB2B49kYqzbpMmECzYQW`
+- **API Key**: `[REDACTED - Set via environment variable RESEND_API_KEY]`
 - **API Name**: A-Player Evaluation
 - **Domain**: `theculturebase.com`
 - **SMTP Host**: `smtp.resend.com`
@@ -16,7 +16,7 @@
 - **Reply-To Email**: Customer rep email (configurable separately)
 - **Port**: 465 (as specified in your settings)
 - **Username**: `resend`
-- **Password**: Your API key (`re_jiGEM9YN_A94SoB2B49kYqzbpMmECzYQW`)
+- **Password**: Your API key (`[REDACTED - Set via RESEND_API_KEY environment variable]`)
 
 ---
 
@@ -45,7 +45,7 @@ SMTP Provider Settings:
 ├── Port number: 465
 ├── Minimum interval between emails: 60 seconds
 ├── Username: resend
-└── Password: re_jiGEM9YN_A94SoB2B49kYqzbpMmECzYQW
+└── Password: [RESEND_API_KEY from environment]
 ```
 
 4. **Save Settings**
@@ -124,7 +124,7 @@ If you want programmatic control over reply-to addresses, we can modify the Edge
 ### **Issue 1: "AuthApiError: Error sending invite email"**
 **Cause**: SMTP authentication failed
 **Solution**: 
-1. Double-check API key is exactly: `re_jiGEM9YN_A94SoB2B49kYqzbpMmECzYQW`
+1. Double-check API key is properly set in environment variable `RESEND_API_KEY`
 2. Verify username is exactly: `resend`
 3. Ensure domain is verified in Resend dashboard
 

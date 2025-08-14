@@ -66,7 +66,7 @@ Enable Custom SMTP: ✅ Checked
 Host: smtp.resend.com
 Port: 465
 Username: resend
-Password: re_jiGEM9YN_A94SoB2B49kYqzbpMmECzYQW
+Password: [RESEND_API_KEY environment variable]
 Sender Email: info@theculturebase.com
 Sender Name: A-Player Evaluations
 Minimum Interval: 60 seconds
@@ -183,7 +183,7 @@ Subject: You're invited to join A-Player Evaluations
 ## 📊 **Current Configuration**
 
 ### **Resend Settings:**
-- **API Key**: `re_jiGEM9YN_A94SoB2B49kYqzbpMmECzYQW`
+- **API Key**: `[REDACTED - Use environment variable RESEND_API_KEY]`
 - **Domain**: `theculturebase.com` (pending verification)
 - **SMTP Host**: `smtp.resend.com`
 - **Port**: `465` (SSL/TLS)

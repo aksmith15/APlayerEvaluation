@@ -1,0 +1,23 @@
+# Security - Never commit credentials
+.env
+.env.*
+**/api_keys.txt
+**/secrets.txt
+**/credentials.*
+**/*password*
+**/*secret*
+**/*key*.txt
+**/*token*.txt
+
+# Backup files that might contain sensitive data
+*.backup
+*.bak
+*_backup.*
+
+# Documentation with sensitive examples
+docs_with_credentials/
+sensitive_examples/
+
+# Local development files
+.vscode/settings.json
+.idea/

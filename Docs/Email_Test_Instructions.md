@@ -100,7 +100,7 @@ Send test invites to different email providers:
 
 1. **Check SMTP Settings**
    - Verify exact configuration in Supabase matches your settings
-   - Ensure API key is exactly: `re_jiGEM9YN_A94SoB2B49kYqzbpMmECzYQW`
+   - Ensure API key is set in environment: `RESEND_API_KEY=your_api_key_here`
 
 2. **Check Resend Dashboard**
    - Go to: [resend.com/dashboard](https://resend.com/dashboard)
