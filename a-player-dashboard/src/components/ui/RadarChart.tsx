@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { RadarChart as RechartsRadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from 'recharts';
 
 interface AttributeData {
@@ -27,7 +27,7 @@ const evaluationTypes = [
   { value: 'self' as EvaluationType, label: 'Self', color: '#8B5CF6', description: 'Self evaluation scores' }
 ];
 
-export const RadarChart: React.FC<RadarChartProps> = memo(({ 
+export const RadarChart: React.FC<RadarChartProps> = React.memo(({ 
   data, 
   height = 400
 }) => {

@@ -72,9 +72,9 @@ export default defineConfig({
           
           // Large components
           if (id.includes('/components/ui/')) {
-            // Heavy chart components
+            // Heavy chart components - include in react-vendor to share React instance
             if (id.includes('Chart') || id.includes('Radar') || id.includes('Trend')) {
-              return 'chart-components';
+              return 'react-vendor';
             }
             // PDF-related components
             if (id.includes('PDF') || id.includes('Download') || id.includes('Generate')) {

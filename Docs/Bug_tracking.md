@@ -1,5 +1,69 @@
 # A-Player Evaluations Dashboard - Bug Tracking & Issue Resolution
 
+## 🚨 **ACTIVE ISSUES - PENDING RESOLUTION**
+
+### **Issue #020: React memo undefined error in chart components** 🔄 **IN PROGRESS**
+**Date Reported:** August 14, 2025  
+**Priority:** High  
+**Category:** Build/Deployment  
+**Reporter:** Production Deployment  
+
+**Problem:**
+Application fails to load in production with the error:
+```
+Uncaught TypeError: Cannot read properties of undefined (reading 'memo')
+    at chart-components-B4d8hkI4.js:1:9860
+```
+
+**Root Cause Analysis:**
+- **Previous Fix Attempted**: Bundled React and Recharts together to fix forwardRef error
+- **Current Issue**: React.memo is undefined, suggesting React import/export issues in chart components
+- **Build Configuration**: Vite is creating separate chart-components bundle that loses React context
+- **File Location**: Error occurs in chart-components bundle, likely in RadarChart.tsx or ClusteredBarChart.tsx
+
+**Investigation Status:**
+- ✅ **Error Confirmed**: Production deployment shows memo undefined error
+- ✅ **Previous forwardRef Fix**: Successfully resolved but introduced new issue
+- ✅ **Bundle Analysis**: Chart components were in separate bundle losing React context
+- ✅ **Build Configuration**: Fixed Vite config and React imports
+
+**Solution Implemented:**
+- ✅ **Fixed React Imports**: Changed from destructuring `{ memo }` to `React.memo`
+- ✅ **Updated Build Config**: Moved chart components from chart-components to react-vendor bundle
+- ✅ **Consistent React Usage**: All useState, useMemo, memo now use React.* syntax
+- ✅ **Bundle Verification**: react-vendor now 1,171.06 kB (includes all chart components)
+
+**Potential Solutions:**
+1. **Fix React Imports**: Ensure all chart components properly import React
+2. **Bundle Configuration**: Modify Vite config to ensure React consistency across all chunks
+3. **Component Analysis**: Check for incorrect React.memo usage in chart components
+
+**Files to Investigate:**
+- `a-player-dashboard/src/components/ui/RadarChart.tsx`
+- `a-player-dashboard/src/components/ui/ClusteredBarChart.tsx`
+- `a-player-dashboard/src/components/ui/HistoricalClusteredBarChart.tsx`
+- `a-player-dashboard/src/components/ui/TrendLineChart.tsx`
+- `a-player-dashboard/vite.config.ts`
+
+**Files Modified:**
+- ✅ `a-player-dashboard/vite.config.ts` - Moved chart components to react-vendor bundle
+- ✅ `a-player-dashboard/src/components/ui/RadarChart.tsx` - Fixed React imports
+- ✅ `a-player-dashboard/src/components/ui/ClusteredBarChart.tsx` - Fixed React imports  
+- ✅ `a-player-dashboard/src/components/ui/HistoricalClusteredBarChart.tsx` - Fixed React imports
+- ✅ `a-player-dashboard/src/components/ui/TrendLineChart.tsx` - Fixed React imports
+
+**Build Results:**
+- ✅ **Successful Build**: No TypeScript errors
+- ✅ **Bundle Optimization**: Chart components now in react-vendor (1,171.06 kB)
+- ✅ **No Separate Chart Bundle**: Eliminated problematic chart-components bundle
+
+**Expected Resolution:**
+Chart components should render properly without React undefined errors in production builds.
+
+---
+
+## ✅ **RESOLVED ISSUES**
+
 ## ✅ **Notes Editing Permission Issue Fixed**
 
 ### **Issue #011: Super admin unable to edit notes in Employee Analytics** ✅ **RESOLVED**

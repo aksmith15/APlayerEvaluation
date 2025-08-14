@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react';
+import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { QuarterRangeSelector } from './QuarterRangeSelector';
 import type { QuarterOption } from '../../types/database';
@@ -175,7 +175,7 @@ const CustomDot = (props: CustomDotProps) => {
   );
 };
 
-export const TrendLineChart: React.FC<TrendLineChartProps> = memo(({ 
+export const TrendLineChart: React.FC<TrendLineChartProps> = React.memo(({ 
   data, 
   height = 400,
   title,
@@ -194,7 +194,7 @@ export const TrendLineChart: React.FC<TrendLineChartProps> = memo(({
   showQuarterSelector = false
 }) => {
   // Memoize expensive calculations
-  const { averageScore, trendDirection } = useMemo(() => {
+  const { averageScore, trendDirection } = React.useMemo(() => {
     if (data.length === 0) return { averageScore: 0, trendDirection: 0 };
     
     const avg = data.reduce((sum, item) => sum + item.averageScore, 0) / data.length;
