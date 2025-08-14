@@ -28,17 +28,18 @@ export default defineConfig({
   build: {
     // Advanced code splitting and optimization
     rollupOptions: {
+      external: (_id) => {
+        // Don't externalize anything - keep all in bundle to fix React issues
+        return false;
+      },
       output: {
         manualChunks: (id) => {
           // Split node_modules into specific vendor chunks
           if (id.includes('node_modules')) {
-            // React ecosystem
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+            // React ecosystem + Chart libraries (bundle together to fix forwardRef)
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router') || 
+                id.includes('recharts') || id.includes('d3-')) {
               return 'react-vendor';
-            }
-            // Chart libraries
-            if (id.includes('recharts') || id.includes('d3-')) {
-              return 'chart-vendor';
             }
             // PDF generation libraries
             if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('@react-pdf') || id.includes('file-saver')) {
@@ -161,6 +162,7 @@ export default defineConfig({
       'react-dom',
       'react-router-dom',
       'react/jsx-runtime',
+      'react-dom/client',
       
       // Backend services
       '@supabase/supabase-js',
@@ -170,13 +172,11 @@ export default defineConfig({
       'clsx',
       'class-variance-authority',
       
-      // Chart libraries (pre-bundle for faster dev)
+      // Chart libraries (pre-bundle for faster dev and ensure React compatibility)
       'recharts',
-      
-      // Frequently used UI components dependencies
-      'react-dom/client'
-    ]
-    // Removed exclude list - let Vite handle all dependencies naturally
+      'recharts/esm'
+    ],
+    force: true // Force re-optimization to fix React forwardRef issues
   },
   // Vitest configuration
   test: {
