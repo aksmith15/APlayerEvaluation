@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Suspense, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { fetchEmployeeData, fetchQuarters, fetchEvaluationScores, fetchQuarterlyTrendData, fetchEnhancedTrendData, fetchHistoricalEvaluationScores, fetchAvailableQuarters } from '../services/dataFetching';
+import { fetchEmployeeData, fetchQuarters, fetchEvaluationScores, fetchQuarterlyTrendData, fetchEnhancedTrendData, fetchHistoricalEvaluationScores, fetchAvailableQuarters, checkExistingAnalysis, pollAnalysisCompletion } from '../services/dataFetching';
 import { fetchCoreGroupAnalytics, checkCoreGroupDataAvailability } from '../services/coreGroupService';
 import { subscribeToEmployeeEvaluations, subscribeToQuarterlyScores, subscribeToEvaluationCycles, realtimeManager } from '../services/realtimeService';
 import { LoadingSpinner, ErrorMessage, Card, ChartSkeleton, NoEvaluationData, Breadcrumb, useBreadcrumbs, KeyboardShortcuts, EmployeeProfile, QuarterlyNotes, TopAnalyticsGrid } from '../components/ui';
@@ -77,6 +77,17 @@ export const EmployeeAnalytics: React.FC = () => {
   const [coreGroupData, setCoreGroupData] = useState<CoreGroupAnalyticsResponse | null>(null);
   const [coreGroupLoading, setCoreGroupLoading] = useState(false);
   const [coreGroupError, setCoreGroupError] = useState<string | null>(null);
+
+  // AI Analysis state (work in progress - UI components not yet implemented)
+  const [_aiAnalysisUrl, setAiAnalysisUrl] = useState<string | undefined>(undefined);
+  const [_aiAnalysisPdfData, setAiAnalysisPdfData] = useState<any>(undefined);
+  const [_aiAnalysisPdfFilename, setAiAnalysisPdfFilename] = useState<string | undefined>(undefined);
+  const [_aiAnalysisJobId, setAiAnalysisJobId] = useState<string | undefined>(undefined);
+  const [_aiAnalysisStage, setAiAnalysisStage] = useState<string>('');
+  const [_aiAnalysisError, setAiAnalysisError] = useState<string | undefined>(undefined);
+  const [_aiAnalysisLoading, setAiAnalysisLoading] = useState<boolean>(false);
+  const [_aiAnalysisResumed, setAiAnalysisResumed] = useState<boolean>(false);
+  const [_aiAnalysisStartTime, setAiAnalysisStartTime] = useState<Date | null>(null);
 
   // Enhanced user permission checking with database fallback
   const [userPermissions, setUserPermissions] = useState<{ canEdit: boolean; lastChecked: Date | null }>({

@@ -11,7 +11,7 @@ import {
 import { fromTenantSafe } from '../../lib/db';
 import { logTenancyEvent } from '../../lib/monitoring';
 import { setCompanyContext } from '../../lib/tenantContext';
-import { resolveCompanyContext } from '../../lib/resolveCompany';
+
 import { 
   getAssignmentByToken,
   updateAssignmentStatus,

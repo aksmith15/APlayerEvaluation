@@ -131,7 +131,7 @@ export const CompanySwitcher: React.FC<CompanySwitcherProps> = ({
   return (
     <div className={`relative ${className}`}>
       <Button
-        variant="outline"
+        variant="secondary"
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
         disabled={switching}
@@ -144,7 +144,7 @@ export const CompanySwitcher: React.FC<CompanySwitcherProps> = ({
           </span>
         )}
         <SwitchIcon className="w-3 h-3 flex-shrink-0" />
-        {switching && <LoadingSpinner size="xs" />}
+        {switching && <LoadingSpinner size="sm" />}
       </Button>
 
       {isOpen && (
