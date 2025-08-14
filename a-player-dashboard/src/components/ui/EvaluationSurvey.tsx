@@ -7,6 +7,11 @@ import {
   LoadingSpinner,
   ErrorMessage
 } from '../ui';
+// Tenancy support
+import { fromTenantSafe } from '../../lib/db';
+import { logTenancyEvent } from '../../lib/monitoring';
+import { setCompanyContext } from '../../lib/tenantContext';
+import { resolveCompanyContext } from '../../lib/resolveCompany';
 import { 
   getAssignmentByToken,
   updateAssignmentStatus,
@@ -2724,6 +2729,42 @@ export const EvaluationSurvey: React.FC = () => {
 
       setAssignment(assignmentData);
 
+      // Establish tenant context for survey operations
+      try {
+        console.log('🏢 Establishing tenant context for survey...');
+        
+        // Get evaluatee's company information to establish context
+        const { data: evaluateeData } = await supabase
+          .from('people')
+          .select('id, company_id, email')
+          .eq('id', assignmentData.evaluatee_id)
+          .single();
+
+        if (evaluateeData?.company_id && user?.id) {
+          // Set tenant context for survey operations
+          const tenantContext = {
+            companyId: evaluateeData.company_id,
+            userId: user.id,
+            userEmail: user.email,
+            role: user.jwtRole || null
+          };
+          
+          setCompanyContext(tenantContext);
+          console.log('✅ Tenant context established for survey:', tenantContext);
+          
+          logTenancyEvent({
+            type: 'CONTEXT_INIT',
+            operation: 'survey_start',
+            context: { companyId: evaluateeData.company_id, role: user.jwtRole }
+          });
+        } else {
+          console.warn('⚠️ Could not establish tenant context for survey - missing company_id or user info');
+        }
+      } catch (contextError) {
+        console.error('❌ Failed to establish tenant context for survey:', contextError);
+        // Don't fail the survey load if tenant context setup fails
+      }
+
       // If assignment already has a submission, load it
       if (assignmentData.submission_id) {
         setSubmissionId(assignmentData.submission_id);
@@ -3078,19 +3119,26 @@ export const EvaluationSurvey: React.FC = () => {
     // Create submission if it doesn't exist
     let currentSubmissionId = submissionId;
     if (!currentSubmissionId) {
-      const { data: newSubmission, error: submissionError } = await supabase
-        .from('submissions')
+      // NEW: Use tenant-aware insertion (automatically adds company_id)
+      const { data: newSubmission, error: submissionError } = await fromTenantSafe(supabase, 'submissions')
         .insert([{
           submitter_id: user.id,
           evaluatee_id: assignment.evaluatee_id,
           evaluation_type: assignment.evaluation_type,
           quarter_id: assignment.quarter_id,
           raw_json: {}
+          // company_id automatically added by fromTenantSafe
         }])
         .select()
         .single();
 
       if (submissionError) {
+        logTenancyEvent({
+          type: 'RLS_ERROR',
+          operation: 'createSubmission',
+          table: 'submissions',
+          error: submissionError
+        });
         throw new Error(`Failed to create submission: ${submissionError.message}`);
       }
 
@@ -3106,12 +3154,13 @@ export const EvaluationSurvey: React.FC = () => {
     }
 
     // Save attribute score
-    const { data: scoreData, error: scoreError } = await supabase
-      .from('attribute_scores')
+    // NEW: Use tenant-aware upsert (automatically adds company_id)
+    const { data: scoreData, error: scoreError } = await fromTenantSafe(supabase, 'attribute_scores')
       .upsert([{
         submission_id: currentSubmissionId,
         attribute_name: currentAttribute,
         score: currentScore
+        // company_id automatically added by fromTenantSafe
       }], {
         onConflict: 'submission_id,attribute_name'
       })
@@ -3119,6 +3168,12 @@ export const EvaluationSurvey: React.FC = () => {
       .single();
 
     if (scoreError) {
+      logTenancyEvent({
+        type: 'RLS_ERROR',
+        operation: 'saveAttributeScore',
+        table: 'attribute_scores',
+        error: scoreError
+      });
       throw new Error(`Failed to save attribute score: ${scoreError.message}`);
     }
 
@@ -3142,13 +3197,19 @@ export const EvaluationSurvey: React.FC = () => {
       }));
 
     if (questionData.length > 0) {
-      const { error: responseError } = await supabase
-        .from('attribute_responses')
+      // NEW: Use tenant-aware upsert (automatically adds company_id)
+      const { error: responseError } = await fromTenantSafe(supabase, 'attribute_responses')
         .upsert(questionData, {
           onConflict: 'submission_id,attribute_name,question_id'
         });
 
       if (responseError) {
+        logTenancyEvent({
+          type: 'RLS_ERROR',
+          operation: 'saveAttributeResponses',
+          table: 'attribute_responses',
+          error: responseError
+        });
         throw new Error(`Failed to save responses: ${responseError.message}`);
       }
     }

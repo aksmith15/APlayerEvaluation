@@ -1,0 +1,282 @@
+erDiagram
+    %% A-Player Evaluations Database - POST Multi-Tenancy Implementation
+    %% Generated: February 1, 2025 - MIGRATION COMPLETED SUCCESSFULLY
+    %% Status: PRODUCTION READY with Multi-Tenant Architecture
+    
+    %% ========================================
+    %% MULTI-TENANCY CORE INFRASTRUCTURE
+    %% ========================================
+    
+    companies {
+        string id PK "UUID - gen_random_uuid()"
+        string name UK "Company name"
+        string slug UK "Auto-generated URL slug"
+        string description "Company description"
+        string website "Company website"
+        string logo_url "Company logo URL"
+        timestamptz created_at "Created timestamp"
+        timestamptz updated_at "Updated timestamp"
+        timestamptz deleted_at "Soft delete timestamp"
+    }
+    
+    profiles {
+        string id PK "UUID - References auth.users(id)"
+        string email UK "User email"
+        string full_name "User full name"
+        string avatar_url "User avatar URL"
+        string default_company_id FK "Default company context"
+        string timezone "User timezone"
+        string locale "User locale"
+        boolean is_active "Account active status"
+        timestamptz created_at "Created timestamp"
+        timestamptz updated_at "Updated timestamp"
+        timestamptz last_seen_at "Last activity timestamp"
+    }
+    
+    company_memberships {
+        string id PK "UUID"
+        string company_id FK "Company ID"
+        string profile_id FK "Profile ID"
+        string role "owner/admin/member/viewer"
+        string invited_by FK "Who invited user"
+        timestamptz invited_at "Invitation timestamp"
+        timestamptz joined_at "Join timestamp"
+        timestamptz created_at "Created timestamp"
+        timestamptz updated_at "Updated timestamp"
+    }
+    
+    %% ========================================
+    %% ENHANCED TENANT-SCOPED TABLES
+    %% ========================================
+    
+    people {
+        string id PK "UUID"
+        string company_id FK "ADDED: Company tenant key"
+        string name "Employee name"
+        string email "Email address"
+        string role "Employee role"
+        boolean active "Active status"
+        string person_description "Description"
+        string manager_notes "Manager notes"
+        string department "Department"
+        string hire_date "Hire date"
+        string created_at "Created timestamp"
+    }
+    
+    evaluation_cycles {
+        string id PK "UUID"
+        string company_id FK "ADDED: Company tenant key"
+        string name "Quarter name (Q1 2025)"
+        string start_date "Quarter start"
+        string end_date "Quarter end"
+        string created_at "Created timestamp"
+    }
+    
+    attribute_scores {
+        string id PK "UUID"
+        string company_id FK "ADDED: Company tenant key"
+        string submission_id FK "Submission reference"
+        string attribute_name "Performance attribute"
+        number score "Attribute score"
+        string created_at "Created timestamp"
+    }
+    
+    submissions {
+        string id PK "UUID"
+        string company_id FK "ADDED: Company tenant key"
+        string evaluatee_id FK "Person being evaluated"
+        string quarter_id FK "Evaluation quarter"
+        string evaluation_type "peer/manager/self"
+        string status "Submission status"
+        string created_at "Created timestamp"
+    }
+    
+    evaluation_assignments {
+        string id PK "UUID"
+        string company_id FK "ADDED: Company tenant key"
+        string evaluator_id FK "Person doing evaluation"
+        string evaluatee_id FK "Person being evaluated"
+        string quarter_id FK "Evaluation quarter"
+        string evaluation_type "peer/manager/self"
+        string status "pending/in_progress/completed"
+        string assigned_by FK "Who assigned"
+        string survey_token "Unique survey access token"
+        string assigned_at "Assignment timestamp"
+        string completed_at "Completion timestamp"
+        string created_at "Created timestamp"
+    }
+    
+    attribute_weights {
+        string id PK "UUID"
+        string company_id FK "ADDED: Company tenant key"
+        string attribute_name "Attribute name"
+        number weight "Weight multiplier"
+        string description "Weight description"
+        string environment "Environment (prod/dev)"
+        object created_by "Created by user"
+        string created_at "Created timestamp"
+        string updated_at "Updated timestamp"
+    }
+    
+    employee_quarter_notes {
+        string id PK "UUID"
+        string company_id FK "ADDED: Company tenant key"
+        string employee_id FK "Employee ID"
+        string quarter_id FK "Quarter ID"
+        string notes "Quarterly notes"
+        string created_by FK "Who created notes"
+        string created_at "Created timestamp"
+        string updated_at "Updated timestamp"
+    }
+    
+    analysis_jobs {
+        string id PK "UUID"
+        string company_id FK "ADDED: Company tenant key"
+        string evaluatee_id FK "Employee being analyzed"
+        string quarter_id FK "Quarter for analysis"
+        string status "pending/processing/completed/error"
+        string stage "Current processing stage"
+        string pdf_url "Generated PDF URL"
+        string pdf_data "PDF binary data"
+        string pdf_filename "PDF filename"
+        string error_message "Error details"
+        string created_at "Created timestamp"
+        string updated_at "Updated timestamp"
+        string completed_at "Completion timestamp"
+    }
+    
+    core_group_calculations {
+        string id PK "UUID"
+        string company_id FK "ADDED: Company tenant key"
+        string employee_id FK "Employee ID"
+        string quarter_id FK "Quarter ID"
+        string core_group "Core group name"
+        number score "Core group score"
+        string created_at "Created timestamp"
+    }
+    
+    core_group_breakdown {
+        string id PK "UUID"
+        string company_id FK "ADDED: Company tenant key"
+        string employee_id FK "Employee ID"
+        string quarter_id FK "Quarter ID"
+        string core_group "Core group name"
+        object breakdown_data "Detailed breakdown"
+        string created_at "Created timestamp"
+    }
+    
+    quarterly_trends {
+        string id PK "UUID"
+        string company_id FK "ADDED: Company tenant key"
+        string employee_id FK "Employee ID"
+        string attribute_name "Attribute name"
+        object trend_data "Historical trend data"
+        string created_at "Created timestamp"
+    }
+    
+    attribute_responses {
+        string id PK "UUID"
+        string company_id FK "ADDED: Company tenant key"
+        string assignment_id FK "Assignment ID"
+        string attribute_name "Attribute name"
+        number score "Attribute score"
+        string created_at "Created timestamp"
+    }
+    
+    persona_classifications {
+        string id PK "UUID"
+        string company_id FK "ADDED: Company tenant key"
+        string employee_id FK "Employee ID"
+        string quarter_id FK "Quarter ID"
+        string persona_type "Persona classification"
+        object classification_data "Classification details"
+        string created_at "Created timestamp"
+    }
+    
+    %% ========================================
+    %% GLOBAL REFERENCE TABLE (No company_id)
+    %% ========================================
+    
+    app_config {
+        number id PK "Serial ID"
+        string key "Configuration key"
+        string value "Configuration value"
+        string environment "Environment"
+        string created_at "Created timestamp"
+    }
+    
+    %% ========================================
+    %% COMPUTED VIEW (Multi-tenant via underlying tables)
+    %% ========================================
+    
+    weighted_evaluation_scores {
+        string evaluatee_id "From people table"
+        string evaluatee_name "From people table"
+        string quarter_id "From evaluation_cycles"
+        string quarter_name "From evaluation_cycles"
+        string attribute_name "From attribute_scores"
+        number manager_score "Calculated from submissions"
+        number peer_score "Calculated from submissions"
+        number self_score "Calculated from submissions"
+        number weighted_final_score "Calculated weighted score"
+        string weighted_final_grade "Letter grade"
+        boolean has_manager_eval "Manager eval exists"
+        boolean has_peer_eval "Peer eval exists"
+        boolean has_self_eval "Self eval exists"
+        number completion_percentage "Completion %"
+    }
+    
+    %% ========================================
+    %% MULTI-TENANCY RELATIONSHIPS
+    %% ========================================
+    
+    %% Core multi-tenancy relationships
+    companies ||--o{ profiles : "default_company"
+    companies ||--o{ company_memberships : "company"
+    profiles ||--o{ company_memberships : "member"
+    profiles ||--o{ company_memberships : "invited_by"
+    
+    %% All tenant tables reference companies
+    companies ||--o{ people : "tenant_isolation"
+    companies ||--o{ evaluation_cycles : "tenant_isolation"
+    companies ||--o{ attribute_scores : "tenant_isolation"
+    companies ||--o{ submissions : "tenant_isolation"
+    companies ||--o{ evaluation_assignments : "tenant_isolation"
+    companies ||--o{ attribute_weights : "tenant_isolation"
+    companies ||--o{ employee_quarter_notes : "tenant_isolation"
+    companies ||--o{ analysis_jobs : "tenant_isolation"
+    companies ||--o{ core_group_calculations : "tenant_isolation"
+    companies ||--o{ core_group_breakdown : "tenant_isolation"
+    companies ||--o{ quarterly_trends : "tenant_isolation"
+    companies ||--o{ attribute_responses : "tenant_isolation"
+    companies ||--o{ persona_classifications : "tenant_isolation"
+    
+    %% Original business relationships (now company-scoped)
+    people ||--o{ submissions : "evaluatee"
+    evaluation_cycles ||--o{ submissions : "quarter"
+    submissions ||--o{ attribute_scores : "submission"
+    people ||--o{ evaluation_assignments : "evaluator"
+    people ||--o{ evaluation_assignments : "evaluatee"
+    people ||--o{ evaluation_assignments : "assigned_by"
+    evaluation_cycles ||--o{ evaluation_assignments : "quarter"
+    people ||--o{ employee_quarter_notes : "employee"
+    evaluation_cycles ||--o{ employee_quarter_notes : "quarter"
+    people ||--o{ employee_quarter_notes : "created_by"
+    people ||--o{ analysis_jobs : "analyzed"
+    evaluation_cycles ||--o{ analysis_jobs : "quarter"
+    people ||--o{ core_group_calculations : "employee"
+    evaluation_cycles ||--o{ core_group_calculations : "quarter"
+    people ||--o{ core_group_breakdown : "employee"
+    evaluation_cycles ||--o{ core_group_breakdown : "quarter"
+    people ||--o{ quarterly_trends : "employee"
+    evaluation_assignments ||--o{ attribute_responses : "assignment"
+    people ||--o{ persona_classifications : "employee"
+    evaluation_cycles ||--o{ persona_classifications : "quarter"
+    
+    %% View relationships (computed from underlying tables)
+    people ||--o{ weighted_evaluation_scores : "computed_from_people"
+    evaluation_cycles ||--o{ weighted_evaluation_scores : "computed_from_cycles"
+    attribute_scores ||--o{ weighted_evaluation_scores : "computed_from_scores"
+    submissions ||--o{ weighted_evaluation_scores : "computed_from_submissions"
+
+

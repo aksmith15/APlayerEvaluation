@@ -1,0 +1,227 @@
+{
+  "generated_at": "2025-08-13T14:15:02.659Z",
+  "database": "A-Player Evaluations System",
+  "inventory_data": {
+    "tables": [
+      {
+        "table_name": "weighted_evaluation_scores",
+        "row_count": 51,
+        "accessible": true
+      },
+      {
+        "table_name": "attribute_weights",
+        "row_count": 10,
+        "accessible": true
+      },
+      {
+        "table_name": "people",
+        "row_count": 0,
+        "accessible": true
+      },
+      {
+        "table_name": "evaluation_cycles",
+        "row_count": 0,
+        "accessible": true
+      },
+      {
+        "table_name": "app_config",
+        "row_count": 0,
+        "accessible": true
+      },
+      {
+        "table_name": "analysis_jobs",
+        "row_count": 0,
+        "accessible": true
+      },
+      {
+        "table_name": "evaluation_assignments",
+        "row_count": 0,
+        "accessible": true
+      },
+      {
+        "table_name": "employee_quarter_notes",
+        "row_count": 0,
+        "accessible": true
+      },
+      {
+        "table_name": "core_group_calculations",
+        "row_count": 0,
+        "accessible": true
+      },
+      {
+        "table_name": "quarterly_trends",
+        "row_count": 0,
+        "accessible": true
+      },
+      {
+        "table_name": "attribute_responses",
+        "row_count": 0,
+        "accessible": true
+      },
+      {
+        "table_name": "core_group_breakdown",
+        "row_count": 0,
+        "accessible": true
+      },
+      {
+        "table_name": "persona_classifications",
+        "row_count": 0,
+        "accessible": true
+      }
+    ],
+    "tableDetails": {
+      "weighted_evaluation_scores": {
+        "columns": [
+          {
+            "column_name": "evaluatee_id",
+            "data_type": "string"
+          },
+          {
+            "column_name": "evaluatee_name",
+            "data_type": "string"
+          },
+          {
+            "column_name": "quarter_id",
+            "data_type": "string"
+          },
+          {
+            "column_name": "quarter_name",
+            "data_type": "string"
+          },
+          {
+            "column_name": "quarter_start_date",
+            "data_type": "string"
+          },
+          {
+            "column_name": "quarter_end_date",
+            "data_type": "string"
+          },
+          {
+            "column_name": "attribute_name",
+            "data_type": "string"
+          },
+          {
+            "column_name": "manager_score",
+            "data_type": "number"
+          },
+          {
+            "column_name": "peer_score",
+            "data_type": "number"
+          },
+          {
+            "column_name": "self_score",
+            "data_type": "number"
+          },
+          {
+            "column_name": "weighted_final_score",
+            "data_type": "number"
+          },
+          {
+            "column_name": "weighted_final_grade",
+            "data_type": "string"
+          },
+          {
+            "column_name": "manager_grade",
+            "data_type": "string"
+          },
+          {
+            "column_name": "peer_grade",
+            "data_type": "string"
+          },
+          {
+            "column_name": "self_grade",
+            "data_type": "string"
+          },
+          {
+            "column_name": "has_manager_eval",
+            "data_type": "boolean"
+          },
+          {
+            "column_name": "has_peer_eval",
+            "data_type": "boolean"
+          },
+          {
+            "column_name": "has_self_eval",
+            "data_type": "boolean"
+          },
+          {
+            "column_name": "completion_percentage",
+            "data_type": "number"
+          }
+        ],
+        "sample_data": {
+          "evaluatee_id": "2639fa80-d382-4951-afa0-00096e16e2ad",
+          "evaluatee_name": "Kolbe Smith",
+          "quarter_id": "979d1cbc-2f98-4da7-bf17-a1664b951ebc",
+          "quarter_name": "Q2 2025",
+          "quarter_start_date": "2025-04-01",
+          "quarter_end_date": "2025-06-30",
+          "attribute_name": "accountability",
+          "manager_score": 6.5,
+          "peer_score": 7.5,
+          "self_score": 6,
+          "weighted_final_score": 6.8,
+          "weighted_final_grade": "C",
+          "manager_grade": "C",
+          "peer_grade": "B",
+          "self_grade": "C",
+          "has_manager_eval": true,
+          "has_peer_eval": true,
+          "has_self_eval": true,
+          "completion_percentage": 100
+        }
+      },
+      "attribute_weights": {
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "string"
+          },
+          {
+            "column_name": "attribute_name",
+            "data_type": "string"
+          },
+          {
+            "column_name": "weight",
+            "data_type": "number"
+          },
+          {
+            "column_name": "description",
+            "data_type": "string"
+          },
+          {
+            "column_name": "environment",
+            "data_type": "string"
+          },
+          {
+            "column_name": "created_by",
+            "data_type": "object"
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "string"
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "string"
+          }
+        ],
+        "sample_data": {
+          "id": "ac01fc5b-df99-496b-9118-fe002994dcb4",
+          "attribute_name": "Continuous Improvement",
+          "weight": 1.1,
+          "description": "Important for long-term success",
+          "environment": "production",
+          "created_by": null,
+          "created_at": "2025-07-28T17:39:50.459128+00:00",
+          "updated_at": "2025-08-13T12:30:32.742+00:00"
+        }
+      }
+    },
+    "foreignKeys": [],
+    "indexes": [],
+    "functions": [],
+    "views": [],
+    "policies": []
+  }
+}

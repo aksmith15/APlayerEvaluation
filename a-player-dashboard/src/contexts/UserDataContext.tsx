@@ -105,3 +105,5 @@ export const useUserPermissions = () => {
     isSuperAdmin: user?.jwtRole === 'super_admin'
   };
 };
+
+

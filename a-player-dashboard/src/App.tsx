@@ -14,6 +14,8 @@ const EmployeeAnalytics = React.lazy(() => import('./pages/EmployeeAnalytics').t
 const AssignmentManagement = React.lazy(() => import('./pages/AssignmentManagement'));
 const MyAssignments = React.lazy(() => import('./pages/MyAssignments'));
 const EvaluationSurvey = React.lazy(() => import('./components/ui').then(module => ({ default: module.EvaluationSurvey })));
+const AcceptInvite = React.lazy(() => import('./pages/AcceptInvite'));
+
 // Dev-only React-PDF live preview
 const DevPdfPreview = React.lazy(() => import('./pages/react-pdf/DevPdfPreview'));
 
@@ -36,7 +38,7 @@ const App: React.FC = () => {
             <div className="App">
               <Suspense fallback={<LoadingSpinner fullScreen message="Loading application..." />}>
                 <Routes>
-                  {/* Public route - redirects to dashboard if already authenticated */}
+                  {/* Public routes - redirects to dashboard if already authenticated */}
                   <Route 
                     path={ROUTES.LOGIN} 
                     element={
@@ -44,6 +46,12 @@ const App: React.FC = () => {
                         <Login />
                       </ProtectedRoute>
                     } 
+                  />
+                  
+                  {/* Accept invitation route - public access for invited users */}
+                  <Route 
+                    path="/accept-invite" 
+                    element={<AcceptInvite />} 
                   />
                   
                   {/* Protected routes - require authentication */}

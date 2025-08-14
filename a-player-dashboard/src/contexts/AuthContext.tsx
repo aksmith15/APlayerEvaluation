@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { authService } from '../services/authService';
 import type { AuthContextType, User, LoginCredentials } from '../types/auth';
+import { setCompanyContext, clearCompanyContext } from '../lib/tenantContext';
+import { resolveCompanyContext } from '../lib/resolveCompany';
+import { logTenancyEvent } from '../lib/monitoring';
+import { supabase } from '../services/supabase';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -19,8 +23,72 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
 
   // Memoized function to avoid recreating on every render
-  const handleAuthStateChange = useCallback((authUser: User | null) => {
+  const handleAuthStateChange = useCallback(async (authUser: User | null) => {
     console.log('Auth state changed:', !!authUser);
+    
+    if (authUser) {
+      // User signed in - initialize tenant context
+      try {
+        console.log('🏢 Initializing tenant context...');
+        const tenantContext = await resolveCompanyContext(supabase);
+        setCompanyContext(tenantContext);
+        
+        logTenancyEvent({
+          type: 'CONTEXT_INIT',
+          operation: 'login',
+          context: { companyId: tenantContext.companyId, role: tenantContext.role }
+        });
+        
+        console.log('✅ Tenant context initialized:', tenantContext);
+        
+        // FIXED: Get the full user profile with jwtRole to ensure UI has complete data
+        try {
+          console.log('👤 Fetching complete user profile...');
+          const fullProfile = await authService.getUserProfile(authUser.email!);
+          
+          if (fullProfile) {
+            // Update the user object with complete profile data
+            const enhancedUser: User = {
+              ...authUser,
+              id: fullProfile.id,
+              name: fullProfile.name,
+              role: fullProfile.role,
+              department: fullProfile.department,
+              jwtRole: fullProfile.jwtRole
+            };
+            
+            console.log('✅ Enhanced user profile:', enhancedUser);
+            setUser(enhancedUser);
+            setLoading(false);
+            setError(null);
+            return; // Early return with enhanced user
+          }
+        } catch (profileError) {
+          console.error('❌ Failed to get full profile:', profileError);
+        }
+        
+      } catch (error) {
+        console.error('❌ Failed to initialize tenant context:', error);
+        
+        logTenancyEvent({
+          type: 'CONTEXT_FAILURE',
+          operation: 'login',
+          error: error instanceof Error ? error.message : String(error)
+        });
+        
+        // Don't break existing flow - continue without tenant context
+        // RLS policies will still provide baseline protection
+      }
+    } else {
+      // User signed out - clear tenant context
+      clearCompanyContext();
+      
+      logTenancyEvent({
+        type: 'CONTEXT_INIT',
+        operation: 'logout'
+      });
+    }
+    
     setUser(authUser);
     setLoading(false);
     setError(null);

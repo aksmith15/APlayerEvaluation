@@ -1,9 +1,10 @@
-import React, { useState, useEffect, Suspense, useMemo } from 'react';
+import React, { useState, useEffect, Suspense, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { fetchEmployeeData, fetchQuarters, fetchEvaluationScores, fetchQuarterlyTrendData, fetchEnhancedTrendData, fetchHistoricalEvaluationScores, fetchAvailableQuarters, generateAIMetaAnalysis, pollAnalysisCompletion, checkExistingAnalysis } from '../services/dataFetching';
+import { fetchEmployeeData, fetchQuarters, fetchEvaluationScores, fetchQuarterlyTrendData, fetchEnhancedTrendData, fetchHistoricalEvaluationScores, fetchAvailableQuarters } from '../services/dataFetching';
 import { fetchCoreGroupAnalytics, checkCoreGroupDataAvailability } from '../services/coreGroupService';
 import { subscribeToEmployeeEvaluations, subscribeToQuarterlyScores, subscribeToEvaluationCycles, realtimeManager } from '../services/realtimeService';
-import { LoadingSpinner, ErrorMessage, Card, ChartSkeleton, NoEvaluationData, Breadcrumb, useBreadcrumbs, KeyboardShortcuts, PDFViewer, DownloadAnalyticsButton, EmployeeProfile, QuarterlyNotes, TopAnalyticsGrid } from '../components/ui';
+import { LoadingSpinner, ErrorMessage, Card, ChartSkeleton, NoEvaluationData, Breadcrumb, useBreadcrumbs, KeyboardShortcuts, EmployeeProfile, QuarterlyNotes, TopAnalyticsGrid } from '../components/ui';
+import { CompanySwitcher } from '../components/ui/CompanySwitcher';
 // Direct chart imports for better code splitting
 import { RadarChart, ClusteredBarChart, HistoricalClusteredBarChart, TrendLineChart } from '../components/ui/charts';
 // Chart preloading for performance optimization
@@ -19,6 +20,7 @@ const LazyCoreGroupAnalysisTabs = React.lazy(() =>
 );
 import { useNavigation, useKeyboardNavigation } from '../contexts/NavigationContext';
 import { useAuth } from '../contexts/AuthContext';
+import { authService } from '../services/authService';
 import { useChartHeight } from '../utils/useResponsive';
 import { findCurrentQuarterInList, logCurrentQuarter } from '../utils/quarterUtils';
 import { getLetterGrade } from '../utils/calculations';
@@ -44,7 +46,6 @@ export const EmployeeAnalytics: React.FC = () => {
   const barChartHeight = useChartHeight(500);
   const trendChartHeight = useChartHeight(500);
   const historicalChartHeight = useChartHeight(500);
-  const pdfViewerHeight = useChartHeight(400);
 
   const [employee, setEmployee] = useState<Person | null>(null);
   const [quarters, setQuarters] = useState<Quarter[]>([]);
@@ -66,16 +67,7 @@ export const EmployeeAnalytics: React.FC = () => {
   const [historicalEndQuarter, setHistoricalEndQuarter] = useState<string>('');
   const [historicalLoading, setHistoricalLoading] = useState(false);
 
-  // AI Meta-Analysis state (simplified async)
-  const [aiAnalysisUrl, setAiAnalysisUrl] = useState<string | undefined>(undefined);
-  const [aiAnalysisPdfData, setAiAnalysisPdfData] = useState<string | undefined>(undefined);
-  const [aiAnalysisPdfFilename, setAiAnalysisPdfFilename] = useState<string | undefined>(undefined);
-  const [aiAnalysisLoading, setAiAnalysisLoading] = useState(false);
-  const [aiAnalysisError, setAiAnalysisError] = useState<string | undefined>(undefined);
-  const [aiAnalysisJobId, setAiAnalysisJobId] = useState<string | undefined>(undefined);
-  const [aiAnalysisStage, setAiAnalysisStage] = useState<string>('');
-  const [aiAnalysisStartTime, setAiAnalysisStartTime] = useState<Date | null>(null);
-  const [aiAnalysisResumed, setAiAnalysisResumed] = useState<boolean>(false);
+
 
   // Real-time update state
   const [realtimeConnected, setRealtimeConnected] = useState(false);
@@ -86,9 +78,78 @@ export const EmployeeAnalytics: React.FC = () => {
   const [coreGroupLoading, setCoreGroupLoading] = useState(false);
   const [coreGroupError, setCoreGroupError] = useState<string | null>(null);
 
+  // Enhanced user permission checking with database fallback
+  const [userPermissions, setUserPermissions] = useState<{ canEdit: boolean; lastChecked: Date | null }>({
+    canEdit: false,
+    lastChecked: null
+  });
+
+  // Function to refresh user permissions from database
+  const refreshUserPermissions = useCallback(async () => {
+    if (!user?.email) return false;
+    
+    try {
+      console.log('🔄 Refreshing user permissions from database...');
+      const profile = await authService.getUserProfile(user.email);
+      
+      if (profile) {
+        const canEdit = profile.jwtRole === 'hr_admin' || profile.jwtRole === 'super_admin';
+        setUserPermissions({ canEdit, lastChecked: new Date() });
+        
+        console.log('✅ User permissions refreshed:', {
+          email: user.email,
+          jwtRole: profile.jwtRole,
+          canEdit
+        });
+        
+        return canEdit;
+      }
+    } catch (error) {
+      console.error('❌ Failed to refresh permissions:', error);
+    }
+    
+    return false;
+  }, [user?.email]);
+
+  // Check user permissions on user change
+  useEffect(() => {
+    if (user?.email && !userPermissions.lastChecked) {
+      refreshUserPermissions();
+    }
+  }, [user?.email, userPermissions.lastChecked, refreshUserPermissions]);
+
   // Helper functions for user permissions and profile management
   const isUserEditable = () => {
-    return user?.jwtRole === 'hr_admin' || user?.jwtRole === 'super_admin';
+    // Debug logging to help identify permission issues
+    console.log('🔍 isUserEditable check:', {
+      user_exists: !!user,
+      user_email: user?.email,
+      user_jwtRole: user?.jwtRole,
+      user_id: user?.id,
+      cached_permissions: userPermissions,
+      full_user_object: user
+    });
+    
+    // Primary check: JWT role-based permissions from user context
+    const hasJwtPermission = user?.jwtRole === 'hr_admin' || user?.jwtRole === 'super_admin';
+    
+    // Secondary check: Use cached permissions from database refresh
+    const hasCachedPermission = userPermissions.canEdit;
+    
+    // Fallback check: If jwtRole is null/undefined but user exists and is authenticated,
+    // check if they are a known admin user by email (kolbes@ridgelineei.com)
+    const isKnownAdmin = user?.email === 'kolbes@ridgelineei.com';
+    
+    const canEdit = hasJwtPermission || hasCachedPermission || isKnownAdmin;
+    
+    console.log('🔍 Permission result:', {
+      hasJwtPermission,
+      hasCachedPermission,
+      isKnownAdmin,
+      canEdit
+    });
+    
+    return canEdit;
   };
 
   const handleProfilePictureUpdate = (newUrl: string | null) => {
@@ -438,75 +499,7 @@ export const EmployeeAnalytics: React.FC = () => {
     setHistoricalEndQuarter(quarterId);
   };
 
-  const handleGenerateMetaAnalysis = async () => {
-    if (!employeeId || !selectedQuarter) {
-      console.error('Missing employeeId or selectedQuarter for AI analysis');
-      return;
-    }
 
-    try {
-      // Reset analysis state
-      setAiAnalysisLoading(true);
-      setAiAnalysisError(undefined);
-      setAiAnalysisUrl(undefined);
-      setAiAnalysisPdfData(undefined);
-      setAiAnalysisPdfFilename(undefined);
-      setAiAnalysisStage('Generating your meta analysis, this can take up to 10 minutes...');
-      setAiAnalysisStartTime(new Date());
-      setAiAnalysisResumed(false); // Not resumed - this is a new analysis
-      
-      console.log('Starting AI meta-analysis job...', { employeeId, selectedQuarter });
-      
-      // Start the analysis job
-      const startResult = await generateAIMetaAnalysis(selectedQuarter, employeeId);
-      
-      if (startResult.status === 'error') {
-        setAiAnalysisError(startResult.error || 'Failed to start analysis');
-        setAiAnalysisLoading(false);
-        return;
-      }
-
-      if (!startResult.jobId) {
-        setAiAnalysisError('No job ID returned from analysis service');
-        setAiAnalysisLoading(false);
-        return;
-      }
-
-      setAiAnalysisJobId(startResult.jobId);
-      console.log('Analysis job started with ID:', startResult.jobId);
-
-      // Start polling for completion
-      const finalResult = await pollAnalysisCompletion(
-        startResult.jobId,
-        (progressResult) => {
-          // Update stage in real-time
-          setAiAnalysisStage(progressResult.stage || 'Processing...');
-          console.log('Analysis stage:', progressResult.stage);
-        },
-        15 * 60 * 1000 // 15 minutes timeout
-      );
-
-      // Handle final result
-      if (finalResult.status === 'completed' && (finalResult.url || finalResult.pdfData)) {
-        setAiAnalysisUrl(finalResult.url);
-        setAiAnalysisPdfData(finalResult.pdfData);
-        setAiAnalysisPdfFilename(finalResult.pdfFilename);
-        setAiAnalysisStage('Analysis complete!');
-        console.log('AI analysis completed successfully:', finalResult.url || `PDF data (${finalResult.pdfFilename})`);
-      } else if (finalResult.status === 'error') {
-        setAiAnalysisError(finalResult.error || 'Analysis failed');
-        console.error('AI analysis failed:', finalResult.error);
-      } else {
-        setAiAnalysisError('Analysis completed but no PDF URL or data was provided');
-      }
-    } catch (error) {
-      console.error('Error during AI meta-analysis:', error);
-      setAiAnalysisError(error instanceof Error ? error.message : 'Unexpected error occurred');
-    } finally {
-      setAiAnalysisLoading(false);
-      setAiAnalysisResumed(false); // Clear resumed flag when analysis ends
-    }
-  };
 
   // Calculate overall score for selected quarter - memoized
   const overallScore = useMemo(() => {
@@ -593,35 +586,7 @@ export const EmployeeAnalytics: React.FC = () => {
     [quarters, selectedQuarter]
   );
 
-  // Prepare analytics data for export
-  const getAnalyticsDataForExport = () => {
-    return {
-      employee: {
-        id: employeeId,
-        name: employee?.name,
-        role: employee?.role,
-        department: employee?.department,
-        email: employee?.email
-      },
-      quarter: {
-        id: selectedQuarter,
-        name: selectedQuarterInfo?.name,
-        date: selectedQuarterInfo?.startDate
-      },
-      scores: {
-        overall: overallScore,
-        byAttribute: attributesData
-      },
-      trends: trendData,
-      historical: historicalData,
-      metadata: {
-        generatedAt: new Date().toISOString(),
-        completionRate: evaluationScores.length > 0 
-          ? evaluationScores.reduce((sum, score) => sum + score.completion_percentage, 0) / evaluationScores.length
-          : 0
-      }
-    };
-  };
+
 
   // Generate breadcrumbs
   const breadcrumbs = generateBreadcrumbs(location.pathname, employee?.name);
@@ -652,9 +617,10 @@ export const EmployeeAnalytics: React.FC = () => {
       {/* Header */}
       <header className="bg-white border-b border-secondary-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
-          {/* Breadcrumb Navigation */}
-          <div className="mb-4">
+          {/* Breadcrumb Navigation and Company Switcher */}
+          <div className="mb-4 flex justify-between items-center">
             <Breadcrumb items={breadcrumbs} />
+            <CompanySwitcher className="flex-shrink-0" />
           </div>
           
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
@@ -708,24 +674,7 @@ export const EmployeeAnalytics: React.FC = () => {
                 </select>
               </div>
 
-              {/* Download Analytics Button */}
-              <div className="no-print">
-                <label className="block text-sm font-medium text-secondary-700 mb-1 opacity-0">
-                  Actions
-                </label>
-                <DownloadAnalyticsButton
-                  employeeName={employee?.name || 'Employee'}
-                  quarterName={selectedQuarterInfo?.name || 'Current Quarter'}
-                  overallScore={overallScore || undefined}
-                  attributeCount={attributesData.length}
-                  completionRate={evaluationScores.length > 0 
-                    ? evaluationScores.reduce((sum, score) => sum + score.completion_percentage, 0) / evaluationScores.length
-                    : undefined
-                  }
-                  analyticsData={getAnalyticsDataForExport()}
-                  disabled={!employee || loading}
-                />
-              </div>
+
 
               {/* Generate PDF Report Button */}
               <div className="no-print">
@@ -767,6 +716,18 @@ export const EmployeeAnalytics: React.FC = () => {
         {/* Quarterly Notes Section */}
         {selectedQuarterInfo && (
           <div className="page-break-avoid quarterly-notes">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-lg font-semibold text-gray-900">Quarterly Notes</h3>
+              {!isUserEditable() && user?.email && (
+                <button
+                  onClick={refreshUserPermissions}
+                  className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                  title="Refresh editing permissions"
+                >
+                  🔄 Refresh Permissions
+                </button>
+              )}
+            </div>
             <QuarterlyNotes
               employeeId={employee.id}
               quarterId={selectedQuarter}
@@ -891,83 +852,7 @@ export const EmployeeAnalytics: React.FC = () => {
           </Card>
         </div>
 
-        {/* AI Analysis Section */}
-        <div className="analytics-section">
-          <Card className="ai-meta-analysis page-break-avoid">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-secondary-800 chart-title">AI Meta-Analysis</h2>
-            <div className="flex items-center gap-3">
-              {(aiAnalysisUrl || aiAnalysisPdfData) && !aiAnalysisLoading && (
-                <span className="text-sm text-green-600 flex items-center">
-                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  Analysis available
-                </span>
-              )}
-              <button 
-                className={(aiAnalysisUrl || aiAnalysisPdfData) && !aiAnalysisLoading ? "btn-secondary" : "btn-primary"}
-                onClick={handleGenerateMetaAnalysis}
-                disabled={!attributesData.length || dataLoading || aiAnalysisLoading}
-              >
-                {aiAnalysisLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Processing...
-                  </>
-                ) : (aiAnalysisUrl || aiAnalysisPdfData) ? (
-                  'Regenerate Meta-Analysis'
-                ) : (
-                  'Generate Meta-Analysis'
-                )}
-              </button>
-            </div>
-          </div>
 
-          {/* Progress Section */}
-          {aiAnalysisLoading && (
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-blue-800">Analysis Status</span>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-              </div>
-              <div className="text-sm text-blue-700 mb-2">
-                {aiAnalysisStage}
-              </div>
-              <div className="flex items-center justify-between text-xs text-blue-600">
-                {aiAnalysisStartTime && (
-                  <span>
-                    Elapsed: {Math.floor((Date.now() - aiAnalysisStartTime.getTime()) / 1000 / 60)}m {Math.floor(((Date.now() - aiAnalysisStartTime.getTime()) / 1000) % 60)}s
-                  </span>
-                )}
-              </div>
-              {aiAnalysisJobId && (
-                <div className="mt-2 space-y-1">
-                  <div className="text-xs text-blue-600">
-                    Job ID: {aiAnalysisJobId}
-                  </div>
-                  {aiAnalysisResumed && (
-                    <div className="text-xs text-blue-500 italic">
-                      ✨ Resumed from previous session - tracking existing analysis
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-          
-          <PDFViewer
-            url={aiAnalysisUrl}
-            pdfData={aiAnalysisPdfData}
-            pdfFilename={aiAnalysisPdfFilename}
-            title={`AI Meta-Analysis - ${employee?.name} - ${selectedQuarterInfo?.name || 'Current Quarter'}`}
-            height={pdfViewerHeight}
-            isLoading={aiAnalysisLoading}
-            error={aiAnalysisError}
-            showDownloadButton={true}
-          />
-        </Card>
-        </div>
 
 
       </main>

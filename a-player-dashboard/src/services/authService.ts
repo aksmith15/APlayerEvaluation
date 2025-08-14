@@ -104,22 +104,34 @@ export const authService = {
   // Sign out current user
   async signOut(): Promise<void> {
     try {
-      // Clear global auth cache
+      // Clear global auth cache immediately (even if logout fails)
       globalUserProfile = null;
       globalAuthComplete = false;
       currentSessionPromise = null;
       lastSuccessfulAuthTime = 0;
       authInitializationPhase = true;
       
-      const { error } = await withTimeout(
-        supabase.auth.signOut(),
-        5000,
-        'Logout request timed out'
-      );
-      if (error) throw error;
+      console.log('🚪 Signing out...');
+      
+      // Try logout with longer timeout, but don't fail if it times out
+      try {
+        const { error } = await withTimeout(
+          supabase.auth.signOut(),
+          10000,  // Increased timeout to 10 seconds
+          'Logout request timed out'
+        );
+        if (error) {
+          console.warn('Logout warning (but continuing):', error);
+        } else {
+          console.log('✅ Logout successful');
+        }
+      } catch (timeoutError) {
+        // Don't throw on timeout - the user is still logged out locally
+        console.warn('⚠️ Logout timed out but local session cleared:', timeoutError);
+      }
     } catch (error) {
       console.error('Sign out error:', error);
-      throw error;
+      // Don't re-throw - we've cleared local state which is most important
     }
   },
 
@@ -171,15 +183,19 @@ export const authService = {
             setTimeout(() => resolve({ 
               data: null, 
               error: new Error(`Profile query timed out (attempt ${attempt})`) 
-            }), 15000);
+            }), 5000); // Reduced timeout from 15s to 5s
           });
 
+          // SIMPLIFIED APPROACH: Direct query to people table by email
+          // The RLS policies will handle security, and we have profiles bridge now
+          console.log('🔍 Querying people table directly by email (profiles bridge should enable RLS)');
+          
           const queryPromise = supabase
             .from('people')
             .select('id, name, role, department, jwt_role')
             .eq('email', email)
-            .eq('active', true)
-            .maybeSingle();
+            .limit(1)
+            .single();
 
           const result = await Promise.race([queryPromise, timeoutPromise]);
           
@@ -211,23 +227,22 @@ export const authService = {
       }
 
       if (profile) {
-        console.log('✅ Profile found successfully:', profile);
-        console.log('People table ID:', profile.id);
-        console.log('JWT role:', profile.jwt_role);
+        console.log('✅ People table lookup successful during auth:', profile);
+        console.log('Profile ID:', profile.id);
+        console.log('JWT Role:', profile.jwt_role);
+        
+        return {
+          id: profile.id,
+          name: profile.name || 'User',
+          role: profile.role || 'Manager',
+          department: profile.department || 'Default',
+          jwtRole: profile.jwt_role || null
+        };
       } else {
         console.error('❌ No profile found for email:', email);
         console.error('This will cause assignment creation to fail!');
+        return null;
       }
-      
-      if (!profile) return null;
-
-      return {
-        id: profile.id,
-        name: profile.name,
-        role: profile.role,
-        department: profile.department,
-        jwtRole: profile.jwt_role || null
-      };
     } catch (error) {
       console.warn('Profile query failed:', error);
       return null;

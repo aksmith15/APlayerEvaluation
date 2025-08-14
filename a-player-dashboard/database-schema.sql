@@ -30,18 +30,79 @@ CREATE INDEX idx_analysis_jobs_created_at ON analysis_jobs(created_at);
 -- Enable Row Level Security (RLS)
 ALTER TABLE analysis_jobs ENABLE ROW LEVEL SECURITY;
 
--- Create policies for RLS (adjust according to your authentication setup)
-CREATE POLICY "Users can view their own analysis jobs" 
-ON analysis_jobs FOR SELECT 
-USING (true); -- Adjust this based on your auth setup
+-- Create policies for RLS with proper role-based access control
+-- Note: These are reference policies - use migration 0004 for actual deployment
 
-CREATE POLICY "Users can insert their own analysis jobs" 
-ON analysis_jobs FOR INSERT 
-WITH CHECK (true); -- Adjust this based on your auth setup
+-- SELECT: Self-access + Admin oversight + Service role
+CREATE POLICY "analysis_jobs_select_policy" ON analysis_jobs
+FOR SELECT USING (
+  -- Self-access: Users can view analysis jobs for their own evaluations
+  EXISTS (
+    SELECT 1 FROM public.people p
+    JOIN public.profiles pr ON p.email = pr.email
+    WHERE pr.id = auth.uid()
+      AND p.id = analysis_jobs.evaluatee_id
+      AND p.company_id IS NOT NULL
+  )
+  OR 
+  -- Admin access: HR admins and super admins can view jobs in their company context
+  EXISTS (
+    SELECT 1 FROM public.people p
+    JOIN public.profiles pr ON p.email = pr.email
+    JOIN public.people evaluatee ON evaluatee.id = analysis_jobs.evaluatee_id
+    WHERE pr.id = auth.uid()
+      AND p.jwt_role IN ('hr_admin', 'super_admin')
+      AND (
+        p.jwt_role = 'super_admin' 
+        OR p.company_id = evaluatee.company_id
+      )
+  )
+  OR
+  -- Service role access: For webhook updates
+  auth.role() = 'service_role'
+);
 
-CREATE POLICY "Users can update their own analysis jobs" 
-ON analysis_jobs FOR UPDATE 
-USING (true); -- Adjust this based on your auth setup
+-- INSERT: Self-creation + Admin creation + Service role
+CREATE POLICY "analysis_jobs_insert_policy" ON analysis_jobs
+FOR INSERT WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.people p
+    JOIN public.profiles pr ON p.email = pr.email
+    WHERE pr.id = auth.uid()
+      AND p.id = analysis_jobs.evaluatee_id
+      AND p.company_id IS NOT NULL
+  )
+  OR 
+  EXISTS (
+    SELECT 1 FROM public.people p
+    JOIN public.profiles pr ON p.email = pr.email
+    JOIN public.people evaluatee ON evaluatee.id = analysis_jobs.evaluatee_id
+    WHERE pr.id = auth.uid()
+      AND p.jwt_role IN ('hr_admin', 'super_admin')
+      AND (
+        p.jwt_role = 'super_admin' 
+        OR p.company_id = evaluatee.company_id
+      )
+  )
+  OR auth.role() = 'service_role'
+);
+
+-- UPDATE: Service role + Admin management
+CREATE POLICY "analysis_jobs_update_policy" ON analysis_jobs
+FOR UPDATE USING (
+  auth.role() = 'service_role'
+  OR EXISTS (
+    SELECT 1 FROM public.people p
+    JOIN public.profiles pr ON p.email = pr.email
+    JOIN public.people evaluatee ON evaluatee.id = analysis_jobs.evaluatee_id
+    WHERE pr.id = auth.uid()
+      AND p.jwt_role IN ('hr_admin', 'super_admin')
+      AND (
+        p.jwt_role = 'super_admin' 
+        OR p.company_id = evaluatee.company_id
+      )
+  )
+);
 
 -- Trigger to automatically update the updated_at timestamp
 CREATE OR REPLACE FUNCTION update_analysis_jobs_updated_at()

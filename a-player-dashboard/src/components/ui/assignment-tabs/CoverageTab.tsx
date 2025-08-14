@@ -17,3 +17,5 @@ export const CoverageTab: React.FC<CoverageTabProps> = ({ onCreateAssignment }) 
     </div>
   );
 };
+
+

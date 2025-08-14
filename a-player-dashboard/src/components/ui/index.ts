@@ -18,6 +18,7 @@ export { SkeletonLoader, EmployeeCardSkeleton, ChartSkeleton } from './SkeletonL
 export { EmptyState, NoEmployeesFound, NoEvaluationData } from './EmptyState';
 export { Breadcrumb, useBreadcrumbs } from './Breadcrumb';
 export { KeyboardShortcuts } from './KeyboardShortcuts';
+export { CompanySwitcher } from './CompanySwitcher';
 export { EmployeeProfile } from './EmployeeProfile';
 export { QuarterlyNotes } from './QuarterlyNotes';
 export { AuthenticationTest } from './AuthenticationTest';
@@ -50,5 +51,12 @@ export { PersonaQuickGlanceWidget, PersonaQuickBadge } from './PersonaQuickGlanc
 
 // PDF Report Generation Components
 export { GeneratePDFButton } from './GeneratePDFButton';
+
+// Notification System Components
+export { Notification, NotificationContainer, useNotifications } from './Notification';
+export type { NotificationProps, NotificationType, NotificationState } from './Notification';
+
+// Invite Management Components
+export { InviteManager } from './InviteManager';
 
  

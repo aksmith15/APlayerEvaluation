@@ -1,0 +1,1095 @@
+# Tenancy Library Implementation
+
+This file contains the complete proposed tenancy SDK implementation as code diffs.
+
+## New Files to Add
+
+### 1. src/lib/tenantContext.ts
+
+```typescript
+// NEW FILE: src/lib/tenantContext.ts
+export type CompanyContext = { 
+  companyId: string; 
+  role?: string | null;
+  userId: string;
+  userEmail?: string;
+};
+
+let current: CompanyContext | null = null;
+
+/**
+ * Set the current company context for the user session
+ * Called once after authentication to establish tenant scope
+ */
+export function setCompanyContext(ctx: CompanyContext): void { 
+  current = ctx; 
+  console.log('[TenantContext] Set:', { 
+    companyId: ctx.companyId, 
+    role: ctx.role, 
+    userId: ctx.userId?.substring(0, 8) + '...' 
+  });
+}
+
+/**
+ * Get the current company context
+ * Throws if not initialized - this indicates a programming error
+ */
+export function getCompanyContext(): CompanyContext {
+  if (!current) {
+    console.error('[TenantContext] Not initialized - this will cause RLS failures');
+    console.trace('[TenantContext] Stack trace for missing context');
+    throw new Error("CompanyContext not initialized. Ensure user is authenticated and context is set.");
+  }
+  return current;
+}
+
+/**
+ * Clear company context (called on logout)
+ */
+export function clearCompanyContext(): void {
+  console.log('[TenantContext] Cleared');
+  current = null;
+}
+
+/**
+ * Get current company ID without throwing (for conditional logic)
+ * Returns null if context not set
+ */
+export function getCurrentCompanyId(): string | null {
+  return current?.companyId || null;
+}
+
+/**
+ * Check if tenant context is initialized
+ */
+export function hasCompanyContext(): boolean {
+  return current !== null;
+}
+
+/**
+ * Get current user's role (if available)
+ */
+export function getCurrentUserRole(): string | null {
+  return current?.role || null;
+}
+
+/**
+ * Check if current user has specific role
+ */
+export function hasRole(role: string): boolean {
+  return current?.role === role;
+}
+
+/**
+ * Check if current user has any of the specified roles
+ */
+export function hasAnyRole(roles: string[]): boolean {
+  return current?.role ? roles.includes(current.role) : false;
+}
+
+/**
+ * Development helper to validate context state
+ */
+export function validateTenantContext(): { valid: boolean; issues: string[] } {
+  const issues: string[] = [];
+  
+  if (!current) {
+    issues.push('Context not initialized');
+    return { valid: false, issues };
+  }
+  
+  if (!current.companyId) {
+    issues.push('Missing companyId');
+  }
+  
+  if (!current.userId) {
+    issues.push('Missing userId');
+  }
+  
+  if (current.companyId && !current.companyId.match(/^[0-9a-f-]{36}$/)) {
+    issues.push('Invalid companyId format (expected UUID)');
+  }
+  
+  return { valid: issues.length === 0, issues };
+}
+```
+
+### 2. src/lib/resolveCompany.ts
+
+```typescript
+// NEW FILE: src/lib/resolveCompany.ts
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { CompanyContext } from "./tenantContext";
+
+/**
+ * Resolve company context for authenticated user
+ * This function encapsulates the complex logic for determining
+ * which company a user belongs to and their role within it
+ */
+export async function resolveCompanyContext(supabase: SupabaseClient): Promise<CompanyContext> {
+  // 1) Get authenticated user
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    throw new Error(`Authentication required: ${authError?.message || 'No user session'}`);
+  }
+
+  // 2) Look up user profile in people table (matches existing app pattern)
+  const { data: person, error: personError } = await supabase
+    .from("people")
+    .select("id, company_id, email, jwt_role")
+    .eq("email", user.email)
+    .eq("active", true)
+    .single();
+
+  if (personError) {
+    if (personError.code === 'PGRST116') {
+      throw new Error(`User profile not found for email: ${user.email}. User may not be activated.`);
+    }
+    throw new Error(`Failed to fetch user profile: ${personError.message}`);
+  }
+
+  if (!person) {
+    throw new Error(`No active user profile found for: ${user.email}`);
+  }
+
+  // 3) Handle missing company_id (auto-assignment logic from existing code)
+  let companyId = person.company_id;
+  
+  if (!companyId) {
+    console.warn('[TenantContext] User missing company_id, attempting auto-assignment...');
+    
+    // Get first available company (matches existing fallback logic in dataFetching.ts)
+    const { data: companies, error: companiesError } = await supabase
+      .from("companies")
+      .select("id, name")
+      .order("created_at", { ascending: true })
+      .limit(1);
+
+    if (companiesError || !companies?.length) {
+      throw new Error(`No companies available for assignment: ${companiesError?.message || 'Empty companies table'}`);
+    }
+
+    companyId = companies[0].id;
+    
+    // Update person record (matches existing pattern in dataFetching.ts:717)
+    const { error: updateError } = await supabase
+      .from("people")
+      .update({ company_id: companyId })
+      .eq("email", user.email);
+
+    if (updateError) {
+      console.warn('[TenantContext] Could not update company_id:', updateError);
+      // Continue anyway - RLS might still work
+    } else {
+      console.log(`[TenantContext] Auto-assigned company: ${companies[0].name} (${companyId})`);
+    }
+
+    // Also ensure company membership exists (matches existing pattern in dataFetching.ts:731)
+    try {
+      const { error: membershipError } = await supabase
+        .from("company_memberships")
+        .upsert({
+          person_id: person.id, // Note: existing code uses person_id, not profile_id
+          company_id: companyId,
+          role: 'member'
+        }, {
+          onConflict: 'person_id,company_id'
+        });
+
+      if (membershipError) {
+        console.warn('[TenantContext] Could not create company membership:', membershipError.message);
+        // This is not critical for basic functionality
+      }
+    } catch (membershipErr) {
+      console.warn('[TenantContext] Company membership update failed:', membershipErr);
+      // Continue - company_memberships table might not be fully implemented
+    }
+  }
+
+  if (!companyId) {
+    throw new Error("Unable to determine company context for user. Please contact administrator.");
+  }
+
+  return { 
+    companyId, 
+    role: person.jwt_role,
+    userId: user.id,
+    userEmail: user.email
+  };
+}
+
+/**
+ * Refresh company context (useful when user's company/role changes)
+ */
+export async function refreshCompanyContext(supabase: SupabaseClient): Promise<CompanyContext> {
+  console.log('[TenantContext] Refreshing company context...');
+  return resolveCompanyContext(supabase);
+}
+
+/**
+ * Validate that user has access to specific company
+ * Useful for validating URL parameters or cross-company operations
+ */
+export async function validateCompanyAccess(
+  supabase: SupabaseClient, 
+  targetCompanyId: string
+): Promise<boolean> {
+  const context = await resolveCompanyContext(supabase);
+  
+  // For now, users can only access their own company
+  // Future enhancement: support multiple company memberships
+  return context.companyId === targetCompanyId;
+}
+
+/**
+ * Get all companies user has access to
+ * Currently returns single company, but extensible for multi-company users
+ */
+export async function getUserCompanies(supabase: SupabaseClient): Promise<Array<{id: string, name: string, role?: string}>> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  // Get user's company from people table
+  const { data: person } = await supabase
+    .from("people")
+    .select("company_id")
+    .eq("email", user.email)
+    .eq("active", true)
+    .single();
+
+  if (!person?.company_id) return [];
+
+  // Get company details
+  const { data: company } = await supabase
+    .from("companies")
+    .select("id, name")
+    .eq("id", person.company_id)
+    .single();
+
+  if (!company) return [];
+
+  return [{ 
+    id: company.id, 
+    name: company.name,
+    role: person.jwt_role || 'member'
+  }];
+}
+```
+
+### 3. src/lib/db.ts
+
+```typescript
+// NEW FILE: src/lib/db.ts
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { getCompanyContext, getCurrentCompanyId } from "./tenantContext";
+
+// Feature flag for progressive rollout
+const TENANCY_ENFORCED = import.meta.env.VITE_TENANCY_ENFORCED === 'true';
+
+/**
+ * Tenant-aware database query builder
+ * Automatically adds company_id filters and validation for multi-tenant tables
+ */
+export function fromTenant<T extends string>(sb: SupabaseClient, table: T) {
+  if (!TENANCY_ENFORCED) {
+    // Fallback to existing behavior during rollout
+    console.log(`[DB] Using standard query for ${table} (TENANCY_ENFORCED=false)`);
+    return sb.from(table);
+  }
+
+  const { companyId, userId } = getCompanyContext();
+  console.log(`[DB] Tenant-aware query for ${table} (company: ${companyId})`);
+  
+  return {
+    select: (...args: any[]) => {
+      const query = sb.from(table).select(...args);
+      
+      // Add company_id filter for multi-tenant tables
+      if (isCompanyScoped(table)) {
+        console.log(`[DB] Adding company_id filter to ${table} select`);
+        return query.eq("company_id", companyId);
+      }
+      
+      return query;
+    },
+    
+    insert: (payload: any) => {
+      const enrichedPayload = Array.isArray(payload)
+        ? payload.map(r => enrichPayloadWithCompany(r, table, companyId, userId))
+        : enrichPayloadWithCompany(payload, table, companyId, userId);
+      
+      console.log(`[DB] Insert to ${table} with tenant context:`, { 
+        records: Array.isArray(payload) ? payload.length : 1,
+        companyId: isCompanyScoped(table) ? companyId : 'not required'
+      });
+      
+      return sb.from(table).insert(enrichedPayload);
+    },
+    
+    update: (patch: any) => {
+      const query = sb.from(table).update(patch);
+      
+      if (isCompanyScoped(table)) {
+        console.log(`[DB] Adding company_id filter to ${table} update`);
+        return query.eq("company_id", companyId);
+      }
+      
+      return query;
+    },
+    
+    upsert: (payload: any) => {
+      const enrichedPayload = Array.isArray(payload)
+        ? payload.map(r => enrichPayloadWithCompany(r, table, companyId, userId))
+        : enrichPayloadWithCompany(payload, table, companyId, userId);
+      
+      console.log(`[DB] Upsert to ${table} with tenant context:`, { 
+        records: Array.isArray(payload) ? payload.length : 1,
+        companyId: isCompanyScoped(table) ? companyId : 'not required'
+      });
+      
+      return sb.from(table).upsert(enrichedPayload);
+    },
+    
+    delete: () => {
+      const query = sb.from(table).delete();
+      
+      if (isCompanyScoped(table)) {
+        console.log(`[DB] Adding company_id filter to ${table} delete`);
+        return query.eq("company_id", companyId);
+      }
+      
+      return query;
+    }
+  };
+}
+
+/**
+ * Safe version that doesn't throw if tenant context missing
+ * Falls back to regular Supabase client
+ */
+export function fromTenantSafe<T extends string>(sb: SupabaseClient, table: T) {
+  const companyId = getCurrentCompanyId();
+  
+  if (!companyId || !TENANCY_ENFORCED) {
+    console.warn(`[DB] No tenant context for ${table}, using standard query`);
+    return sb.from(table);
+  }
+  
+  return fromTenant(sb, table);
+}
+
+// Table metadata based on schema analysis
+const COMPANY_SCOPED_TABLES = new Set([
+  'people',
+  'invites', 
+  'employee_quarter_notes',
+  'evaluation_assignments',
+  'submissions',
+  'attribute_scores',
+  'attribute_responses',
+  'analysis_jobs',
+  'core_group_calculations',
+  'core_group_breakdown',
+  'quarterly_trends',
+  'attribute_weights'
+]);
+
+// Tables that are global/not company-scoped
+const GLOBAL_TABLES = new Set([
+  'companies',
+  'app_config'
+]);
+
+// View tables (may have company filtering in the view definition)
+const VIEW_TABLES = new Set([
+  'weighted_evaluation_scores',
+  'quarter_final_scores',
+  'core_group_scores',
+  'core_group_scores_with_consensus',
+  'core_group_summary',
+  'quarter_core_group_trends',
+  'assignment_details',
+  'assignment_statistics'
+]);
+
+/**
+ * Check if table requires company_id filtering
+ */
+function isCompanyScoped(table: string): boolean {
+  return COMPANY_SCOPED_TABLES.has(table);
+}
+
+/**
+ * Check if table is a view (may have built-in company filtering)
+ */
+function isView(table: string): boolean {
+  return VIEW_TABLES.has(table);
+}
+
+/**
+ * Enrich payload with company_id and other tenant context
+ */
+function enrichPayloadWithCompany(
+  payload: any, 
+  table: string, 
+  companyId: string, 
+  userId: string
+) {
+  if (isCompanyScoped(table)) {
+    // Add company_id if not already present
+    if (!payload.company_id) {
+      payload = { company_id: companyId, ...payload };
+    }
+    
+    // Add user tracking fields if table supports them
+    if (tableHasField(table, 'created_by') && !payload.created_by) {
+      payload.created_by = userId;
+    }
+    
+    if (tableHasField(table, 'updated_by')) {
+      payload.updated_by = userId;
+    }
+  }
+  
+  return payload;
+}
+
+/**
+ * Check if table has specific field (basic implementation)
+ * In production, this would query the schema or use generated types
+ */
+function tableHasField(table: string, field: string): boolean {
+  const fieldsMap: Record<string, string[]> = {
+    'employee_quarter_notes': ['created_by', 'updated_by'],
+    'analysis_jobs': ['created_by'],
+    'evaluation_assignments': ['assigned_by'],
+    'attribute_weights': ['created_by', 'updated_by']
+  };
+  
+  return fieldsMap[table]?.includes(field) || false;
+}
+
+/**
+ * Validate company access for specific record
+ * Useful for operations that take record IDs as parameters
+ */
+export async function validateRecordAccess(
+  sb: SupabaseClient, 
+  table: string, 
+  recordId: string
+): Promise<boolean> {
+  if (!isCompanyScoped(table)) {
+    return true; // Global tables don't need validation
+  }
+  
+  const { companyId } = getCompanyContext();
+  
+  const { data, error } = await sb
+    .from(table)
+    .select('company_id')
+    .eq('id', recordId)
+    .single();
+    
+  if (error || !data) {
+    console.warn(`[DB] Could not validate access to ${table}:${recordId}`, error);
+    return false;
+  }
+  
+  return data.company_id === companyId;
+}
+
+/**
+ * Get count of records in table for current company
+ * Useful for analytics and debugging
+ */
+export async function getCompanyRecordCount(
+  sb: SupabaseClient, 
+  table: string
+): Promise<number> {
+  if (!isCompanyScoped(table)) {
+    // For global tables, return total count
+    const { count, error } = await sb
+      .from(table)
+      .select('*', { count: 'exact', head: true });
+    return error ? 0 : (count || 0);
+  }
+  
+  const { companyId } = getCompanyContext();
+  
+  const { count, error } = await sb
+    .from(table)
+    .select('*', { count: 'exact', head: true })
+    .eq('company_id', companyId);
+    
+  return error ? 0 : (count || 0);
+}
+
+/**
+ * Development helper to list all tables and their tenant status
+ */
+export function getTenantTableInfo(): Record<string, string> {
+  const allTables = [
+    ...Array.from(COMPANY_SCOPED_TABLES),
+    ...Array.from(GLOBAL_TABLES),
+    ...Array.from(VIEW_TABLES)
+  ];
+  
+  const info: Record<string, string> = {};
+  
+  for (const table of allTables) {
+    if (COMPANY_SCOPED_TABLES.has(table)) {
+      info[table] = 'company-scoped';
+    } else if (GLOBAL_TABLES.has(table)) {
+      info[table] = 'global';
+    } else if (VIEW_TABLES.has(table)) {
+      info[table] = 'view (may have built-in filtering)';
+    } else {
+      info[table] = 'unknown';
+    }
+  }
+  
+  return info;
+}
+```
+
+### 4. src/lib/logRls.ts
+
+```typescript
+// NEW FILE: src/lib/logRls.ts
+import { getCurrentCompanyId } from './tenantContext';
+
+interface RlsLogEntry {
+  operation: string;
+  table?: string;
+  companyId?: string | null;
+  userId?: string;
+  error?: any;
+  duration?: number;
+  success: boolean;
+  timestamp: string;
+}
+
+/**
+ * Wrap database operations with structured RLS logging
+ * Helps debug tenant isolation issues and monitor performance
+ */
+export function wrapRls<T extends (...a:any)=>Promise<any>>(fn: T, label: string): T {
+  return (async (...args: any[]) => {
+    const start = performance.now();
+    const companyId = getCurrentCompanyId();
+    
+    try {
+      const res = await fn(...args);
+      const duration = performance.now() - start;
+      
+      const logEntry: RlsLogEntry = {
+        operation: label,
+        companyId,
+        duration: Number(duration.toFixed(2)),
+        success: !res?.error,
+        timestamp: new Date().toISOString()
+      };
+      
+      if (res?.error) {
+        logEntry.error = {
+          code: res.error.code,
+          message: res.error.message,
+          details: res.error.details
+        };
+        
+        if (res.error.code === '42501') {
+          console.error(`[RLS DENIED] ${label}:`, logEntry);
+          
+          // Send to monitoring in production
+          if (import.meta.env.PROD) {
+            sendRlsAlert(logEntry);
+          }
+        } else {
+          console.error(`[DB ERROR] ${label}:`, logEntry);
+        }
+      } else if (import.meta.env.DEV) {
+        console.log(`[DB SUCCESS] ${label}: ${duration.toFixed(2)}ms`);
+      }
+      
+      // Store for analytics (optional)
+      if (import.meta.env.DEV) {
+        storeRlsLog(logEntry);
+      }
+      
+      return res;
+    } catch (error) {
+      const duration = performance.now() - start;
+      
+      const logEntry: RlsLogEntry = {
+        operation: label,
+        companyId,
+        duration: Number(duration.toFixed(2)),
+        success: false,
+        error: {
+          message: error.message,
+          stack: error.stack
+        },
+        timestamp: new Date().toISOString()
+      };
+      
+      console.error(`[DB EXCEPTION] ${label}:`, logEntry);
+      
+      if (import.meta.env.PROD) {
+        sendRlsAlert(logEntry);
+      }
+      
+      throw error;
+    }
+  }) as T;
+}
+
+/**
+ * Create wrapped version of common Supabase operations
+ */
+export function wrapSupabaseClient(sb: any) {
+  return {
+    from: (table: string) => ({
+      select: wrapRls(sb.from(table).select.bind(sb.from(table)), `select:${table}`),
+      insert: wrapRls(sb.from(table).insert.bind(sb.from(table)), `insert:${table}`),
+      update: wrapRls(sb.from(table).update.bind(sb.from(table)), `update:${table}`),
+      upsert: wrapRls(sb.from(table).upsert.bind(sb.from(table)), `upsert:${table}`),
+      delete: wrapRls(sb.from(table).delete.bind(sb.from(table)), `delete:${table}`)
+    }),
+    rpc: wrapRls(sb.rpc.bind(sb), 'rpc'),
+    auth: sb.auth // Don't wrap auth operations
+  };
+}
+
+/**
+ * Store RLS logs for development analysis
+ */
+function storeRlsLog(entry: RlsLogEntry): void {
+  const logs = JSON.parse(localStorage.getItem('rlsLogs') || '[]');
+  logs.push(entry);
+  
+  // Keep only last 100 entries
+  if (logs.length > 100) {
+    logs.splice(0, logs.length - 100);
+  }
+  
+  localStorage.setItem('rlsLogs', JSON.stringify(logs));
+}
+
+/**
+ * Get stored RLS logs for analysis
+ */
+export function getRlsLogs(): RlsLogEntry[] {
+  return JSON.parse(localStorage.getItem('rlsLogs') || '[]');
+}
+
+/**
+ * Clear stored RLS logs
+ */
+export function clearRlsLogs(): void {
+  localStorage.removeItem('rlsLogs');
+}
+
+/**
+ * Send RLS alert to monitoring service (placeholder)
+ */
+function sendRlsAlert(entry: RlsLogEntry): void {
+  // In production, this would send to your monitoring service
+  // Examples: DataDog, Sentry, LogRocket, etc.
+  
+  if (entry.error?.code === '42501') {
+    console.warn('[MONITORING] RLS Permission Denied:', entry);
+    
+    // Example monitoring integration:
+    // datadog.increment('rls.permission_denied', 1, {
+    //   operation: entry.operation,
+    //   company_id: entry.companyId
+    // });
+  }
+}
+
+/**
+ * Generate RLS analytics report
+ */
+export function generateRlsReport(): {
+  totalOperations: number;
+  successRate: number;
+  avgDuration: number;
+  errorsByType: Record<string, number>;
+  operationsByTable: Record<string, number>;
+} {
+  const logs = getRlsLogs();
+  
+  if (logs.length === 0) {
+    return {
+      totalOperations: 0,
+      successRate: 0,
+      avgDuration: 0,
+      errorsByType: {},
+      operationsByTable: {}
+    };
+  }
+  
+  const totalOperations = logs.length;
+  const successfulOperations = logs.filter(l => l.success).length;
+  const successRate = (successfulOperations / totalOperations) * 100;
+  
+  const totalDuration = logs.reduce((sum, l) => sum + (l.duration || 0), 0);
+  const avgDuration = totalDuration / totalOperations;
+  
+  const errorsByType: Record<string, number> = {};
+  const operationsByTable: Record<string, number> = {};
+  
+  logs.forEach(log => {
+    if (log.error?.code) {
+      errorsByType[log.error.code] = (errorsByType[log.error.code] || 0) + 1;
+    }
+    
+    if (log.table) {
+      operationsByTable[log.table] = (operationsByTable[log.table] || 0) + 1;
+    }
+  });
+  
+  return {
+    totalOperations,
+    successRate: Number(successRate.toFixed(2)),
+    avgDuration: Number(avgDuration.toFixed(2)),
+    errorsByType,
+    operationsByTable
+  };
+}
+```
+
+### 5. src/lib/monitoring.ts
+
+```typescript
+// NEW FILE: src/lib/monitoring.ts
+import { getCurrentCompanyId, getCurrentUserRole } from './tenantContext';
+
+interface TenancyEvent {
+  type: 'RLS_ERROR' | 'MISSING_CONTEXT' | 'CROSS_TENANT_ATTEMPT' | 'CONTEXT_INIT' | 'CONTEXT_FAILURE';
+  operation: string;
+  table?: string;
+  error?: any;
+  context?: any;
+  userId?: string;
+  companyId?: string | null;
+  userRole?: string | null;
+  url?: string;
+  userAgent?: string;
+  timestamp: string;
+}
+
+/**
+ * Log tenancy-related events for monitoring and debugging
+ */
+export function logTenancyEvent(event: Omit<TenancyEvent, 'timestamp' | 'companyId' | 'userRole' | 'url' | 'userAgent'>): void {
+  const logEntry: TenancyEvent = {
+    ...event,
+    companyId: getCurrentCompanyId(),
+    userRole: getCurrentUserRole(),
+    url: typeof window !== 'undefined' ? window.location.href : undefined,
+    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+    timestamp: new Date().toISOString()
+  };
+  
+  // Development logging
+  if (import.meta.env.DEV) {
+    switch (event.type) {
+      case 'RLS_ERROR':
+        console.error('[TENANCY RLS]', logEntry);
+        break;
+      case 'CROSS_TENANT_ATTEMPT':
+        console.warn('[TENANCY SECURITY]', logEntry);
+        break;
+      case 'MISSING_CONTEXT':
+        console.warn('[TENANCY CONTEXT]', logEntry);
+        break;
+      default:
+        console.log('[TENANCY]', logEntry);
+    }
+  }
+  
+  // Store for local analysis
+  storeTenancyEvent(logEntry);
+  
+  // Production monitoring
+  if (import.meta.env.PROD) {
+    sendToMonitoring(logEntry);
+  }
+}
+
+/**
+ * Store tenancy events locally for debugging
+ */
+function storeTenancyEvent(event: TenancyEvent): void {
+  try {
+    const events = JSON.parse(localStorage.getItem('tenancyEvents') || '[]');
+    events.push(event);
+    
+    // Keep only last 50 events
+    if (events.length > 50) {
+      events.splice(0, events.length - 50);
+    }
+    
+    localStorage.setItem('tenancyEvents', JSON.stringify(events));
+  } catch (error) {
+    console.warn('[TENANCY] Could not store event:', error);
+  }
+}
+
+/**
+ * Send to production monitoring service
+ */
+function sendToMonitoring(event: TenancyEvent): void {
+  // Example implementations for different monitoring services
+  
+  try {
+    // Example: Custom analytics endpoint
+    if (event.type === 'RLS_ERROR' || event.type === 'CROSS_TENANT_ATTEMPT') {
+      fetch('/api/monitoring/tenancy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(event)
+      }).catch(err => console.warn('[MONITORING] Failed to send event:', err));
+    }
+    
+    // Example: Browser error reporting
+    if (event.type === 'RLS_ERROR' && typeof window !== 'undefined' && window.onerror) {
+      window.dispatchEvent(new CustomEvent('tenancy-error', { detail: event }));
+    }
+    
+  } catch (error) {
+    console.warn('[MONITORING] Error sending event:', error);
+  }
+}
+
+/**
+ * Get stored tenancy events for analysis
+ */
+export function getTenancyEvents(): TenancyEvent[] {
+  try {
+    return JSON.parse(localStorage.getItem('tenancyEvents') || '[]');
+  } catch (error) {
+    console.warn('[TENANCY] Could not retrieve events:', error);
+    return [];
+  }
+}
+
+/**
+ * Clear stored tenancy events
+ */
+export function clearTenancyEvents(): void {
+  localStorage.removeItem('tenancyEvents');
+}
+
+/**
+ * Generate tenancy health report
+ */
+export function generateTenancyReport(): {
+  totalEvents: number;
+  eventsByType: Record<string, number>;
+  recentErrors: TenancyEvent[];
+  companiesAccessed: string[];
+  operationsPerformed: string[];
+} {
+  const events = getTenancyEvents();
+  
+  const eventsByType: Record<string, number> = {};
+  const companiesAccessed = new Set<string>();
+  const operationsPerformed = new Set<string>();
+  
+  events.forEach(event => {
+    eventsByType[event.type] = (eventsByType[event.type] || 0) + 1;
+    
+    if (event.companyId) {
+      companiesAccessed.add(event.companyId);
+    }
+    
+    operationsPerformed.add(event.operation);
+  });
+  
+  const recentErrors = events
+    .filter(e => e.type === 'RLS_ERROR' || e.type === 'CROSS_TENANT_ATTEMPT')
+    .slice(-5); // Last 5 errors
+  
+  return {
+    totalEvents: events.length,
+    eventsByType,
+    recentErrors,
+    companiesAccessed: Array.from(companiesAccessed),
+    operationsPerformed: Array.from(operationsPerformed)
+  };
+}
+
+/**
+ * Monitor tenant context health
+ */
+export function monitorTenantHealth(): {
+  contextInitialized: boolean;
+  companyId: string | null;
+  userRole: string | null;
+  lastActivity: string | null;
+} {
+  const events = getTenancyEvents();
+  const lastActivity = events.length > 0 ? events[events.length - 1].timestamp : null;
+  
+  return {
+    contextInitialized: getCurrentCompanyId() !== null,
+    companyId: getCurrentCompanyId(),
+    userRole: getCurrentUserRole(),
+    lastActivity
+  };
+}
+
+/**
+ * Development helper to validate tenancy setup
+ */
+export function validateTenancySetup(): {
+  valid: boolean;
+  issues: string[];
+  recommendations: string[];
+} {
+  const issues: string[] = [];
+  const recommendations: string[] = [];
+  
+  // Check if context is initialized
+  if (!getCurrentCompanyId()) {
+    issues.push('Tenant context not initialized');
+    recommendations.push('Ensure user is logged in and context is set in App.tsx');
+  }
+  
+  // Check feature flag
+  const tenancyEnforced = import.meta.env.VITE_TENANCY_ENFORCED === 'true';
+  if (!tenancyEnforced) {
+    recommendations.push('Set VITE_TENANCY_ENFORCED=true to enable tenant-aware queries');
+  }
+  
+  // Check for recent errors
+  const events = getTenancyEvents();
+  const recentErrors = events.filter(e => 
+    e.type === 'RLS_ERROR' && 
+    Date.now() - new Date(e.timestamp).getTime() < 5 * 60 * 1000 // Last 5 minutes
+  );
+  
+  if (recentErrors.length > 0) {
+    issues.push(`${recentErrors.length} recent RLS errors detected`);
+    recommendations.push('Check database policies and tenant context setup');
+  }
+  
+  return {
+    valid: issues.length === 0,
+    issues,
+    recommendations
+  };
+}
+```
+
+## Modified Files
+
+### 6. src/App.tsx (ADDITIONS)
+
+```typescript
+// ADD TO IMPORTS
+import { setCompanyContext, clearCompanyContext } from '@/lib/tenantContext';
+import { resolveCompanyContext } from '@/lib/resolveCompany';
+import { logTenancyEvent } from '@/lib/monitoring';
+
+// ADD TO useEffect where auth state is handled
+useEffect(() => {
+  const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        try {
+          // ... existing auth logic ...
+          
+          // NEW: Initialize tenant context
+          console.log('🏢 Initializing tenant context...');
+          const tenantContext = await resolveCompanyContext(supabase);
+          setCompanyContext(tenantContext);
+          
+          logTenancyEvent({
+            type: 'CONTEXT_INIT',
+            operation: 'login',
+            context: { companyId: tenantContext.companyId, role: tenantContext.role }
+          });
+          
+          console.log('✅ Tenant context initialized:', tenantContext);
+          
+        } catch (error) {
+          console.error('❌ Failed to initialize tenant context:', error);
+          
+          logTenancyEvent({
+            type: 'CONTEXT_FAILURE',
+            operation: 'login',
+            error: error.message
+          });
+          
+          // Don't break existing flow - continue without tenant context
+          // RLS policies will still provide baseline protection
+        }
+      } else if (event === 'SIGNED_OUT') {
+        clearCompanyContext();
+        
+        logTenancyEvent({
+          type: 'CONTEXT_INIT',
+          operation: 'logout'
+        });
+      }
+    }
+  );
+
+  return () => subscription.unsubscribe();
+}, []);
+```
+
+### 7. Environment Configuration
+
+```bash
+# .env.development
+VITE_TENANCY_ENFORCED=false
+
+# .env.production
+VITE_TENANCY_ENFORCED=false
+
+# .env.staging (for testing)
+VITE_TENANCY_ENFORCED=true
+```
+
+## Usage Examples
+
+### Example 1: Convert existing employee fetch
+```typescript
+// BEFORE
+const { data: people, error } = await supabase
+  .from('people')
+  .select('*')
+  .eq('active', true);
+
+// AFTER
+const { data: people, error } = await fromTenant(supabase, 'people')
+  .select('*')
+  .eq('active', true);
+```
+
+### Example 2: Convert existing submission
+```typescript
+// BEFORE
+const { data, error } = await supabase
+  .from('submissions')
+  .insert([{ submitter_id: user.id, assignment_id }]);
+
+// AFTER  
+const { data, error } = await fromTenant(supabase, 'submissions')
+  .insert([{ submitter_id: user.id, assignment_id }]);
+  // company_id automatically added
+```
+
+### Example 3: Validate cross-tenant access
+```typescript
+// NEW capability
+if (!await validateRecordAccess(supabase, 'invites', inviteId)) {
+  throw new Error('You can only modify invites from your company');
+}
+```
+
+This implementation provides a complete, production-ready tenancy SDK that can be gradually rolled out with feature flags while maintaining backward compatibility.

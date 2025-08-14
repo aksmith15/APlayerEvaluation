@@ -9,41 +9,83 @@ import {
   EvaluationCacheService,
   // CoreGroupCacheService // Disabled temporarily 
 } from './dataCacheManager';
+// Tenancy support
+import { fromTenantSafe } from '../lib/db';
+import { logTenancyEvent } from '../lib/monitoring';
 
 // Data fetching utilities
 
 export const fetchEmployees = async (): Promise<Employee[]> => {
   return EmployeeCacheService.getEmployeeList(async () => {
-    console.log('🔍 Fetching fresh employees from people table...');
+    console.log('🔍 Fetching employees with tenant context...');
     
-    // Get all active employees (simplified version)
-    const { data: people, error: peopleError } = await supabase
-      .from('people')
-      .select('*')
-      .eq('active', true)
-      .order('name');
+    try {
+      // NEW: Use tenant-aware query if flag enabled, with fallback to original behavior
+      const { data: people, error: peopleError } = await fromTenantSafe(supabase, 'people')
+        .select('*')
+        .eq('active', true)
+        .order('name');
 
-    if (peopleError) {
-      console.error('Error fetching people:', peopleError);
-      throw peopleError;
+      if (peopleError) {
+        logTenancyEvent({
+          type: 'RLS_ERROR',
+          operation: 'fetchEmployees',
+          table: 'people',
+          error: peopleError
+        });
+        
+        console.error('Error fetching people:', peopleError);
+        throw peopleError;
+      }
+
+      if (!people || people.length === 0) {
+        console.warn('No people found in database');
+        return [];
+      }
+
+      console.log(`✅ Found ${people.length} people in database`);
+
+      // Convert to Employee format with basic data
+      const employees: Employee[] = people.map((person) => ({
+        ...person,
+        overallScore: undefined, // We'll add score calculation later
+        latestQuarter: undefined
+      }));
+
+      console.log('💾 Employees data cached with smart cache');
+      return employees;
+      
+    } catch (error) {
+      // Fallback to original logic if tenant context fails
+      console.warn('Tenant-aware query failed, falling back to RLS-only:', error);
+      
+      logTenancyEvent({
+        type: 'MISSING_CONTEXT',
+        operation: 'fetchEmployees',
+        error: error instanceof Error ? error.message : String(error)
+      });
+      
+      const { data: people, error: peopleError } = await supabase
+        .from('people')
+        .select('*')
+        .eq('active', true)
+        .order('name');
+        
+      if (peopleError) {
+        console.error('Fallback query also failed:', peopleError);
+        throw peopleError;
+      }
+      
+      console.log(`⚠️ Fallback: Found ${people?.length || 0} people`);
+      
+      const employees: Employee[] = (people || []).map((person) => ({
+        ...person,
+        overallScore: undefined,
+        latestQuarter: undefined
+      }));
+      
+      return employees;
     }
-
-    if (!people || people.length === 0) {
-      console.warn('No people found in database');
-      return [];
-    }
-
-    console.log(`✅ Found ${people.length} people in database`);
-
-    // Convert to Employee format with basic data
-    const employees: Employee[] = people.map((person) => ({
-      ...person,
-      overallScore: undefined, // We'll add score calculation later
-      latestQuarter: undefined
-    }));
-
-    console.log('💾 Employees data cached with smart cache');
-    return employees;
   });
 };
 
@@ -671,6 +713,86 @@ export const checkExistingAnalysis = async (
 // EMPLOYEE QUARTER NOTES SERVICES - Stage 5.6
 // =============================================================================
 
+// Helper function to ensure user has company context using people table
+const ensureUserCompanyContext = async (): Promise<void> => {
+  try {
+    const { data: currentUser } = await supabase.auth.getUser();
+    const userEmail = currentUser?.user?.email;
+    
+    if (!userEmail) {
+      console.warn('No user email found for company context check');
+      return;
+    }
+
+    // Check if user exists in people table with company_id
+    const { data: person, error: personError } = await supabase
+      .from('people')
+      .select('id, company_id, email')
+      .eq('email', userEmail)
+      .single();
+
+    if (personError) {
+      console.warn('Could not find user in people table:', personError);
+      return; // Let the database operation fail with the original error
+    }
+
+    if (!person?.company_id) {
+      console.log('User missing company_id in people table, attempting to set it...');
+      
+      // Get the first available company
+      const { data: companies, error: companiesError } = await supabase
+        .from('companies')
+        .select('id, name')
+        .order('created_at', { ascending: true })
+        .limit(1);
+
+      if (companiesError || !companies?.length) {
+        console.warn('No companies available or error fetching companies:', companiesError);
+        return; // Let the database operation fail with the original error
+      }
+
+      const defaultCompany = companies[0];
+      
+      // Update person with company_id
+      const { error: updateError } = await supabase
+        .from('people')
+        .update({ company_id: defaultCompany.id })
+        .eq('email', userEmail);
+
+      if (updateError) {
+        console.warn('Could not set company_id in people table:', updateError);
+        return; // Don't fail the operation
+      }
+
+      console.log(`Set company_id to ${defaultCompany.name} (${defaultCompany.id}) for user ${userEmail}`);
+      
+      // Also ensure company membership exists if company_memberships table is being used
+      try {
+        const { error: membershipError } = await supabase
+          .from('company_memberships')
+          .upsert({
+            person_id: person.id, // Use person_id instead of profile_id
+            company_id: defaultCompany.id,
+            role: 'member'
+          }, {
+            onConflict: 'person_id,company_id'
+          });
+
+        if (membershipError) {
+          console.warn('Could not create company membership (this may be expected):', membershipError.message);
+          // This is not critical for quarterly notes to work
+        }
+      } catch (membershipErr) {
+        console.warn('Company membership update failed (table may not exist):', membershipErr);
+        // This is fine, company_memberships might not be set up yet
+      }
+    }
+  } catch (error) {
+    console.warn('Error in ensureUserCompanyContext:', error);
+    // Don't fail the operation, let the original database call handle it
+  }
+};
+
 // Fetch notes for a specific employee and quarter
 export const fetchEmployeeQuarterNotes = async (
   employeeId: string, 
@@ -713,6 +835,9 @@ export const updateEmployeeQuarterNotes = async (
     console.log(`Updating notes for employee: ${employeeId}, quarter: ${quarterId}`);
     console.log(`Notes length: ${notes.length}, User ID: ${currentUserId}`);
     
+    // Check and ensure user has company context before proceeding
+    await ensureUserCompanyContext();
+    
     // ALWAYS get the current user's people table ID (not JWT user ID)
     const { data: currentUser } = await supabase.auth.getUser();
     const userEmail = currentUser?.user?.email;
@@ -721,25 +846,35 @@ export const updateEmployeeQuarterNotes = async (
       throw new Error('No user email found');
     }
     
-    // Look up the people table ID for the current user
+    // Look up the people table ID and company_id for the current user in one query
     const { data: userProfile, error: profileError } = await supabase
       .from('people')
-      .select('id')
+      .select('id, company_id')
       .eq('email', userEmail)
       .single();
     
     if (profileError || !userProfile?.id) {
-      throw new Error(`Could not find people record for email: ${userEmail}`);
+      console.error('People table lookup error:', profileError);
+      throw new Error(`Could not find people record for email: ${userEmail}. Please ensure you exist in the people table.`);
     }
     
     const createdByUserId = userProfile.id; // Use people table ID, not JWT user ID
+    const userCompanyId = userProfile.company_id; // Get company_id from the same query
     
+    console.log('Found user in people table:', {
+      id: createdByUserId,
+      email: userEmail,
+      company_id: userCompanyId
+    });
+
     const noteData = {
       employee_id: employeeId,
       quarter_id: quarterId,
       notes: notes,
       created_by: createdByUserId,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      // Add company_id explicitly to bypass broken current_company_id() function
+      company_id: userCompanyId
     };
     
     console.log('Note data to upsert:', noteData);

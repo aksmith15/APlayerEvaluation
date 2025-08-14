@@ -4,6 +4,7 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { ErrorMessage } from '../components/ui/ErrorMessage';
+import { CompanySwitcher } from '../components/ui/CompanySwitcher';
 
 // import { QuarterRangeSelector } from '../components/ui/QuarterRangeSelector';
 import { AssignmentCreationForm } from '../components/ui/AssignmentCreationForm';
@@ -15,6 +16,10 @@ import { CoverageDashboard } from '../components/ui/CoverageDashboard';
 const LazyAttributeWeightsManager = React.lazy(() => 
   import('../components/ui/AttributeWeightsManager').then(module => ({ default: module.AttributeWeightsManager }))
 );
+const LazyInviteManager = React.lazy(() => 
+  import('../components/ui/InviteManager').then(module => ({ default: module.InviteManager }))
+);
+
 import { 
   fetchAllAssignments, 
   getAssignmentStatistics,
@@ -89,6 +94,12 @@ const DebugIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) 
   </svg>
 );
 
+const UserPlusIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
+    <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
+  </svg>
+);
+
 const CheckCircleIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 20 20">
     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4a1 1 0 00-1.414-1.414L10 10.586l-1.293-1.293z" clipRule="evenodd" />
@@ -113,7 +124,7 @@ const AssignmentManagement: React.FC = () => {
   const [selectedAssignments, setSelectedAssignments] = useState<string[]>([]);
   
   // UI state
-  const [activeTab, setActiveTab] = useState<'overview' | 'create' | 'upload' | 'manage' | 'coverage' | 'weights' | 'debug'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'create' | 'upload' | 'manage' | 'coverage' | 'weights' | 'invitations' | 'debug'>('overview');
   const [filters, setFilters] = useState<AssignmentFilters>({});
   const [refreshing, setRefreshing] = useState(false);
 
@@ -280,6 +291,9 @@ const AssignmentManagement: React.FC = () => {
             </div>
             
             <div className="flex items-center space-x-3">
+              {/* Company Switcher */}
+              <CompanySwitcher />
+              
               {/* Navigation Links */}
               <button
                 onClick={() => window.location.href = '/employees'}
@@ -329,6 +343,7 @@ const AssignmentManagement: React.FC = () => {
               { id: 'manage', name: 'Manage Assignments', icon: FilterIcon },
               { id: 'coverage', name: 'Coverage Tracking', icon: UsersIcon },
               { id: 'weights', name: 'Attribute Weights', icon: WeightsIcon },
+              { id: 'invitations', name: 'Company Invitations', icon: UserPlusIcon },
               { id: 'debug', name: 'Debug', icon: DebugIcon }
             ].map((tab) => {
               const count = getTabCount(tab.id);
@@ -594,6 +609,15 @@ const AssignmentManagement: React.FC = () => {
                   console.log('Attribute weights updated successfully');
                 }}
               />
+            </Suspense>
+          </div>
+        )}
+
+        {/* Company Invitations Tab */}
+        {activeTab === 'invitations' && (
+          <div className="space-y-6">
+            <Suspense fallback={<LoadingSpinner message="Loading invite manager..." />}>
+              <LazyInviteManager />
             </Suspense>
           </div>
         )}

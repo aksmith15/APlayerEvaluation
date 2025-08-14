@@ -19,41 +19,47 @@ const CACHE_TTL = {
   CHART_DATA: 15 * 60 * 1000,        // 15 minutes - computed chart data
 } as const;
 
-// Cache instances
+// Cache instances - All tenant-aware by default
 export const employeeCache = new SmartCache<Person>('employees', {
   maxSize: 200,
   defaultTTL: CACHE_TTL.EMPLOYEE_DATA,
   persistToStorage: true,
+  tenantAware: true,
 });
 
 const employeeListCache = new SmartCache<Person[]>('employee-lists', {
   maxSize: 10,
   defaultTTL: CACHE_TTL.EMPLOYEE_DATA,
   persistToStorage: true,
+  tenantAware: true,
 });
 
 export const quarterCache = new SmartCache<Quarter[]>('quarters', {
   maxSize: 10,
   defaultTTL: CACHE_TTL.QUARTER_DATA,
   persistToStorage: true,
+  tenantAware: true,
 });
 
 export const evaluationCache = new SmartCache<WeightedEvaluationScore[]>('evaluations', {
   maxSize: 100,
   defaultTTL: CACHE_TTL.EVALUATION_DATA,
   persistToStorage: true,
+  tenantAware: true,
 });
 
 export const coreGroupCache = new SmartCache<CoreGroupAnalyticsResponse>('coreGroups', {
   maxSize: 50,
   defaultTTL: CACHE_TTL.CORE_GROUP_DATA,
   persistToStorage: true,
+  tenantAware: true,
 });
 
 export const chartDataCache = new SmartCache<any>('chartData', {
   maxSize: 100,
   defaultTTL: CACHE_TTL.CHART_DATA,
   persistToStorage: true,
+  tenantAware: true,
 });
 
 /**

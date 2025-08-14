@@ -205,3 +205,5 @@ import { useEmployeeData } from '@shared/hooks';
 ```
 
 This structure provides a solid foundation for scaling the application while maintaining code quality and developer productivity.
+
+

@@ -1,9 +1,11 @@
 /**
  * Smart Cache Service
  * 
- * Provides intelligent caching with TTL, LRU eviction, and storage persistence.
+ * Provides intelligent caching with TTL, LRU eviction, storage persistence, and tenant-awareness.
  * Optimized for employee evaluation data with smart invalidation strategies.
  */
+
+import { getCurrentCompanyId } from '../lib/tenantContext';
 
 export interface CacheItem<T> {
   data: T;
@@ -18,6 +20,7 @@ export interface CacheConfig {
   defaultTTL?: number; // Default TTL in milliseconds
   persistToStorage?: boolean; // Whether to persist to localStorage
   storagePrefix?: string; // Prefix for localStorage keys
+  tenantAware?: boolean; // Whether to include company context in cache keys
 }
 
 export class SmartCache<T> {
@@ -27,6 +30,7 @@ export class SmartCache<T> {
   private readonly persistToStorage: boolean;
   private readonly storagePrefix: string;
   private readonly storageKey: string;
+  private readonly tenantAware: boolean;
 
   constructor(
     name: string,
@@ -37,6 +41,7 @@ export class SmartCache<T> {
     this.persistToStorage = config.persistToStorage ?? true;
     this.storagePrefix = config.storagePrefix ?? 'a-player-cache';
     this.storageKey = `${this.storagePrefix}-${name}`;
+    this.tenantAware = config.tenantAware ?? true; // Default to tenant-aware
 
     // Load from storage if enabled (defer to prevent auth interference)
     if (this.persistToStorage) {
@@ -49,10 +54,30 @@ export class SmartCache<T> {
   }
 
   /**
+   * Generate tenant-aware cache key
+   * Includes company context if tenantAware is enabled
+   */
+  private getTenantAwareKey(key: string): string {
+    if (!this.tenantAware) {
+      return key;
+    }
+
+    try {
+      const companyId = getCurrentCompanyId();
+      return companyId ? `${companyId}:${key}` : key;
+    } catch {
+      // If tenant context is not available, fall back to original key
+      console.warn('[SmartCache] Tenant context not available, using non-tenant key:', key);
+      return key;
+    }
+  }
+
+  /**
    * Get item from cache
    */
   get(key: string): T | null {
-    const item = this.cache.get(key);
+    const tenantKey = this.getTenantAwareKey(key);
+    const item = this.cache.get(tenantKey);
     
     if (!item) {
       return null;
@@ -76,11 +101,12 @@ export class SmartCache<T> {
    * Set item in cache with optional TTL
    */
   set(key: string, data: T, ttl?: number): void {
+    const tenantKey = this.getTenantAwareKey(key);
     const now = Date.now();
     const itemTTL = ttl ?? this.defaultTTL;
 
     // If at max capacity, remove LRU item
-    if (this.cache.size >= this.maxSize && !this.cache.has(key)) {
+    if (this.cache.size >= this.maxSize && !this.cache.has(tenantKey)) {
       this.evictLRU();
     }
 
@@ -92,7 +118,7 @@ export class SmartCache<T> {
       lastAccessed: now,
     };
 
-    this.cache.set(key, item);
+    this.cache.set(tenantKey, item);
     this.saveToStorage();
   }
 
@@ -100,10 +126,11 @@ export class SmartCache<T> {
    * Check if cache has valid (non-expired) item
    */
   has(key: string): boolean {
-    const item = this.cache.get(key);
+    const tenantKey = this.getTenantAwareKey(key);
+    const item = this.cache.get(tenantKey);
     if (!item || this.isExpired(item)) {
       if (item) {
-        this.cache.delete(key);
+        this.cache.delete(tenantKey);
         this.saveToStorage();
       }
       return false;
@@ -115,7 +142,8 @@ export class SmartCache<T> {
    * Delete item from cache
    */
   delete(key: string): void {
-    this.cache.delete(key);
+    const tenantKey = this.getTenantAwareKey(key);
+    this.cache.delete(tenantKey);
     this.saveToStorage();
   }
 
