@@ -119,6 +119,51 @@ The Vite build configuration was splitting Recharts library into a separate `cha
 
 ---
 
+### **Issue #025: React Router createContext Error** ✅ **FIXED**
+**Date Reported:** February 1, 2025  
+**Priority:** High  
+**Category:** React Router/React Context  
+**Reporter:** Console Logs Post-Deployment  
+
+**Problem:**
+Console shows React Router createContext error:
+```
+react-router-CG0dymrT.js:1 Uncaught TypeError: Cannot read properties of undefined (reading 'createContext')
+    at react-router-CG0dymrT.js:1:8329
+```
+
+**Investigation Status:**
+- ✅ **Root Cause Identified**: Vite code splitting separating React Router from React core bundle
+- ✅ **Problem Located**: `vite.config.ts` creating separate `react-router` chunk at lines 47-49
+- ✅ **Impact Assessment**: Navigation and routing functionality broken due to React API isolation
+- ✅ **Solution Implemented**: Modified Vite config to include React Router in react-core bundle
+- ✅ **Local Testing**: Production build tested locally - React Router chunk eliminated
+
+**Root Cause:**
+The Vite build configuration was splitting React Router into a separate chunk (`react-router-CG0dymrT.js`), which broke access to React's `createContext` API. React Router depends on React's context system for state management and needs to share the same React instance.
+
+**Solution Implemented:**
+- ✅ **Modified vite.config.ts**: Moved React Router from separate chunk to `react-core` bundle
+- ✅ **Updated React Core Logic**: Changed condition from `!id.includes('router')` to include router
+- ✅ **Commented Out Router Chunk**: Disabled separate `react-router` chunk creation
+- ✅ **Bundle Size Verification**: react-core chunk grew from 1,105kB to 1,138kB (33kB increase)
+
+**Technical Details:**
+- **Error Location**: `react-router-CG0dymrT.js:1:8329` (Vite build bundle)
+- **Components Involved**: BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation
+- **React APIs Affected**: createContext, useContext, useState, useEffect
+- **Build Verification**: Separate react-router chunk no longer appears in build output
+
+**Files Modified:**
+- ✅ `vite.config.ts` - Fixed React Router chunking to prevent createContext isolation
+
+**Testing Results:**
+- ✅ **Production Build**: No separate react-router chunk generated
+- ✅ **Bundle Analysis**: React Router successfully included in react-core chunk
+- ✅ **Local Preview**: Production build serves without chunking errors
+
+---
+
 ### **Issue #021: TenantContext Not Initialized - RLS Failures** ✅ **RESOLVED**
 **Date Reported:** August 15, 2025  
 **Priority:** High  

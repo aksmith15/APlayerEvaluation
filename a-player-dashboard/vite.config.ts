@@ -39,14 +39,15 @@ export default defineConfig({
         manualChunks: (id) => {
           // Split node_modules into specific vendor chunks
           if (id.includes('node_modules')) {
-            // React core (keep minimal)
-            if (id.includes('react') && !id.includes('recharts') && !id.includes('router')) {
-              return 'react-core';
+            // React core - include React Router to prevent createContext errors
+            if (id.includes('react') && !id.includes('recharts')) {
+              return 'react-core'; // Keep React Router with React core for context sharing
             }
-            // React router
-            if (id.includes('react-router')) {
-              return 'react-router';
-            }
+            // React router - moved to react-core chunk above
+            // NOTE: React Router needs React createContext API, so keep with React core
+            // if (id.includes('react-router')) {
+            //   return 'react-router';
+            // }
             // Chart libraries - keep with React core to prevent forwardRef errors
             if (id.includes('recharts') || id.includes('d3-')) {
               return 'react-core'; // Keep Recharts with React core for forwardRef compatibility
