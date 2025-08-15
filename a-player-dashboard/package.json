@@ -21,7 +21,11 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "docs": "powershell -ExecutionPolicy Bypass -File ../scripts/run_docs_simple.ps1",
+    "docs:schema": "make schema -C ..",
+    "docs:types": "make types -C ..",
+    "docs:clean": "make clean -C .."
   },
   "dependencies": {
     "@react-pdf/renderer": "^3.4.5",

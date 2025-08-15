@@ -1,0 +1,16 @@
+﻿[?25l
+    Select a project:                                                                                
+                                                                                                     
+  >  1. dfcdkdoocsxhzrhlrdmv [name: A-Player Hire, org: ynntuoybiimwubxbgokp, region: us-east-2]     
+    2. yohxpszdhyhetxpctowt [name: Edgecraft 2, org: ynntuoybiimwubxbgokp, region: us-east-2]        
+    3. mcccdfkmcdoeetyhlkbu [name: edgecraft, org: ynntuoybiimwubxbgokp, region: us-east-1]          
+    4. tufjnccktzcbmaemekiz [name: A-Player Eval 1, org: ynntuoybiimwubxbgokp, region: us-east-2]    
+    5. okskotyvjxzswuoxvmlj [name: A-Player Evaluation, org: ynntuoybiimwubxbgokp, region: us-east-2]
+    6. noluzcmdqkisqlegltor [name: n8n Builds, org: duiucpuzrvsfbyqzellx, region: us-east-1]         
+                                                                                                     
+                                                                                                     
+                                                                                                     
+                                                                                                     
+                                                                                                     
+    Γåæ/k up ΓÇó Γåô/j down ΓÇó / filter ΓÇó q quit ΓÇó ? more                                                   
+                                                                                                     [0D[2K[?25h[?1002l[?1003l[?1006l

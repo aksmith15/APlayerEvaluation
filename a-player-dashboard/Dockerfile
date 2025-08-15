@@ -1,7 +1,7 @@
 # Multi-stage Docker build for A-Player Evaluations Dashboard
 
 # Base image for shared dependencies
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci && npm cache clean --force
