@@ -20,7 +20,7 @@ const EmployeeAnalytics = React.lazy(() => import('./pages/EmployeeAnalytics').t
 const AssignmentManagement = React.lazy(() => import('./pages/AssignmentManagement'));
 const MyAssignments = React.lazy(() => import('./pages/MyAssignments'));
 const EvaluationSurvey = React.lazy(() => import('./components/ui').then(module => ({ default: module.EvaluationSurvey })));
-const AcceptInvite = React.lazy(() => import('./pages/AcceptInvite'));
+const AcceptInvite = React.lazy(() => import('./pages/AcceptInvite').then(module => ({ default: module.AcceptInvite })));
 
 // Dev-only React-PDF live preview
 const DevPdfPreview = React.lazy(() => import('./pages/react-pdf/DevPdfPreview'));

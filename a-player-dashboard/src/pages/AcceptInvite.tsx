@@ -18,7 +18,7 @@ interface AcceptInviteState {
   error?: string;
 }
 
-export const AcceptInvite: React.FC = () => {
+const AcceptInvite: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
