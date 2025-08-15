@@ -68,9 +68,9 @@ export const DevPdfPreview: React.FC = () => {
         setAiReview(null);
       }
 
-      // Coaching report
+      // Coaching report with enhanced error handling
       try {
-        console.log('🧠 Invoking AI Coaching Report...');
+        console.log('🧠 Invoking AI Coaching Report (this may take 30-90 seconds)...');
         const responses = await fetchAttributeResponses(employeeId, quarterId);
         const normalizeName = (s: string) => (s || '').replace(/\s+/g, ' ').trim();
         const toAttrMap = (group?: any[]) => {
@@ -112,9 +112,13 @@ export const DevPdfPreview: React.FC = () => {
         const coaching = await fetchCoachingReport(payload);
         setCoachingReport(coaching?.coaching_report || null);
         console.log('✅ AI Coaching Report received');
-      } catch (aiErr) {
-        console.warn('AI coaching report unavailable; continuing without it.', aiErr);
+      } catch (aiErr: any) {
+        console.warn('AI coaching report error:', aiErr);
         setCoachingReport(null);
+        // Don't fail the entire PDF for coaching report issues
+        if (aiErr.message?.includes('timed out') || aiErr.message?.includes('503')) {
+          console.log('💡 Tip: Coaching report generation can take time. The PDF will be generated without it.');
+        }
       }
       const next = new URLSearchParams(location.search);
       next.set('employeeId', employeeId);

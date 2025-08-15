@@ -6649,7 +6649,7 @@ The comprehensive fix (Issues #022-#027) was correct, but required updating Rend
 
 ---
 
-### **Issue #029: AI Coaching Report 503 Service Unavailable** 🔴 **ACTIVE**
+### **Issue #029: AI Coaching Report 503 Service Unavailable** ✅ **IMPROVED**
 **Date Reported:** February 1, 2025  
 **Priority:** Medium  
 **Category:** Supabase Edge Functions  
@@ -6674,16 +6674,56 @@ The AI coaching report functionality works in local development but fails in pro
 3. Runtime environment issues in production
 4. Resource limits or timeouts
 
-**Current Status:**
-- ✅ **Local Functionality**: AI coaching report generates correctly in dev
-- ❌ **Production Function**: Supabase Edge Function returning 503
-- 🔍 **Investigation Needed**: Check function deployment status and logs
+**Investigation Update:**
+- ✅ **Function Deployed**: Edge Function is running and listening correctly
+- ✅ **API Keys Present**: Both ANTHROPIC_API_KEY and OPENAI_API_KEY configured
+- ✅ **Function Logs**: Shows "listening on http://localhost:9999" - function is active
+- 🔍 **Current Issue**: Function appears to be processing but taking extended time
 
-**Next Steps:**
-1. Check Supabase Edge Functions dashboard for ai-coaching-report status
-2. Verify function deployment and any error logs
-3. Test function directly via Supabase dashboard
-4. Check function code for production environment compatibility
+**Root Cause Analysis:**
+The 503 error is likely due to:
+1. **Request Timeout**: Edge Functions have execution time limits (default: 150 seconds)
+2. **API Rate Limits**: Anthropic/OpenAI API calls being throttled
+3. **Large Payload**: Complex coaching report data causing slow AI processing
+4. **Cold Start**: Function initialization delay on first request
+
+**Current Status:**
+- ✅ **Function Infrastructure**: Working correctly in production
+- ✅ **Authentication**: API keys properly configured
+- 🔍 **Performance Issue**: Long processing time causing timeouts
+
+**Recommended Solutions:**
+1. **Add Timeout Handling**: Implement client-side timeout and retry logic
+2. **Reduce Payload Size**: Optimize data sent to function (fewer responses/attributes)
+3. **Add Progress Indicators**: Show "generating report..." status to users
+4. **Implement Caching**: Cache results for identical requests
+5. **Split Function**: Break large reports into smaller sections
+
+**Solution Implemented:**
+1. ✅ **Enhanced Timeout Handling**: Added 90-second client-side timeout with abort controller
+2. ✅ **Payload Optimization**: Limit to 10 most recent/relevant responses per attribute
+3. ✅ **Sequential Processing**: Changed from parallel to sequential requests to avoid rate limits
+4. ✅ **Better Error Messages**: User-friendly messages for timeouts and 503 errors
+5. ✅ **Loading Progress**: Added generation stage indicators and time expectations
+6. ✅ **Graceful Degradation**: PDF generates without AI insights if coaching report fails
+
+**Code Changes Implemented:**
+- ✅ **aiCoachingService.ts**: Added timeout, optimization, and enhanced error handling
+- ✅ **GeneratePDFButton.tsx**: Added loading stages and user feedback
+- ✅ **DevPdfPreview.tsx**: Enhanced error handling for coaching reports
+- ✅ **reactPdfBuilder.ts**: Sequential processing and graceful failure handling
+
+**User Experience Improvements:**
+- Clear progress messages: "Generating AI coaching insights (this may take 1-2 minutes)..."
+- Helpful timeout messages with guidance on reducing scope
+- PDF still generates successfully even if AI coaching times out
+- Console logs provide detailed progress tracking
+
+**Expected Results:**
+- Reduced timeout errors through payload optimization
+- Better user experience with clear progress indicators
+- Graceful fallback ensures PDF generation always succeeds
+- Helpful error messages guide users on how to resolve issues
 
 **Technical Details:**
 - **Function Name**: ai-coaching-report

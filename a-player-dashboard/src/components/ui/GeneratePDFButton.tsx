@@ -27,17 +27,22 @@ export const GeneratePDFButton: React.FC<GeneratePDFButtonProps> = ({
   className = ''
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationStage, setGenerationStage] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
   const handleGeneratePDF = async () => {
     setIsGenerating(true);
     setError(null);
+    setGenerationStage('Initializing...');
 
     try {
       // Small delay to allow UI to update and show loading state
       await new Promise(resolve => setTimeout(resolve, 100));
 
       console.log('🚀 Generating React-PDF report...');
+      
+      // Update stage for user feedback
+      setGenerationStage('Generating AI coaching insights (this may take 1-2 minutes)...');
       
       await generateEmployeeReportReact({
         employee,
@@ -46,12 +51,23 @@ export const GeneratePDFButton: React.FC<GeneratePDFButtonProps> = ({
       });
 
       console.log('✅ PDF report generated successfully');
+      setGenerationStage('Complete!');
 
     } catch (err) {
       console.error('❌ PDF generation failed:', err);
-      setError(err instanceof Error ? err.message : 'Failed to generate PDF report');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to generate PDF report';
+      
+      // Provide helpful error messages for common issues
+      if (errorMessage.includes('timed out')) {
+        setError('AI coaching report generation timed out. The PDF was created without AI insights. You can try again for a version with AI coaching recommendations.');
+      } else if (errorMessage.includes('503') || errorMessage.includes('Service Unavailable')) {
+        setError('AI service is temporarily busy. The PDF was created without AI insights. Please try again later for AI coaching recommendations.');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setIsGenerating(false);
+      setGenerationStage('');
     }
   };
 
@@ -77,6 +93,14 @@ export const GeneratePDFButton: React.FC<GeneratePDFButtonProps> = ({
           </>
         )}
       </Button>
+      
+      {/* Generation stage indicator */}
+      {isGenerating && generationStage && (
+        <div className="mt-2 text-sm text-gray-600 flex items-center gap-2">
+          <LoadingSpinner size="xs" />
+          {generationStage}
+        </div>
+      )}
       
       {error && (
         <div className="mt-2">

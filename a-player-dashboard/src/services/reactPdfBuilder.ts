@@ -305,7 +305,32 @@ export async function generateEmployeeReportReact(
         { ...base, scope: 'overview', section: 'questions', attributes: overviewMap }
       ];
 
-      const results = await Promise.all(sectionPayloads.map(p => fetchCoachingReport(p)));
+      // Process coaching sections sequentially to avoid rate limits and provide better error handling
+      console.log('🤖 Processing AI coaching report sections (this may take 1-2 minutes)...');
+      const results: any[] = [];
+      
+      for (let i = 0; i < sectionPayloads.length; i++) {
+        const payload = sectionPayloads[i];
+        try {
+          console.log(`📊 Processing section ${i + 1}/${sectionPayloads.length}: ${payload.section}...`);
+          const result = await fetchCoachingReport(payload);
+          results.push(result);
+          
+          // Small delay between requests to avoid rate limiting
+          if (i < sectionPayloads.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        } catch (sectionError: any) {
+          console.warn(`⚠️ Section ${payload.section} failed:`, sectionError.message);
+          // Continue with other sections, use empty result for failed section
+          results.push({ coaching_report: {} });
+          
+          // Don't fail entire PDF for one section
+          if (sectionError.message?.includes('timed out')) {
+            console.log('💡 Continuing PDF generation without this AI section due to timeout');
+          }
+        }
+      }
 
       // Merge keys from sectioned responses
       const empty = { top_strengths: [], top_development_priorities: [], perception_gaps: [], critical_incidents: [], '1on1_questions': [] as any[] } as any;
@@ -323,8 +348,13 @@ export async function generateEmployeeReportReact(
 
       // Optional: per-core-group depth can be added later with sequential throttling to avoid 429
       coachingReport = merged;
-    } catch (e) {
+      console.log('✅ AI coaching report sections completed');
+    } catch (e: any) {
+      console.warn('⚠️ AI coaching report generation failed:', e.message);
       // AI coaching report unavailable; continuing without it
+      if (e.message?.includes('timed out')) {
+        console.log('💡 PDF will be generated without AI coaching insights due to timeout');
+      }
     }
 
     // Create React-PDF document
