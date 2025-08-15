@@ -10,20 +10,43 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- One-time cache nuke script - REMOVE AFTER FIRST DEPLOY -->
+    <!-- Enhanced cache management - Clear stale assets -->
     <script>
     (async () => {
-      if ('serviceWorker' in navigator) {
-        try {
-          const regs = await navigator.serviceWorker.getRegistrations();
-          await Promise.all(regs.map(r => r.unregister()));
-        } catch {}
-      }
-      if (window.caches) {
-        try {
-          const keys = await caches.keys();
-          await Promise.all(keys.map(k => caches.delete(k)));
-        } catch {}
+      const APP_VERSION = 'v2025.02.01.3'; // Update this with each deployment that changes asset names
+      const CACHE_VERSION_KEY = 'app-cache-version';
+      
+      try {
+        const storedVersion = localStorage.getItem(CACHE_VERSION_KEY);
+        
+        if (storedVersion !== APP_VERSION) {
+          console.log('🧹 Clearing stale caches due to version change...');
+          
+          // Clear all caches
+          if (window.caches) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map(k => caches.delete(k)));
+          }
+          
+          // Clear service workers
+          if ('serviceWorker' in navigator) {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(r => r.unregister()));
+          }
+          
+          // Clear relevant localStorage items but preserve user settings
+          Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('vite-') || key.startsWith('assets-') || key.includes('chunk')) {
+              localStorage.removeItem(key);
+            }
+          });
+          
+          // Update version
+          localStorage.setItem(CACHE_VERSION_KEY, APP_VERSION);
+          console.log('✅ Cache cleared and version updated to', APP_VERSION);
+        }
+      } catch (error) {
+        console.warn('Cache management error:', error);
       }
     })();
     </script>

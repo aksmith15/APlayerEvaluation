@@ -6725,6 +6725,49 @@ The 503 error is likely due to:
 - Graceful fallback ensures PDF generation always succeeds
 - Helpful error messages guide users on how to resolve issues
 
+---
+
+### **Issue #030: Dynamic Import Module Loading Errors** 🔴 **ACTIVE**
+**Date Reported:** February 1, 2025  
+**Priority:** High  
+**Category:** Deployment/Asset Serving  
+**Reporter:** Production Usage  
+
+**Problem:**
+Employee Analytics page failing to load with dynamic import errors:
+```
+AssignmentCard-DBx7cqHF.js:1 Failed to load module script: Expected a JavaScript-or-Wasm module script but the server responded with a MIME type of "text/html"
+TypeError: Failed to fetch dynamically imported module: https://a-player-evaluations.onrender.com/assets/index-CNFNBg6G.js
+```
+
+**Investigation Status:**
+- 🔍 **Pattern Recognition**: Same stale HTML caching issue as previous 403/404 errors
+- 🔍 **Browser Cache**: HTML references old asset names that don't exist in current build
+- 🔍 **MIME Type Error**: Server returning HTML (404 page) instead of JavaScript modules
+- 🔍 **Cache Nuke Script**: May need to be re-added or browser cache manually cleared
+
+**Root Cause:**
+This is a recurrence of the stale HTML caching problem. The browser has cached HTML that references old chunk names:
+- Browser expects: `index-CNFNBg6G.js`, `AssignmentCard-DBx7cqHF.js`
+- Server has: Different hashed filenames from recent builds
+- Result: 404 responses served as HTML instead of JavaScript
+
+**Current Status:**
+- ❌ **Employee Analytics**: Failing to load due to missing dynamic imports
+- ❌ **Asset References**: Browser requesting old chunk names
+- ❌ **User Impact**: Cannot access main analytics functionality
+
+**Immediate Solutions:**
+1. **User Side**: Hard refresh (Ctrl+F5) or clear browser cache
+2. **Development**: Re-add temporary cache nuke script to index.html
+3. **Render Config**: Verify Express server serving with proper no-cache headers
+
+**Technical Details:**
+- **Error Type**: Failed to fetch dynamically imported module
+- **MIME Issue**: Server returning "text/html" instead of "application/javascript"
+- **Missing Assets**: index-CNFNBg6G.js, AssignmentCard-DBx7cqHF.js
+- **Component**: EmployeeAnalytics lazy-loaded components
+
 **Technical Details:**
 - **Function Name**: ai-coaching-report
 - **Error Code**: 503 Service Unavailable
