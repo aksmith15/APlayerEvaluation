@@ -20,7 +20,7 @@ const EmployeeAnalytics = React.lazy(() => import('./pages/EmployeeAnalytics').t
 const AssignmentManagement = React.lazy(() => import('./pages/AssignmentManagement'));
 const MyAssignments = React.lazy(() => import('./pages/MyAssignments'));
 const EvaluationSurvey = React.lazy(() => import('./components/ui').then(module => ({ default: module.EvaluationSurvey })));
-const AcceptInvite = React.lazy(() => import('./pages/AcceptInvite').then(module => ({ default: module.AcceptInvite })));
+const AcceptInvite = React.lazy(() => import('./pages/AcceptInvite'));
 
 // Dev-only React-PDF live preview
 const DevPdfPreview = React.lazy(() => import('./pages/react-pdf/DevPdfPreview'));
@@ -57,7 +57,12 @@ const App: React.FC = () => {
                   {/* Accept invitation route - public access for invited users */}
                   <Route 
                     path="/accept-invite" 
-                    element={<AcceptInvite />} 
+                    element={
+                      <div style={{padding: '20px', backgroundColor: 'yellow'}}>
+                        <h1>DEBUG: Accept Invite Route Matched!</h1>
+                        <AcceptInvite />
+                      </div>
+                    } 
                   />
                   
                   {/* Protected routes - require authentication */}
