@@ -30,11 +30,20 @@ export const AcceptInvite: React.FC = () => {
 
   const token = searchParams.get('token');
 
+  // Debug logging
+  console.log('AcceptInvite component loaded', { token, user: !!user, authLoading });
+
   useEffect(() => {
+    console.log('AcceptInvite useEffect triggered', { token, user: !!user, authLoading });
+    
     // Wait for auth to initialize
-    if (authLoading) return;
+    if (authLoading) {
+      console.log('Still loading auth...');
+      return;
+    }
 
     if (!token) {
+      console.log('No token found in URL');
       setState({
         status: 'error',
         message: 'Invalid invitation link',
@@ -44,6 +53,7 @@ export const AcceptInvite: React.FC = () => {
     }
 
     if (!user) {
+      console.log('User not authenticated, showing login required');
       setState({
         status: 'login_required',
         message: 'Please log in to accept this invitation',
@@ -53,6 +63,7 @@ export const AcceptInvite: React.FC = () => {
     }
 
     // User is authenticated, process the invite
+    console.log('User authenticated, processing invite');
     acceptInvitation();
   }, [token, user, authLoading]);
 
