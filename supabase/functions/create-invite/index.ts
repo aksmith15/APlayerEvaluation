@@ -48,15 +48,30 @@ Deno.serve(async (req) => {
       )
     }
 
-    const userClient = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      {
-        global: {
-          headers: { Authorization: authHeader }
-        }
+    // Get environment variables with fallbacks for debugging
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || Deno.env.get('VITE_SUPABASE_URL')
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') || Deno.env.get('VITE_SUPABASE_ANON_KEY')
+    
+    if (!supabaseUrl || !anonKey) {
+      console.error('Missing Supabase configuration:', { 
+        hasUrl: !!supabaseUrl, 
+        hasKey: !!anonKey,
+        envKeys: Object.keys(Deno.env.toObject()).filter(k => k.includes('SUPABASE'))
+      })
+      return new Response(
+        JSON.stringify({ 
+          error: 'Server configuration error - missing Supabase credentials',
+          debug: { hasUrl: !!supabaseUrl, hasKey: !!anonKey }
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: {
+        headers: { Authorization: authHeader }
       }
-    )
+    })
 
     // Extract JWT token and decode it to get user info
     const token = authHeader.replace('Bearer ', '')
@@ -68,10 +83,19 @@ Deno.serve(async (req) => {
     }
 
     // Create admin client for privileged operations
-    const admin = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    )
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    
+    if (!serviceKey) {
+      console.error('Missing SUPABASE_SERVICE_ROLE_KEY')
+      return new Response(
+        JSON.stringify({ 
+          error: 'Server configuration error - missing service role key'
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const admin = createClient(supabaseUrl, serviceKey)
 
     // Verify JWT token and get user info using admin client
     const { data: { user }, error: userError } = await admin.auth.getUser(token)
@@ -158,9 +182,16 @@ Deno.serve(async (req) => {
     const inviteToken = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '')
     
     // Create redirect URL that includes our custom token
-    const redirectTo = `${Deno.env.get('SITE_URL') || 'http://localhost:5173'}/accept-invite?token=${inviteToken}`
+    // Force production URL for invites to ensure proper redirects
+    const siteUrl = 'https://a-player-dashboard.onrender.com'
+    const redirectTo = `${siteUrl}/accept-invite?token=${inviteToken}`
+    
+    console.log('Using site URL for redirect:', siteUrl)
 
-    // Send Supabase invite email (this actually sends the email!)
+    // Send Supabase invite email using custom SMTP configuration
+    console.log('Sending invite email with custom SMTP to:', email.toLowerCase().trim());
+    console.log('Redirect URL:', redirectTo);
+    
     const { data: inviteData, error: inviteError } = await admin.auth.admin.inviteUserByEmail(
       email.toLowerCase().trim(),
       {
@@ -172,6 +203,8 @@ Deno.serve(async (req) => {
         }
       }
     )
+    
+    console.log('Invite email result:', { inviteData, inviteError });
 
     if (inviteError) {
       console.error('Supabase inviteUserByEmail error:', inviteError)
@@ -232,10 +265,25 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error('Create invite function error:', error)
+    
+    // More detailed error information for debugging
+    const errorDetails = {
+      message: error.message,
+      name: error.name,
+      stack: error.stack,
+      environment: {
+        hasSupabaseUrl: !!(Deno.env.get('SUPABASE_URL') || Deno.env.get('VITE_SUPABASE_URL')),
+        hasAnonKey: !!(Deno.env.get('SUPABASE_ANON_KEY') || Deno.env.get('VITE_SUPABASE_ANON_KEY')),
+        hasServiceKey: !!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
+        hasSiteUrl: !!(Deno.env.get('SITE_URL') || Deno.env.get('VITE_APP_URL'))
+      }
+    }
+    
     return new Response(
       JSON.stringify({ 
         error: 'Internal server error', 
-        details: error.message 
+        details: error.message,
+        debug: errorDetails
       }),
       {
         status: 500,

@@ -59,4 +59,7 @@ export type { NotificationProps, NotificationType, NotificationState } from './N
 // Invite Management Components
 export { InviteManager } from './InviteManager';
 
+// Debug Components (temporary)
+export { DebugInviteTest } from './DebugInviteTest';
+
  

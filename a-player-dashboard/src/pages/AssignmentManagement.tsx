@@ -19,6 +19,9 @@ const LazyAttributeWeightsManager = React.lazy(() =>
 const LazyInviteManager = React.lazy(() => 
   import('../components/ui/InviteManager').then(module => ({ default: module.InviteManager }))
 );
+const LazyDebugInviteTest = React.lazy(() => 
+  import('../components/ui/DebugInviteTest').then(module => ({ default: module.DebugInviteTest }))
+);
 
 import { 
   fetchAllAssignments, 
@@ -626,6 +629,11 @@ const AssignmentManagement: React.FC = () => {
         {activeTab === 'debug' && (
           <div className="space-y-6">
             <AssignmentDebugger />
+            
+            {/* Debug Invite Function Test */}
+            <Suspense fallback={<LoadingSpinner message="Loading debug test..." />}>
+              <LazyDebugInviteTest />
+            </Suspense>
           </div>
         )}
       </div>

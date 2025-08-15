@@ -155,6 +155,12 @@ export const InviteManager: React.FC = () => {
       }
 
       // Call create-invite Edge Function
+      console.log('Calling create-invite with:', {
+        company_id: peopleData.company_id,
+        email: formData.email.trim().toLowerCase(),
+        role_to_assign: formData.role_to_assign
+      });
+
       const { data, error } = await supabase.functions.invoke('create-invite', {
         body: {
           company_id: peopleData.company_id,
@@ -163,12 +169,21 @@ export const InviteManager: React.FC = () => {
         }
       });
 
+      console.log('create-invite response:', { data, error });
+
       if (error) {
-        throw error;
+        console.error('Function invoke error:', error);
+        // Try to extract more detailed error information
+        const errorMessage = error.message || 'Function invocation failed';
+        const errorDetails = error.context || error.details || 'No additional details';
+        throw new Error(`${errorMessage} - ${errorDetails}`);
       }
 
-      if (data.error) {
-        throw new Error(data.error);
+      if (data?.error) {
+        console.error('Function returned error:', data);
+        // Show the detailed error from our enhanced function
+        const debugInfo = data.debug ? `\nDebug: ${JSON.stringify(data.debug, null, 2)}` : '';
+        throw new Error(`${data.error}${debugInfo}`);
       }
 
       setSuccess(`Invite sent successfully to ${formData.email}!`);
