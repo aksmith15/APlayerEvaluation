@@ -18,9 +18,15 @@ interface InviteRequest {
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
+  console.log('create-invite request:', req.method, req.url)
+  
+  // Handle CORS preflight requests FIRST
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    console.log('Handling OPTIONS preflight')
+    return new Response('ok', { 
+      status: 200,
+      headers: corsHeaders 
+    })
   }
 
   try {
