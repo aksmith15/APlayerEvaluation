@@ -97,7 +97,7 @@ export const GeneratePDFButton: React.FC<GeneratePDFButtonProps> = ({
       {/* Generation stage indicator */}
       {isGenerating && generationStage && (
         <div className="mt-2 text-sm text-gray-600 flex items-center gap-2">
-          <LoadingSpinner size="xs" />
+          <LoadingSpinner size="sm" />
           {generationStage}
         </div>
       )}
