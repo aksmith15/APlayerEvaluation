@@ -114,7 +114,7 @@ export const DebugInviteTest: React.FC = () => {
         createInviteTest: {
           success: !createInviteError,
           data: createInviteResult,
-          error: createInviteError?.message,
+          error: createInviteError,
           userCompany: peopleData?.company_id
         },
         smtpDirectTest: {
