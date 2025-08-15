@@ -87,8 +87,8 @@ const AcceptInvite: React.FC = () => {
         return;
       }
 
-      // Call accept-invite Edge Function with explicit auth
-      const { data, error } = await supabase.functions.invoke('accept-invite', {
+      // Call accept-invite-v2 Edge Function with explicit auth (test version)
+      const { data, error } = await supabase.functions.invoke('accept-invite-v2', {
         body: { token },
         headers: {
           Authorization: `Bearer ${session.session.access_token}`
