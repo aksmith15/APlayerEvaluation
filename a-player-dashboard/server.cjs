@@ -5,6 +5,16 @@ const compression = require('compression');
 const app = express();
 const dist = path.resolve(__dirname, 'dist');
 
+// Canonical host redirect (old → new)
+app.use((req, res, next) => {
+  const host = req.headers.host || '';
+  if (host.includes('a-player-dashboard.onrender.com')) {
+    const target = `https://a-player-evaluations.onrender.com${req.originalUrl}`;
+    return res.redirect(301, target);
+  }
+  return next();
+});
+
 // Gzip everything
 app.use(compression());
 

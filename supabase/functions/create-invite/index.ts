@@ -181,12 +181,11 @@ Deno.serve(async (req) => {
     // Generate secure token for our invite system
     const inviteToken = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '')
     
-    // Create redirect URL that includes our custom token
-    // Force production URL for invites to ensure proper redirects
-    const siteUrl = 'https://a-player-evaluations.onrender.com'
-    const redirectTo = `${siteUrl}/accept-invite?token=${inviteToken}`
+    // Create redirect URL via Edge Function to decouple from frontend hostname
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const redirectTo = `${supabaseUrl}/functions/v1/invite-redirect?token=${inviteToken}`
     
-    console.log('Using site URL for redirect:', siteUrl)
+    console.log('Using invite redirect function for link:', redirectTo)
 
     // Send invite email directly via Resend API (bypassing Supabase auth email)
     console.log('Sending invite email directly via Resend to:', email.toLowerCase().trim());
