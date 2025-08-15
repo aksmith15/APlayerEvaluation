@@ -76,9 +76,23 @@ const AcceptInvite: React.FC = () => {
         message: 'Accepting invitation...'
       });
 
-      // Call accept-invite Edge Function
+      // Get current session to ensure auth headers are included
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session) {
+        setState({
+          status: 'login_required',
+          message: 'Please log in to accept this invitation',
+          error: 'Authentication session expired'
+        });
+        return;
+      }
+
+      // Call accept-invite Edge Function with explicit auth
       const { data, error } = await supabase.functions.invoke('accept-invite', {
-        body: { token }
+        body: { token },
+        headers: {
+          Authorization: `Bearer ${session.session.access_token}`
+        }
       });
 
       if (error) {
