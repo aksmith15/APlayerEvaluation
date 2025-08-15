@@ -188,35 +188,66 @@ Deno.serve(async (req) => {
     
     console.log('Using site URL for redirect:', siteUrl)
 
-    // Send Supabase invite email using custom SMTP configuration
-    console.log('Sending invite email with custom SMTP to:', email.toLowerCase().trim());
+    // Send invite email directly via Resend API (bypassing Supabase auth email)
+    console.log('Sending invite email directly via Resend to:', email.toLowerCase().trim());
     console.log('Redirect URL:', redirectTo);
     
-    const { data: inviteData, error: inviteError } = await admin.auth.admin.inviteUserByEmail(
-      email.toLowerCase().trim(),
-      {
-        redirectTo: redirectTo,
-        data: {
-          company_id,
-          role_to_assign,
-          invite_token: inviteToken
-        }
-      }
-    )
-    
-    console.log('Invite email result:', { inviteData, inviteError });
-
-    if (inviteError) {
-      console.error('Supabase inviteUserByEmail error:', inviteError)
+    const resendApiKey = Deno.env.get('RESEND_API_KEY')
+    if (!resendApiKey) {
       return new Response(
-        JSON.stringify({ error: 'Failed to send invite email', details: inviteError.message }),
+        JSON.stringify({ error: 'RESEND_API_KEY not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    console.log('Invite email sent successfully:', { 
-      userEmail: inviteData?.user?.email,
-      userId: inviteData?.user?.id,
+    // Send email directly via Resend API
+    const emailResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${resendApiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'A-Player Evaluations <info@theculturebase.com>',
+        to: [email.toLowerCase().trim()],
+        subject: 'You\'re invited to join A-Player Evaluations',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">You're invited to join A-Player Evaluations</h2>
+            <p>You've been invited to join the A-Player Evaluations platform.</p>
+            <p><strong>Role:</strong> ${role_to_assign}</p>
+            <div style="margin: 30px 0;">
+              <a href="${redirectTo}" 
+                 style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
+                Accept Invitation
+              </a>
+            </div>
+            <p style="color: #666; font-size: 14px;">
+              This invitation will expire in 7 days. If you have any questions, please contact your administrator.
+            </p>
+            <p style="color: #666; font-size: 12px;">
+              If you can't click the button above, copy and paste this link into your browser:<br>
+              ${redirectTo}
+            </p>
+          </div>
+        `
+      })
+    })
+
+    const emailResult = await emailResponse.json()
+    console.log('Resend API response:', emailResult)
+
+    if (!emailResponse.ok) {
+      console.error('Resend API error:', emailResult)
+      return new Response(
+        JSON.stringify({ error: 'Failed to send invite email', details: emailResult.message || 'Email service error' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    console.log('Invite email sent successfully via Resend:', { 
+      emailId: emailResult.id,
+      recipient: email.toLowerCase().trim(),
       inviteToken: inviteToken
     })
 
@@ -254,8 +285,8 @@ Deno.serve(async (req) => {
         invite_id: dbInviteData.id,
         email: dbInviteData.email,
         expires_at: dbInviteData.expires_at,
-        user_id: inviteData?.user?.id,
-        message: 'Invite created successfully. Email sent to user.'
+        email_id: emailResult.id,
+        message: 'Invite created successfully. Email sent via Resend.'
       }),
       {
         status: 200,
