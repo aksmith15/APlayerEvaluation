@@ -2,7 +2,57 @@
 
 ## 🚨 **ACTIVE ISSUES - PENDING RESOLUTION**
 
-### **Issue #020: React memo undefined error in chart components** 🔄 **IN PROGRESS**
+### **Issue #021: TenantContext Not Initialized - RLS Failures** ✅ **RESOLVED**
+**Date Reported:** August 15, 2025  
+**Priority:** High  
+**Category:** Authentication/Database  
+**Reporter:** Development Environment  
+
+**Problem:**
+Development environment shows console error:
+```
+[TenantContext] Not initialized - this will cause RLS failures
+```
+
+**Root Cause Analysis:**
+- **Location**: `src/lib/tenantContext.ts:32` - getCompanyContext() called before setCompanyContext()
+- **Authentication Flow**: TenantContext should be initialized in AuthContext.tsx during user login
+- **Potential Issues**: 
+  - resolveCompanyContext() function failing silently
+  - Database connection or RLS policy issues
+  - Missing user profile in people table
+
+**Investigation Status:**
+- ✅ **Added Debug Logging**: Enhanced AuthContext.tsx and resolveCompany.ts with detailed logging
+- ✅ **Created Debug Utility**: src/utils/debugTenant.ts for console debugging
+- ✅ **Identified Root Cause**: CompanySwitcher.tsx calling getCompanyContext() before auth flow completes
+- ✅ **Fixed Component Race Condition**: Updated CompanySwitcher to use safe context checking
+
+**Root Cause Identified:**
+The `CompanySwitcher` component was calling `getCompanyContext()` during its initial render, which happens before the authentication flow has had a chance to initialize the tenant context via `setCompanyContext()`. This created a race condition.
+
+**Solution Implemented:**
+- ✅ **Fixed CompanySwitcher**: Replaced `getCompanyContext()` with safe alternatives `hasCompanyContext()` and `getCurrentCompanyId()`
+- ✅ **Enhanced TenantContext API**: Added safe functions that don't throw errors during normal initialization flow
+- ✅ **Added Utility Functions**: `getCompanyContextSafe()`, `waitForTenantContext()` for robust component integration
+
+**Files Modified:**
+- ✅ `src/components/ui/CompanySwitcher.tsx` - Fixed to use safe context checking
+- ✅ `src/lib/tenantContext.ts` - Added safe context access functions
+- ✅ `src/contexts/AuthContext.tsx` - Added detailed error logging
+- ✅ `src/lib/resolveCompany.ts` - Added debug logging for each step
+- ✅ `src/utils/debugTenant.ts` - Created debug utility
+- ✅ `src/App.tsx` - Import debug utility in development
+
+**Solution Approach:**
+1. **Debug Authentication Flow**: Use enhanced logging to identify failure point
+2. **Test Database Access**: Verify RLS policies allow user profile lookup
+3. **Check User Data**: Ensure authenticated user has valid profile in people table
+4. **Fix Root Cause**: Address the specific failure preventing tenant context initialization
+
+---
+
+### **Issue #020: React memo undefined error in chart components** ✅ **RESOLVED**
 **Date Reported:** August 14, 2025  
 **Priority:** High  
 **Category:** Build/Deployment  
