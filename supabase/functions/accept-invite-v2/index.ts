@@ -78,16 +78,16 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Create user client
+    // Extract JWT token from Authorization header
+    console.log('Extracting JWT token...')
+    const token = authHeader.replace('Bearer ', '')
+    
+    // Create user client and set session manually
     console.log('Creating user client...')
-    const userClient = createClient(supabaseUrl, anonKey, {
-      global: {
-        headers: { Authorization: authHeader }
-      }
-    })
-
-    console.log('Getting user...')
-    const { data: { user }, error: userError } = await userClient.auth.getUser()
+    const userClient = createClient(supabaseUrl, anonKey)
+    
+    console.log('Getting user with JWT...')
+    const { data: { user }, error: userError } = await userClient.auth.getUser(token)
     
     console.log('Auth result:', { 
       hasUser: !!user, 
