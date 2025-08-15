@@ -182,7 +182,7 @@ Deno.serve(async (req) => {
     const inviteToken = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '')
     
     // Create redirect URL via Edge Function to decouple from frontend hostname
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    // Reuse the existing supabaseUrl defined above
     const redirectTo = `${supabaseUrl}/functions/v1/invite-redirect?token=${inviteToken}`
     
     console.log('Using invite redirect function for link:', redirectTo)
