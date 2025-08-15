@@ -4,7 +4,12 @@
 // Date: February 1, 2025
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
-import { corsHeaders } from '../_shared/cors.ts'
+// Inline CORS headers so this function can be pasted in the dashboard without shared imports
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
+}
 
 interface InviteRequest {
   company_id: string
