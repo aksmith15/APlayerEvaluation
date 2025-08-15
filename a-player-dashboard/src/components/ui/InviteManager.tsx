@@ -173,6 +173,20 @@ export const InviteManager: React.FC = () => {
 
       if (error) {
         console.error('Function invoke error:', error);
+        
+        // Handle specific HTTP status codes
+        if (error.message && error.message.includes('non-2xx status code')) {
+          // Try to get more details from the response
+          const response = error.context || error.details;
+          
+          // Check if it's a 409 conflict (duplicate invite)
+          if (response && response.status === 409) {
+            throw new Error(`This email already has a pending invitation. Please check the "Sent Invitations" list below and revoke the existing invite if needed, then try again.`);
+          }
+          
+          throw new Error(`Server error occurred. Please try again or contact support if the problem persists.`);
+        }
+        
         // Try to extract more detailed error information
         const errorMessage = error.message || 'Function invocation failed';
         const errorDetails = error.context || error.details || 'No additional details';
@@ -194,7 +208,16 @@ export const InviteManager: React.FC = () => {
       
     } catch (err: any) {
       console.error('Failed to send invite:', err);
-      setError(`Failed to send invite: ${err.message || 'Unknown error'}`);
+      
+      // Handle specific error cases with helpful messages
+      let errorMessage = err.message || 'Unknown error';
+      
+      if (errorMessage.includes('non-2xx status code')) {
+        // This is likely a 409 conflict for duplicate invites
+        errorMessage = 'This email already has a pending invitation. Please check the "Sent Invitations" list below and revoke the existing invite if needed, then try again.';
+      }
+      
+      setError(`Failed to send invite: ${errorMessage}`);
     } finally {
       setSubmitting(false);
     }
