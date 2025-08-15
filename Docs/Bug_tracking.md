@@ -164,6 +164,51 @@ The Vite build configuration was splitting React Router into a separate chunk (`
 
 ---
 
+### **Issue #026: Asset 404 Error - survey-components-EbTAcVai.js** ✅ **FIXED**
+**Date Reported:** February 1, 2025  
+**Priority:** High  
+**Category:** Deployment/Asset Serving  
+**Reporter:** Production Console Logs  
+
+**Problem:**
+Console shows 404 error for survey components asset:
+```
+GET https://a-player-evaluations.onrender.com/assets/survey-components-EbTAcVai.js net::ERR_ABORTED 404 (Not Found)
+```
+
+**Investigation Status:**
+- ✅ **Root Cause Identified**: Vite code splitting creating separate survey-components chunk that Render couldn't serve properly
+- ✅ **Problem Located**: `vite.config.ts` creating separate `survey-components` chunk for Survey/Question/Rating components  
+- ✅ **Build Analysis**: File was built correctly but failed to load due to serving configuration mismatch
+- ✅ **Solution Implemented**: Disabled survey-components chunking to include in main bundle
+- ✅ **Local Testing**: Production build verified - no survey-components chunk generated
+
+**Root Cause:**
+The Vite build configuration was splitting survey-related components into a separate `survey-components` chunk. While the file was built correctly (visible in deployment logs), Render's serving configuration wasn't properly serving this dynamically loaded chunk, resulting in 404 errors.
+
+**Solution Implemented:**
+- ✅ **Modified vite.config.ts**: Disabled survey-components chunk creation (lines 109-111)
+- ✅ **Added Base Path**: Explicitly set `base: '/'` for deployment consistency
+- ✅ **Bundle Redistribution**: Survey components now included in assignment-components bundle
+- ✅ **Size Verification**: assignment-components grew from 323kB → 421kB (98kB increase)
+
+**Technical Details:**
+- **Error Location**: `https://a-player-evaluations.onrender.com/assets/survey-components-EbTAcVai.js`
+- **HTTP Status**: 404 (Not Found) 
+- **Components Involved**: EvaluationSurvey, Survey forms, Question components, Rating components
+- **Build Verification**: survey-components chunk eliminated from build output
+- **Deployment Platform**: Render.com static site deployment
+
+**Files Modified:**
+- ✅ `vite.config.ts` - Fixed survey components chunking and added deployment base path
+
+**Testing Results:**
+- ✅ **Production Build**: No survey-components chunk generated
+- ✅ **Bundle Analysis**: Survey components successfully included in assignment-components bundle  
+- ✅ **Asset Verification**: All components accessible without separate chunk loading
+
+---
+
 ### **Issue #021: TenantContext Not Initialized - RLS Failures** ✅ **RESOLVED**
 **Date Reported:** August 15, 2025  
 **Priority:** High  

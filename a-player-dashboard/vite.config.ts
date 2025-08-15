@@ -6,6 +6,8 @@ import path from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // Ensure correct base path for deployment
+  base: '/',
 
   resolve: {
     alias: {
@@ -102,10 +104,11 @@ export default defineConfig({
             if (id.includes('Assignment') || id.includes('Coverage') || id.includes('Weights')) {
               return 'assignment-components';
             }
-            // Survey components
-            if (id.includes('Survey') || id.includes('Question') || id.includes('Rating')) {
-              return 'survey-components';
-            }
+            // Survey components - keep in main bundle to prevent 404 errors in production
+            // NOTE: Survey components are critical and should not be split to avoid serving issues
+            // if (id.includes('Survey') || id.includes('Question') || id.includes('Rating')) {
+            //   return 'survey-components';
+            // }
             // Tab components
             if (id.includes('Tab') && id.includes('/assignment-tabs/')) {
               return 'assignment-tabs';
