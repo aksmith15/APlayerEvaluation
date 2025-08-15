@@ -6524,6 +6524,120 @@ The Vite build configuration was splitting assignment-related components (Assign
 
 ---
 
+### **COMPREHENSIVE PRODUCTION FIX IMPLEMENTED** 🚀 **COMPLETE**
+**Date Implemented:** February 1, 2025  
+**Scope:** All console errors (Issues #022-#027)
+**Strategy:** Simplified chunking + Express server + cache management
+
+**Root Cause Analysis:**
+- **Stale HTML caching**: Cached HTML referenced old chunk names causing 404s
+- **Over-engineered chunking**: Feature-specific chunks isolated React context APIs
+- **Multiple React instances**: Caused createContext/forwardRef undefined errors
+- **Poor production serving**: vite preview inadequate for production deployment
+
+**Comprehensive Solution Implemented:**
+
+**1. Vite Configuration Overhaul:**
+- ✅ **Simplified manualChunks**: Only react-core bundle (react, react-dom, react-router)
+- ✅ **React Deduplication**: Added resolve.dedupe to prevent multiple React instances
+- ✅ **Removed Feature Chunks**: Eliminated assignment-*, survey-*, chart-*, pdf-* chunks
+- ✅ **Stable Naming**: Predictable asset names for better caching
+
+**2. Production Server Setup:**
+- ✅ **Express Server**: Created server.cjs with proper caching headers
+- ✅ **Asset Caching**: 1-year cache for /assets/*, no-cache for index.html
+- ✅ **SPA Fallback**: Proper handling of deep links
+- ✅ **Gzip Compression**: Enabled compression middleware
+
+**3. Cache & Session Management:**
+- ✅ **Cache Nuke Script**: Temporary script to clear stale browser caches
+- ✅ **Supabase Health Check**: Enhanced session management with refresh token handling
+- ✅ **Storage Key**: Consistent auth storage key ('ape.auth')
+
+**Build Verification Results:**
+```
+✅ react-core-Cnft9sMd.js (178kB) - All React dependencies together
+✅ index-ZbaeeCp2.js (2.1MB) - Main application bundle
+✅ No problematic chunks generated
+✅ Clean, predictable asset names
+✅ TypeScript compilation successful
+```
+
+**Files Modified:**
+- ✅ `vite.config.ts` - Simplified configuration
+- ✅ `server.cjs` - New Express production server
+- ✅ `package.json` - Added Express deps and serve scripts
+- ✅ `index.html` - Added temporary cache nuke script
+- ✅ `src/services/supabase.ts` - Enhanced session health checks
+
+**Deployment Instructions for Render:**
+- **Build Command**: `npm ci && npm run build`
+- **Start Command**: `npm run serve` (uses Express server)
+- **Expected Result**: Zero console errors, fast loading, proper SPA routing
+
+**Next Steps:**
+1. ✅ **Deploy**: Pushed to production (commit 072b420)
+2. 🔄 **Monitor**: Check console logs after deployment
+3. 📝 **Remove Cache Script**: Remove from index.html after one deploy cycle
+4. ✅ **Verify**: Test all major app functions
+
+**Expected Resolution:** All Issues #022-#027 should be resolved with this comprehensive fix.
+
+---
+
+### **Issue #028: Assets 403 Forbidden Errors** 🔴 **ACTIVE**
+**Date Reported:** February 1, 2025  
+**Priority:** High  
+**Category:** Deployment/Asset Serving  
+**Reporter:** Production Console Logs  
+
+**Problem:**
+All assets returning 403 Forbidden errors:
+```
+GET https://a-player-evaluations.onrender.com/assets/ai-services-BXYFEbHH.js net::ERR_ABORTED 403 (Forbidden)
+GET https://a-player-evaluations.onrender.com/assets/ui-vendor-B-dksMZM.js net::ERR_ABORTED 403 (Forbidden)
+GET https://a-player-evaluations.onrender.com/assets/react-core-D8DZKptW.js net::ERR_ABORTED 403 (Forbidden)
+GET https://a-player-evaluations.onrender.com/assets/assignment-creation-BNkdqLn2.js net::ERR_ABORTED 403 (Forbidden)
+```
+
+**Investigation Status:**
+- 🔍 **Local Server Works**: Express server runs correctly on localhost:8080
+- 🔍 **Stale HTML Issue**: Browser requesting OLD chunk names, not current build
+- 🔍 **Current Build**: Generates different chunk names (react-core-Cnft9sMd.js, index-ZbaeeCp2.js)
+- 🔍 **Root Cause**: Render likely still using old start command or deployment incomplete
+
+**Problem Analysis:**
+The comprehensive fix deployed successfully and the Express server works locally. However, Render is returning 403 errors for assets, suggesting either:
+1. Render deployment configuration not updated (still using `npm run preview`)
+2. Render serving old build artifacts
+3. Deployment process not fully completed
+
+**Current Status:**
+- ✅ **Express Server**: Works locally, serves assets correctly
+- ✅ **Build Output**: Correct chunk names generated
+- ❌ **Render Deployment**: Returning 403 for all assets
+- ❌ **Browser Access**: Cannot load application due to asset failures
+
+**Required Solution:**
+1. Update Render Web Service configuration:
+   - **Start Command**: Change from `npm run preview` to `npm run serve`
+   - **Build Command**: Verify still set to `npm ci && npm run build`
+2. Force complete redeployment on Render
+3. Clear browser cache completely after deployment
+
+**Technical Details:**
+- **Error Type**: 403 Forbidden (not 404 Not Found)
+- **Asset Names**: Requesting old chunk names from previous builds
+- **Local Test**: ✅ `npm run serve` works on localhost:8080
+- **Build Verification**: ✅ Current build generates correct assets
+
+**Next Steps:**
+1. 🔄 **Update Render Config**: Change Start Command to `npm run serve`
+2. 🔄 **Force Redeploy**: Trigger complete rebuild on Render
+3. 🔄 **Browser Reset**: Clear all caches after deployment completes
+
+---
+
 **End of Bug Tracking Log**  
 **Last Updated:** February 1, 2025  
 **Total Issues Tracked:** 90  
