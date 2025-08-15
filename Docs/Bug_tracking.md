@@ -6931,4 +6931,59 @@ if (storedVersion !== APP_VERSION) {
 
 ---
 
+### **Issue #031: Invite Link URL Mismatch - Persistent Wrong Domain** ❌ **OPEN**
+**Date Reported:** January 15, 2025  
+**Priority:** High  
+**Category:** Email/Invite System  
+**Reporter:** User Testing  
+
+**Problem:**
+Invite function is still generating links to incorrect domain despite function deployment:
+- **Generated Link**: `https://a-player-dashboard.onrender.com/accept-invite?token=...`
+- **Should Generate**: `https://a-player-evaluations.onrender.com/accept-invite?token=...`
+- **Result**: 404 Not Found when users click invite links
+
+**Investigation Status:**
+- 🔍 **Code Fix Applied**: Updated `supabase/functions/create-invite/index.ts` line 186 to use correct URL
+- 🔍 **Function Deployed**: Successfully deployed with `supabase functions deploy create-invite`
+- ❌ **Still Failing**: New invites continue to generate wrong domain links
+- 🔍 **Possible Causes**: 
+  1. Supabase function caching
+  2. Deployment not fully propagated
+  3. Environment variable override
+  4. Multiple function versions
+
+**Current Impact:**
+- ✅ **Invite Creation**: Working perfectly (function logs show success)
+- ✅ **Email Sending**: Working (emails received with correct formatting)
+- ❌ **Link Functionality**: 404 errors prevent invite acceptance
+- ❌ **User Experience**: Invited users cannot join the platform
+
+**Technical Details:**
+```typescript
+// Applied fix in create-invite/index.ts:186
+const siteUrl = 'https://a-player-evaluations.onrender.com'  // CORRECT URL
+// But function still generates:
+// https://a-player-dashboard.onrender.com/accept-invite?token=...
+```
+
+**Next Steps for Investigation:**
+1. **Verify Function Deployment**: Check Supabase dashboard function logs
+2. **Test Function Directly**: Call function via API to verify URL generation
+3. **Check Environment Variables**: Verify no SITE_URL override in Supabase
+4. **Force Redeploy**: Try deploying with --no-verify-jwt flag
+5. **Check Function Versions**: Ensure latest version is active
+
+**Workaround Options:**
+1. **Manual URL Correction**: Users can manually change domain in browser
+2. **Temporary Redirect**: Set up redirect from old domain to new domain
+3. **Database Direct Fix**: Update invite tokens to use correct URLs
+
+**Resolution Required:**
+- Fix function deployment to use correct production domain
+- Ensure all future invites generate proper URLs
+- Test complete invite flow from email to successful login
+
+---
+
 This bug tracking system ensures systematic identification, documentation, and resolution of issues in the A-Player Evaluations Dashboard while maintaining high code quality and user experience standards.
