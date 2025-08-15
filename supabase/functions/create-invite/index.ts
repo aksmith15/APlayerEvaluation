@@ -183,7 +183,7 @@ Deno.serve(async (req) => {
     
     // Create redirect URL that includes our custom token
     // Force production URL for invites to ensure proper redirects
-    const siteUrl = 'https://a-player-dashboard.onrender.com'
+    const siteUrl = 'https://a-player-evaluations.onrender.com'
     const redirectTo = `${siteUrl}/accept-invite?token=${inviteToken}`
     
     console.log('Using site URL for redirect:', siteUrl)

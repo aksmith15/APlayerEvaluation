@@ -57,12 +57,7 @@ const App: React.FC = () => {
                   {/* Accept invitation route - public access for invited users */}
                   <Route 
                     path="/accept-invite" 
-                    element={
-                      <div style={{padding: '20px', backgroundColor: 'yellow'}}>
-                        <h1>DEBUG: Accept Invite Route Matched!</h1>
-                        <AcceptInvite />
-                      </div>
-                    } 
+                    element={<AcceptInvite />} 
                   />
                   
                   {/* Protected routes - require authentication */}
