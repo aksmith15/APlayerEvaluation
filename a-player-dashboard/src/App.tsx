@@ -1,6 +1,12 @@
 import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+
+// Import debug utilities in development
+if (import.meta.env.DEV) {
+  import('./utils/debugTenant');
+  import('./utils/clearAuthStorage');
+}
 import { NavigationProvider } from './contexts/NavigationContext';
 import { ErrorBoundary, LoadingSpinner } from './components/ui';
 import { ProtectedRoute } from './components/ProtectedRoute';

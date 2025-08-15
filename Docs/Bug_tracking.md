@@ -2,6 +2,85 @@
 
 ## 🚨 **ACTIVE ISSUES - PENDING RESOLUTION**
 
+### **Issue #022: React-PDF Context Initialization Error** 🔍 **INVESTIGATING**
+**Date Reported:** February 1, 2025  
+**Priority:** Medium  
+**Category:** PDF Components/React Context  
+**Reporter:** Console Logs Post-Deployment  
+
+**Problem:**
+Console shows React-PDF related error:
+```
+pdf-pages-DJuRIdTk.js:1 Uncaught TypeError: Cannot read properties of undefined (reading 'createContext')
+```
+
+**Investigation Status:**
+- ✅ **Root Cause Identified**: Vite code splitting separating React-PDF components from React context
+- ✅ **Problem Located**: `vite.config.ts` creating separate `pdf-pages`, `pdf-components`, `pdf-services` chunks
+- ✅ **Impact Assessment**: PDF generation functionality broken due to context isolation
+- ✅ **Solution Implemented**: Modified Vite config to keep React-PDF components with React core bundle
+
+**Root Cause:**
+The Vite build configuration was splitting React-PDF related code into separate chunks (`pdf-pages`, `pdf-components`, `pdf-services`), which broke React context sharing between the main bundle and PDF chunks. React contexts cannot be shared across separate JavaScript bundles.
+
+**Solution Implemented:**
+- ✅ **Modified vite.config.ts**: Removed `pdf-pages` chunk creation for `/pages/react-pdf/` 
+- ✅ **Fixed PDF Components**: Commented out `pdf-components` chunk to keep in main bundle
+- ✅ **Fixed PDF Services**: Commented out `pdf-services` chunk to keep in main bundle  
+- ✅ **Fixed React-PDF Vendor**: Moved `@react-pdf` from `pdf-vendor` to `react-core` chunk
+
+**Technical Details:**
+- **Error Location**: `pdf-pages-DJuRIdTk.js:1:375` (Vite build bundle)
+- **Components Involved**: DevPdfPreview, PDFViewer, BlobProvider from @react-pdf/renderer
+- **Lazy Loading**: DevPdfPreview is lazy loaded in App.tsx
+- **Recent Changes**: Documentation cleanup and potential build configuration changes
+
+---
+
+### **Issue #023: Supabase Refresh Token Authentication Error** 🔍 **INVESTIGATING**
+**Date Reported:** February 1, 2025  
+**Priority:** High  
+**Category:** Authentication/Supabase  
+**Reporter:** Console Logs Post-Deployment  
+
+**Problem:**
+Console shows Supabase authentication errors:
+```
+POST https://tufjnccktzcbmaemekiz.supabase.co/auth/v1/token?grant_type=refresh_token 400 (Bad Request)
+AuthApiError: Invalid Refresh Token: Refresh Token Not Found
+```
+
+**Investigation Status:**
+- ❌ **Error Identified**: Refresh token validation failing on Supabase side
+- 🔍 **Authentication Flow**: Token refresh cycle encountering "Refresh Token Not Found"
+- ✅ **Positive Sign**: "✅ Supabase connection successful" appears after errors
+- 🔍 **Root Cause Analysis**: Potentially stale/invalid refresh tokens in browser storage
+
+**Technical Details:**
+- **Error Location**: `supabase-vendor-FVyvT66B.js:24` (Supabase client bundle)
+- **API Endpoint**: `/auth/v1/token?grant_type=refresh_token`
+- **Error Type**: `AuthApiError: Invalid Refresh Token: Refresh Token Not Found`
+- **Sequence**: _refreshAccessToken → _callRefreshToken → _recoverAndRefresh → _initialize
+- **Recovery**: Application continues to function despite errors
+
+**Immediate Actions:**
+- ✅ **Created Storage Clearing Utility**: Added `src/utils/clearAuthStorage.ts` with development helpers
+- ✅ **Development Tools**: Available in dev console: `clearAuthStorage()`, `checkForStaleTokens()`
+- 🔍 **Monitor Frequency**: Determine if error occurs on every page load or specific triggers
+- 🔍 **User Instructions**: Provide clear steps for users experiencing refresh token errors
+
+**User Resolution Steps:**
+1. **Open Developer Console** (F12)
+2. **Run**: `clearAuthStorage()` 
+3. **Refresh Page** and log in again
+4. **Alternative**: Clear browser data for the site manually
+
+**Files Modified:**
+- ✅ `src/utils/clearAuthStorage.ts` - Utility to clear stale auth tokens
+- ✅ `src/App.tsx` - Import auth storage utility in development mode
+
+---
+
 ### **Issue #021: TenantContext Not Initialized - RLS Failures** ✅ **RESOLVED**
 **Date Reported:** August 15, 2025  
 **Priority:** High  

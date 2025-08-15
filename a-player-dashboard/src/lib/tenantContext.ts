@@ -81,6 +81,42 @@ export function hasAnyRole(roles: string[]): boolean {
 }
 
 /**
+ * Safely get company context without throwing
+ * Returns null if context not initialized
+ */
+export function getCompanyContextSafe(): CompanyContext | null {
+  return current;
+}
+
+/**
+ * Wait for tenant context to be initialized (with timeout)
+ * Useful for components that need to wait for auth flow completion
+ */
+export function waitForTenantContext(timeoutMs: number = 5000): Promise<CompanyContext> {
+  return new Promise((resolve, reject) => {
+    if (current) {
+      resolve(current);
+      return;
+    }
+    
+    let attempts = 0;
+    const maxAttempts = timeoutMs / 100; // Check every 100ms
+    
+    const checkInterval = setInterval(() => {
+      attempts++;
+      
+      if (current) {
+        clearInterval(checkInterval);
+        resolve(current);
+      } else if (attempts >= maxAttempts) {
+        clearInterval(checkInterval);
+        reject(new Error(`Tenant context not initialized within ${timeoutMs}ms`));
+      }
+    }, 100);
+  });
+}
+
+/**
  * Development helper to validate context state
  */
 export function validateTenantContext(): { valid: boolean; issues: string[] } {

@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { fetchCuriosityAnalysis } from '../../services/coreGroupService';
-import { ClusteredBarChart } from './ClusteredBarChart';
+import { LazyChart } from './LazyChart';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ErrorMessage } from './ErrorMessage';
 import { Card } from './Card';
@@ -143,7 +143,8 @@ export const CuriosityTab: React.FC<CuriosityTabProps> = ({
           
           {/* Enhanced chart height for 4 attributes */}
           <div className="h-96">
-            <ClusteredBarChart
+            <LazyChart
+              chartType="clustered-bar"
               data={chartData}
               height={384}
               showLegend={true}

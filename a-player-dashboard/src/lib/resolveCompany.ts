@@ -11,13 +11,20 @@ import { setCompanyContext } from "./tenantContext";
  * which company a user belongs to and their role within it
  */
 export async function resolveCompanyContext(supabase: SupabaseClient): Promise<CompanyContext> {
+  console.log('[resolveCompanyContext] Starting tenant context resolution...');
+  
   // 1) Get authenticated user
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) {
+    console.error('[resolveCompanyContext] Auth error:', authError);
     throw new Error(`Authentication required: ${authError?.message || 'No user session'}`);
   }
+  
+  console.log('[resolveCompanyContext] Auth user found:', { email: user.email, id: user.id });
 
   // 2) Look up user profile in people table (matches existing app pattern)
+  console.log('[resolveCompanyContext] Looking up user profile for:', user.email);
+  
   const { data: person, error: personError } = await supabase
     .from("people")
     .select("id, company_id, email, jwt_role")
@@ -26,6 +33,7 @@ export async function resolveCompanyContext(supabase: SupabaseClient): Promise<C
     .single();
 
   if (personError) {
+    console.error('[resolveCompanyContext] Person lookup error:', personError);
     if (personError.code === 'PGRST116') {
       throw new Error(`User profile not found for email: ${user.email}. User may not be activated.`);
     }
@@ -33,8 +41,15 @@ export async function resolveCompanyContext(supabase: SupabaseClient): Promise<C
   }
 
   if (!person) {
+    console.error('[resolveCompanyContext] No person found for email:', user.email);
     throw new Error(`No active user profile found for: ${user.email}`);
   }
+  
+  console.log('[resolveCompanyContext] User profile found:', { 
+    id: person.id, 
+    companyId: person.company_id,
+    role: person.jwt_role 
+  });
 
   // 3) Handle missing company_id (auto-assignment logic from existing code)
   let companyId = person.company_id;

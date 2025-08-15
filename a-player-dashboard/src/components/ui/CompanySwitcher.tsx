@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Button } from './Button';
 import { LoadingSpinner } from './LoadingSpinner';
 import { getUserCompanies, switchCompanyContext } from '../../lib/resolveCompany';
-import { getCompanyContext } from '../../lib/tenantContext';
+import { getCurrentCompanyId, hasCompanyContext } from '../../lib/tenantContext';
 import { supabase } from '../../services/supabase';
 
 interface Company {
@@ -54,13 +54,13 @@ export const CompanySwitcher: React.FC<CompanySwitcherProps> = ({
         const userCompanies = await getUserCompanies(supabase);
         setCompanies(userCompanies);
 
-        // Get current company context
-        try {
-          const context = getCompanyContext();
-          const current = userCompanies.find(c => c.id === context.companyId);
+        // Get current company context (safe check without throwing)
+        if (hasCompanyContext()) {
+          const currentCompanyId = getCurrentCompanyId();
+          const current = userCompanies.find(c => c.id === currentCompanyId);
           setCurrentCompany(current || null);
-        } catch {
-          // Context not set, use first company
+        } else {
+          // Context not set yet, use first company as fallback
           setCurrentCompany(userCompanies[0] || null);
         }
       } catch (error) {

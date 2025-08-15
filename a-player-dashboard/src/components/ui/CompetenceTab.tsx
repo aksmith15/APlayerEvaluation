@@ -7,7 +7,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { fetchCompetenceAnalysis } from '../../services/coreGroupService';
 import { generateCompetenceAnalysisFromData } from '../../services/competencePatternAnalysis';
-import { ClusteredBarChart } from './ClusteredBarChart';
+import { LazyChart } from './LazyChart';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ErrorMessage } from './ErrorMessage';
 import { Card } from './Card';
@@ -156,7 +156,8 @@ export const CompetenceTab: React.FC<CompetenceTabProps> = ({
           </div>
           
           <div className="h-80 mb-6">
-            <ClusteredBarChart
+            <LazyChart
+              chartType="clustered-bar"
               data={chartData}
               height={320}
               showLegend={true}

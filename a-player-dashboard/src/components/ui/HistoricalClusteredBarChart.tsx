@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo, useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { QuarterRangeSelector } from './QuarterRangeSelector';
 import type { QuarterOption } from '../../types/database';
@@ -111,7 +111,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export const HistoricalClusteredBarChart: React.FC<HistoricalClusteredBarChartProps> = React.memo(({
+export const HistoricalClusteredBarChart: React.FC<HistoricalClusteredBarChartProps> = memo(({
   data,
   height = 400,
   title = "Historical Performance Comparison",
@@ -124,11 +124,11 @@ export const HistoricalClusteredBarChart: React.FC<HistoricalClusteredBarChartPr
   showQuarterSelector = true,
   employeeName
 }) => {
-  const [selectedEvaluationType, setSelectedEvaluationType] = React.useState<EvaluationType>('weighted');
-  const [viewType, setViewType] = React.useState<ViewType>('by-quarter');
+  const [selectedEvaluationType, setSelectedEvaluationType] = useState<EvaluationType>('weighted');
+  const [viewType, setViewType] = useState<ViewType>('by-quarter');
 
   // Memoize expensive data transformations
-  const chartData = React.useMemo(() => {
+  const chartData = useMemo(() => {
     if (viewType === 'by-quarter') {
       // Group by quarters, show attributes as separate bars
       const quarterData: Record<string, any> = {};
@@ -176,7 +176,7 @@ export const HistoricalClusteredBarChart: React.FC<HistoricalClusteredBarChartPr
   }, [data, viewType, selectedEvaluationType]);
 
   // Memoize data keys for bars
-  const dataKeys = React.useMemo(() => {
+  const dataKeys = useMemo(() => {
     if (chartData.length === 0) return [];
     
     if (viewType === 'by-quarter') {
@@ -205,7 +205,7 @@ export const HistoricalClusteredBarChart: React.FC<HistoricalClusteredBarChartPr
   }, [chartData, viewType]);
 
   // Generate colors for quarters/attributes
-  const colors = React.useMemo(() => {
+  const colors = useMemo(() => {
     const uniqueItems = dataKeys;
     const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#84cc16', '#f97316'];
     return uniqueItems.reduce((acc, item, index) => {

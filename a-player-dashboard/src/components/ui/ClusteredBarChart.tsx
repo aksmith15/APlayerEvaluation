@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo, useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useChartPerformance } from '../../hooks/usePerformanceMonitoring';
 
@@ -155,20 +155,20 @@ const createSmartLabel = (attribute: string): string => {
   return cleanName;
 };
 
-export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = React.memo(({ 
+export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = memo(({ 
   data, 
   height = 400,
   showLegend = true,
   title,
   showHelperText = true
 }) => {
-  const [selectedType, setSelectedType] = React.useState<EvaluationType>('all');
+  const [selectedType, setSelectedType] = useState<EvaluationType>('all');
   
   // Performance monitoring for chart rendering
   const { measureChartOperation } = useChartPerformance('ClusteredBarChart', true);
 
   // Memoize expensive data transformations with performance tracking
-  const chartData = React.useMemo(() => {
+  const chartData = useMemo(() => {
     return measureChartOperation(() => {
       // Safety check for data
       if (!data || !Array.isArray(data)) {
@@ -189,7 +189,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = React.memo(({
     });
   }, [data, selectedType, measureChartOperation]);
 
-  const selectedEvaluation = React.useMemo(() => 
+  const selectedEvaluation = useMemo(() => 
     evaluationTypes.find(type => type.value === selectedType)!,
     [selectedType]
   );

@@ -36,14 +36,24 @@ export default defineConfig({
         manualChunks: (id) => {
           // Split node_modules into specific vendor chunks
           if (id.includes('node_modules')) {
-            // React ecosystem + Chart libraries (bundle together to fix forwardRef)
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router') || 
-                id.includes('recharts') || id.includes('d3-')) {
-              return 'react-vendor';
+            // React core (keep minimal)
+            if (id.includes('react') && !id.includes('recharts') && !id.includes('router')) {
+              return 'react-core';
             }
-            // PDF generation libraries
-            if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('@react-pdf') || id.includes('file-saver')) {
-              return 'pdf-vendor';
+            // React router
+            if (id.includes('react-router')) {
+              return 'react-router';
+            }
+            // Chart libraries (separate from React core)
+            if (id.includes('recharts') || id.includes('d3-')) {
+              return 'chart-vendor';
+            }
+            // PDF generation libraries - keep with React core to prevent context issues
+            if (id.includes('@react-pdf')) {
+              return 'react-core'; // Keep React-PDF with React core for context sharing
+            }
+            if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('file-saver')) {
+              return 'pdf-vendor'; // Non-React PDF libs can be separate
             }
             // Supabase ecosystem
             if (id.includes('@supabase') || id.includes('supabase')) {
@@ -64,33 +74,49 @@ export default defineConfig({
           // Split application code by feature
           // Pages - lazy loaded, so they'll be separate chunks automatically
           if (id.includes('/pages/')) {
-            if (id.includes('react-pdf')) {
-              return 'pdf-pages';
-            }
+            // NOTE: Removed pdf-pages chunk to fix React context sharing issues
+            // PDF components need to stay in main bundle or shared React chunk
             // Other pages will be separate chunks due to lazy loading
           }
           
-          // Large components
+          // Large components - split more aggressively
           if (id.includes('/components/ui/')) {
-            // Heavy chart components - include in react-vendor to share React instance
+            // Chart components - create separate chunk for better lazy loading
             if (id.includes('Chart') || id.includes('Radar') || id.includes('Trend')) {
-              return 'react-vendor';
+              return 'chart-components';
             }
-            // PDF-related components
-            if (id.includes('PDF') || id.includes('Download') || id.includes('Generate')) {
-              return 'pdf-components';
+            // PDF-related components - keep in main bundle to prevent React context issues
+            // NOTE: PDF components need React context sharing, so don't split them
+            // if (id.includes('PDF') || id.includes('Download') || id.includes('Generate')) {
+            //   return 'pdf-components';
+            // }
+            // Assignment management components - split further
+            if (id.includes('Assignment') && (id.includes('Creation') || id.includes('Upload'))) {
+              return 'assignment-creation';
             }
-            // Assignment management components
             if (id.includes('Assignment') || id.includes('Coverage') || id.includes('Weights')) {
               return 'assignment-components';
+            }
+            // Survey components
+            if (id.includes('Survey') || id.includes('Question') || id.includes('Rating')) {
+              return 'survey-components';
+            }
+            // Tab components
+            if (id.includes('Tab') && id.includes('/assignment-tabs/')) {
+              return 'assignment-tabs';
+            }
+            // Core analysis components
+            if (id.includes('Core') || id.includes('Character') || id.includes('Competence') || id.includes('Curiosity')) {
+              return 'core-analysis';
             }
           }
           
           // Services
           if (id.includes('/services/')) {
-            if (id.includes('pdf') || id.includes('download')) {
-              return 'pdf-services';
-            }
+            // NOTE: Keep PDF services in main bundle to prevent React context issues
+            // if (id.includes('pdf') || id.includes('download')) {
+            //   return 'pdf-services';
+            // }
             if (id.includes('ai') || id.includes('insights') || id.includes('coaching')) {
               return 'ai-services';
             }
@@ -116,8 +142,8 @@ export default defineConfig({
         }
       }
     },
-    // Reduce chunk size warning to encourage better splitting
-    chunkSizeWarningLimit: 800,
+    // More aggressive chunk size limit
+    chunkSizeWarningLimit: 500,
     // Enable source maps for production debugging (smaller than default)
     sourcemap: 'hidden',
     // Advanced minification

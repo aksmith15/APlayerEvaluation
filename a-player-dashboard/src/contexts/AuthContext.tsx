@@ -30,6 +30,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // User signed in - initialize tenant context
       try {
         console.log('🏢 Initializing tenant context...');
+        console.log('🔍 Auth user details:', { email: authUser.email, id: authUser.id });
+        
         const tenantContext = await resolveCompanyContext(supabase);
         setCompanyContext(tenantContext);
         
@@ -39,7 +41,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           context: { companyId: tenantContext.companyId, role: tenantContext.role }
         });
         
-        console.log('✅ Tenant context initialized:', tenantContext);
+        console.log('✅ Tenant context initialized successfully:', tenantContext);
         
         // FIXED: Get the full user profile with jwtRole to ensure UI has complete data
         try {
@@ -69,6 +71,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
       } catch (error) {
         console.error('❌ Failed to initialize tenant context:', error);
+        console.error('❌ Error details:', {
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          userEmail: authUser.email
+        });
         
         logTenancyEvent({
           type: 'CONTEXT_FAILURE',
@@ -78,6 +85,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         // Don't break existing flow - continue without tenant context
         // RLS policies will still provide baseline protection
+        console.warn('⚠️ Continuing without tenant context - RLS policies will provide baseline protection');
       }
     } else {
       // User signed out - clear tenant context

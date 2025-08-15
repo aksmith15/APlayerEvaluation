@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { fetchCharacterAnalysis } from '../../services/coreGroupService';
-import { ClusteredBarChart } from './ClusteredBarChart';
+import { LazyChart } from './LazyChart';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ErrorMessage } from './ErrorMessage';
 import { Card } from './Card';
@@ -142,7 +142,8 @@ export const CharacterTab: React.FC<CharacterTabProps> = ({
           </div>
           
           <div className="h-80">
-            <ClusteredBarChart
+            <LazyChart
+              chartType="clustered-bar"
               data={chartData}
               height={320}
               showLegend={true}

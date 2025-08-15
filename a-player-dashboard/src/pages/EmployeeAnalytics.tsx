@@ -5,8 +5,8 @@ import { fetchCoreGroupAnalytics, checkCoreGroupDataAvailability } from '../serv
 import { subscribeToEmployeeEvaluations, subscribeToQuarterlyScores, subscribeToEvaluationCycles, realtimeManager } from '../services/realtimeService';
 import { LoadingSpinner, ErrorMessage, Card, ChartSkeleton, NoEvaluationData, Breadcrumb, useBreadcrumbs, KeyboardShortcuts, EmployeeProfile, QuarterlyNotes, TopAnalyticsGrid } from '../components/ui';
 import { CompanySwitcher } from '../components/ui/CompanySwitcher';
-// Direct chart imports for better code splitting
-import { RadarChart, ClusteredBarChart, HistoricalClusteredBarChart, TrendLineChart } from '../components/ui/charts';
+// Use lazy loading for charts to resolve build warnings
+import { LazyChart } from '../components/ui';
 // Chart preloading for performance optimization
 import { preloadChartComponents } from '../services/chartLoader';
 
@@ -786,7 +786,8 @@ export const EmployeeAnalytics: React.FC = () => {
             {dataLoading ? (
               <ChartSkeleton height="h-64 md:h-96" />
             ) : attributesData.length > 0 ? (
-              <RadarChart 
+              <LazyChart
+                chartType="radar"
                 data={attributesData}
                 height={radarChartHeight}
               />
@@ -810,7 +811,8 @@ export const EmployeeAnalytics: React.FC = () => {
             {dataLoading ? (
               <ChartSkeleton height="h-64 md:h-80" />
             ) : attributesData.length > 0 ? (
-              <ClusteredBarChart 
+              <LazyChart
+                chartType="clustered-bar"
                 data={attributesData}
                 height={barChartHeight}
                 showLegend={true}
@@ -826,7 +828,8 @@ export const EmployeeAnalytics: React.FC = () => {
               <h2 className="text-xl font-semibold text-secondary-800 chart-title">Performance Trend</h2>
               {dataLoading && <LoadingSpinner size="sm" />}
             </div>
-            <TrendLineChart 
+            <LazyChart
+              chartType="trend-line"
               data={trendData}
               height={trendChartHeight}
               employeeName={employee?.name}
@@ -846,7 +849,8 @@ export const EmployeeAnalytics: React.FC = () => {
                          {historicalLoading ? (
                <ChartSkeleton height="h-64 md:h-96" />
              ) : (
-               <HistoricalClusteredBarChart
+               <LazyChart
+                 chartType="historical-bar"
                  data={historicalData}
                  height={historicalChartHeight}
                  title="Performance Comparison Across Quarters"
