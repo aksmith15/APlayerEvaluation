@@ -4,16 +4,27 @@
 // Date: February 1, 2025
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
-import { corsHeaders } from '../_shared/cors.ts'
+// Inline CORS headers so this function can be pasted in the dashboard without shared imports
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
+}
 
 interface AcceptInviteRequest {
   token: string
 }
 
 Deno.serve(async (req) => {
+  console.log('accept-invite request:', req.method, req.url)
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    console.log('Handling OPTIONS preflight')
+    return new Response('ok', { 
+      status: 200,
+      headers: corsHeaders 
+    })
   }
 
   try {
@@ -47,11 +58,15 @@ Deno.serve(async (req) => {
     )
 
     const { data: { user }, error: userError } = await userClient.auth.getUser()
+    console.log('Auth check result:', { user: !!user, userError, authHeader: !!req.headers.get('Authorization') })
+    
     if (userError || !user) {
+      console.error('Auth failed:', userError)
       return new Response(
         JSON.stringify({ 
           error: 'Unauthorized - user must be logged in to accept invite',
-          redirect_to_login: true
+          redirect_to_login: true,
+          debug: { userError: userError?.message, hasAuthHeader: !!req.headers.get('Authorization') }
         }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
