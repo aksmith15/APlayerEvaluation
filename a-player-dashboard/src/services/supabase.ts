@@ -29,18 +29,45 @@ export const supabase = createClient(
     auth: {
       autoRefreshToken: true,
       persistSession: true,
-      detectSessionInUrl: false
+      detectSessionInUrl: false,
+      storageKey: 'ape.auth'
     }
   }
 );
 
-// Test connection
-supabase.auth.getSession().then(({ error }) => {
-  if (error) {
-    console.error('Supabase connection error:', error);
-  } else {
-    console.log('✅ Supabase connection successful');
+// Session health check - handles stale refresh tokens
+export async function ensureSessionHealthy() {
+  try {
+    await supabase.auth.getSession(); // triggers refresh if needed
+  } catch (e: any) {
+    const msg = String(e?.message || e);
+    if (msg.includes('Invalid Refresh Token') || msg.includes('Refresh Token Not Found')) {
+      try { 
+        await supabase.auth.signOut(); 
+      } catch {}
+      try { 
+        localStorage.removeItem('ape.auth'); 
+      } catch {}
+      console.log('🔄 Cleared stale auth tokens, please refresh and log in again');
+      // Don't auto-reload in production to avoid loops
+      if (import.meta.env.DEV) {
+        location.reload();
+      }
+    } else {
+      throw e; // Re-throw non-auth errors
+    }
   }
+}
+
+// Test connection with health check
+ensureSessionHealthy().then(() => {
+  supabase.auth.getSession().then(({ error }) => {
+    if (error) {
+      console.error('Supabase connection error:', error);
+    } else {
+      console.log('✅ Supabase connection successful');
+    }
+  });
 }).catch(err => {
   console.error('Failed to connect to Supabase:', err);
 });
