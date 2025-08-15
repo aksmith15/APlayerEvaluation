@@ -61,17 +61,17 @@ export const DebugInviteTest: React.FC = () => {
           
           try {
             createInviteResult = JSON.parse(responseText);
-          } catch (parseError) {
-            createInviteResult = { rawResponse: responseText, parseError: parseError.message };
-          }
-          
-          if (!response.ok) {
-            createInviteError = `HTTP ${response.status}: ${response.statusText}`;
-          }
-        } catch (fetchError) {
-          createInviteError = `Fetch error: ${fetchError.message}`;
-          createInviteResult = null;
+                  } catch (parseError) {
+          createInviteResult = { rawResponse: responseText, parseError: parseError instanceof Error ? parseError.message : String(parseError) };
         }
+        
+        if (!response.ok) {
+          createInviteError = `HTTP ${response.status}: ${response.statusText}`;
+        }
+      } catch (fetchError) {
+        createInviteError = `Fetch error: ${fetchError instanceof Error ? fetchError.message : String(fetchError)}`;
+        createInviteResult = null;
+      }
       }
 
       // Test direct SMTP functionality
@@ -94,14 +94,14 @@ export const DebugInviteTest: React.FC = () => {
         try {
           smtpTestResult = JSON.parse(smtpResponseText);
         } catch (parseError) {
-          smtpTestResult = { rawResponse: smtpResponseText, parseError: parseError.message };
+          smtpTestResult = { rawResponse: smtpResponseText, parseError: parseError instanceof Error ? parseError.message : String(parseError) };
         }
         
         if (!smtpResponse.ok) {
           smtpTestError = `HTTP ${smtpResponse.status}: ${smtpResponse.statusText}`;
         }
       } catch (fetchError) {
-        smtpTestError = `Fetch error: ${fetchError.message}`;
+        smtpTestError = `Fetch error: ${fetchError instanceof Error ? fetchError.message : String(fetchError)}`;
         smtpTestResult = null;
       }
 
@@ -127,9 +127,9 @@ export const DebugInviteTest: React.FC = () => {
       console.log('Combined test results:', combinedResult);
       setResult(combinedResult);
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Debug test failed:', err);
-      setResult({ error: err.message, details: err });
+      setResult({ error: err instanceof Error ? err.message : String(err), details: err });
     } finally {
       setTesting(false);
     }
