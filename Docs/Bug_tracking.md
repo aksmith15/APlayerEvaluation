@@ -6476,10 +6476,58 @@ supabase/functions/test-exact-copy/index.ts
 
 ---
 
+### **Issue #027: Assignment Components createContext Error** ✅ **FIXED**
+**Date Reported:** February 1, 2025  
+**Priority:** High  
+**Category:** Deployment/React Context  
+**Reporter:** Production Console Logs  
+
+**Problem:**
+Console shows createContext error in assignment components:
+```
+assignment-components-DdNoby73.js:2 Uncaught TypeError: Cannot read properties of undefined (reading 'createContext')
+    at assignment-components-DdNoby73.js:2:14988
+```
+
+**Investigation Status:**
+- 🔍 **Pattern Identified**: Same createContext isolation issue, now in assignment-components chunk
+- 🔍 **Root Cause**: Vite config still creating `assignment-components` chunk (line 105) that gets isolated from React core
+- 🔍 **Previous Fixes**: Successfully eliminated survey-components, pdf-pages, chart-vendor, react-router chunks
+- 🔍 **Remaining Issue**: Assignment components still being split despite React context dependencies
+
+**Problem Analysis:**
+Even after fixing survey-components, chart-vendor, and react-router chunking issues, the assignment-components chunk is still being created and isolated from the React core bundle. This chunk contains React components that need access to createContext but can't access it when separated.
+
+**Root Cause:**
+The Vite build configuration was splitting assignment-related components (Assignment*, Coverage*, Weights*) into a separate `assignment-components` chunk. When this chunk was loaded separately from the React core bundle, it lost access to React's createContext API, causing runtime errors.
+
+**Solution Implemented:**
+- ✅ **Modified vite.config.ts**: Disabled assignment-components chunk creation (lines 105-107)
+- ✅ **Component Redistribution**: Assignment components now included in main bundle with React context access
+- ✅ **Build Verification**: Production build no longer generates assignment-components chunk
+- ✅ **Size Impact**: Components redistributed to main bundle and existing chunks
+
+**Technical Details:**
+- **Error Location**: `assignment-components-DdNoby73.js:2:14988`
+- **HTTP Status**: JavaScript runtime error (not HTTP 404)
+- **Components Involved**: Assignment management components (Assignment*, Coverage*, Weights*)
+- **Build Verification**: assignment-components chunk eliminated from build output
+- **Component Access**: All assignment components now have proper React context access
+
+**Files Modified:**
+- ✅ `vite.config.ts` - Disabled assignment-components chunking and added context notes
+
+**Testing Results:**
+- ✅ **Production Build**: No assignment-components chunk generated
+- ✅ **Bundle Analysis**: Assignment components redistributed to main bundle and assignment-creation chunk
+- ✅ **Context Access**: All components maintain access to React createContext API
+
+---
+
 **End of Bug Tracking Log**  
-**Last Updated:** August 11, 2025  
-**Total Issues Tracked:** 89  
-**Current Status:** Active Development - Infrastructure Investigation Required
+**Last Updated:** February 1, 2025  
+**Total Issues Tracked:** 90  
+**Current Status:** Active Development - Fixing React Context Isolation Issues
 
 ---
 

@@ -97,13 +97,14 @@ export default defineConfig({
             // if (id.includes('PDF') || id.includes('Download') || id.includes('Generate')) {
             //   return 'pdf-components';
             // }
-            // Assignment management components - split further
+            // Assignment management components - keep in main bundle to prevent React context issues
+            // NOTE: Assignment components need React context and hooks, so don't split them
             if (id.includes('Assignment') && (id.includes('Creation') || id.includes('Upload'))) {
               return 'assignment-creation';
             }
-            if (id.includes('Assignment') || id.includes('Coverage') || id.includes('Weights')) {
-              return 'assignment-components';
-            }
+            // if (id.includes('Assignment') || id.includes('Coverage') || id.includes('Weights')) {
+            //   return 'assignment-components';
+            // }
             // Survey components - keep in main bundle to prevent 404 errors in production
             // NOTE: Survey components are critical and should not be split to avoid serving issues
             // if (id.includes('Survey') || id.includes('Question') || id.includes('Rating')) {
