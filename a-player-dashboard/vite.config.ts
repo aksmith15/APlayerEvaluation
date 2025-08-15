@@ -28,9 +28,12 @@ export default defineConfig({
   build: {
     // Advanced code splitting and optimization
     rollupOptions: {
-      external: (_id) => {
-        // Don't externalize anything - keep all in bundle to fix React issues
-        return false;
+      external: (id) => {
+        // Don't externalize React or React-dependent libraries to prevent version conflicts
+        if (id.includes('react') || id.includes('recharts')) {
+          return false;
+        }
+        return false; // Keep everything bundled for now
       },
       output: {
         manualChunks: (id) => {
@@ -44,9 +47,9 @@ export default defineConfig({
             if (id.includes('react-router')) {
               return 'react-router';
             }
-            // Chart libraries (separate from React core)
+            // Chart libraries - keep with React core to prevent forwardRef errors
             if (id.includes('recharts') || id.includes('d3-')) {
-              return 'chart-vendor';
+              return 'react-core'; // Keep Recharts with React core for forwardRef compatibility
             }
             // PDF generation libraries - keep with React core to prevent context issues
             if (id.includes('@react-pdf')) {
@@ -81,10 +84,11 @@ export default defineConfig({
           
           // Large components - split more aggressively
           if (id.includes('/components/ui/')) {
-            // Chart components - create separate chunk for better lazy loading
-            if (id.includes('Chart') || id.includes('Radar') || id.includes('Trend')) {
-              return 'chart-components';
-            }
+            // Chart components - keep in main bundle to prevent React forwardRef issues
+            // NOTE: Chart components need React context and forwardRef, so don't split them
+            // if (id.includes('Chart') || id.includes('Radar') || id.includes('Trend')) {
+            //   return 'chart-components';
+            // }
             // PDF-related components - keep in main bundle to prevent React context issues
             // NOTE: PDF components need React context sharing, so don't split them
             // if (id.includes('PDF') || id.includes('Download') || id.includes('Generate')) {
@@ -200,7 +204,7 @@ export default defineConfig({
       
       // Chart libraries (pre-bundle for faster dev and ensure React compatibility)
       'recharts',
-      'recharts/esm'
+      'recharts/es6'
     ],
     force: true // Force re-optimization to fix React forwardRef issues
   },

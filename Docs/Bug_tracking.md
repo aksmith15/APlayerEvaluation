@@ -81,6 +81,44 @@ AuthApiError: Invalid Refresh Token: Refresh Token Not Found
 
 ---
 
+### **Issue #024: React forwardRef Undefined in Chart Components** 🔍 **INVESTIGATING**
+**Date Reported:** February 1, 2025  
+**Priority:** High  
+**Category:** Chart Components/React Compatibility  
+**Reporter:** Console Logs Post-Deployment  
+
+**Problem:**
+Console shows React forwardRef error in chart vendor bundle:
+```
+chart-vendor-QBFMCu5g.js:1 Uncaught TypeError: Cannot read properties of undefined (reading 'forwardRef')
+```
+
+**Investigation Status:**
+- ✅ **Root Cause Identified**: Vite code splitting separating Recharts from React core bundle
+- ✅ **Problem Located**: `vite.config.ts` creating separate `chart-vendor` and `chart-components` chunks
+- ✅ **Impact Assessment**: Chart rendering functionality broken due to React API isolation
+- ✅ **Solution Implemented**: Modified Vite config to keep Recharts components with React core bundle
+
+**Root Cause:**
+The Vite build configuration was splitting Recharts library into a separate `chart-vendor` chunk, which broke access to React APIs like `forwardRef`. React libraries need to share the same React instance to access React's internal APIs.
+
+**Solution Implemented:**
+- ✅ **Modified vite.config.ts**: Moved Recharts from `chart-vendor` to `react-core` chunk
+- ✅ **Fixed Chart Components**: Commented out `chart-components` chunk to keep in main bundle
+- ✅ **Updated Dependencies**: Changed recharts optimization from `recharts/esm` to `recharts/es6`
+- ✅ **Preserved React Compatibility**: Ensured all React-dependent libraries share React instance
+
+**Technical Details:**
+- **Error Location**: `chart-vendor-QBFMCu5g.js:1:10110` (Vite build bundle)
+- **Components Involved**: All Recharts components (BarChart, LineChart, RadarChart, etc.)
+- **React Dependencies**: forwardRef, memo, createElement, and other React APIs
+- **Build Target**: Production deployment on Render.com
+
+**Files Modified:**
+- ✅ `vite.config.ts` - Fixed chart vendor chunking and React API sharing
+
+---
+
 ### **Issue #021: TenantContext Not Initialized - RLS Failures** ✅ **RESOLVED**
 **Date Reported:** August 15, 2025  
 **Priority:** High  
