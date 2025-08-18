@@ -15,6 +15,9 @@ interface InviteRecord {
   id: string;
   email: string;
   role_to_assign: string;
+  position?: string;
+  jwt_role?: string;
+  inviter_name?: string;
   created_at: string;
   expires_at: string;
   claimed_at: string | null;
@@ -23,7 +26,9 @@ interface InviteRecord {
 
 interface InviteFormData {
   email: string;
-  role_to_assign: 'admin' | 'member' | 'viewer';
+  role_to_assign: 'admin' | 'member' | 'viewer' | 'owner';
+  position: string;
+  jwt_role?: 'hr_admin' | 'super_admin' | '';
 }
 
 export const InviteManager: React.FC = () => {
@@ -36,11 +41,14 @@ export const InviteManager: React.FC = () => {
   
   const [formData, setFormData] = useState<InviteFormData>({
     email: '',
-    role_to_assign: 'member'
+    role_to_assign: 'member',
+    position: '',
+    jwt_role: ''
   });
 
   // Check if user has admin permissions
   const isAdmin = user?.jwtRole === 'super_admin' || user?.jwtRole === 'hr_admin';
+  const isSuperAdmin = user?.jwtRole === 'super_admin';
 
   // Load existing invites on component mount
   useEffect(() => {
@@ -61,6 +69,9 @@ export const InviteManager: React.FC = () => {
           id,
           email,
           role_to_assign,
+          position,
+          jwt_role,
+          inviter_name,
           created_at,
           expires_at,
           claimed_at,
@@ -107,6 +118,9 @@ export const InviteManager: React.FC = () => {
             id,
             email,
             role_to_assign,
+            position,
+            jwt_role,
+            inviter_name,
             created_at,
             expires_at,
             claimed_at,
@@ -158,14 +172,18 @@ export const InviteManager: React.FC = () => {
       console.log('Calling create-invite with:', {
         company_id: peopleData.company_id,
         email: formData.email.trim().toLowerCase(),
-        role_to_assign: formData.role_to_assign
+        role_to_assign: formData.role_to_assign,
+        position: formData.position || undefined,
+        jwt_role: formData.jwt_role || undefined
       });
 
       const { data, error } = await supabase.functions.invoke('create-invite', {
         body: {
           company_id: peopleData.company_id,
           email: formData.email.trim().toLowerCase(),
-          role_to_assign: formData.role_to_assign
+          role_to_assign: formData.role_to_assign,
+          position: formData.position.trim() || undefined,
+          jwt_role: formData.jwt_role || undefined
         }
       });
 
@@ -201,7 +219,7 @@ export const InviteManager: React.FC = () => {
       }
 
       setSuccess(`Invite sent successfully to ${formData.email}!`);
-      setFormData({ email: '', role_to_assign: 'member' });
+      setFormData({ email: '', role_to_assign: 'member', position: '', jwt_role: '' });
       
       // Reload invites to show the new one
       await loadInvites();
@@ -322,7 +340,7 @@ export const InviteManager: React.FC = () => {
         <form onSubmit={sendInvite} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
+              Email Address *
             </label>
             <input
               id="email"
@@ -337,8 +355,24 @@ export const InviteManager: React.FC = () => {
           </div>
 
           <div>
+            <label htmlFor="position" className="block text-sm font-medium text-gray-700 mb-1">
+              Position/Title *
+            </label>
+            <input
+              id="position"
+              type="text"
+              value={formData.position}
+              onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Software Engineer, Manager, etc."
+              required
+              disabled={submitting}
+            />
+          </div>
+
+          <div>
             <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
-              Role Assignment
+              Company Role *
             </label>
             <select
               id="role"
@@ -350,12 +384,35 @@ export const InviteManager: React.FC = () => {
               <option value="member">Member</option>
               <option value="admin">Admin</option>
               <option value="viewer">Viewer</option>
+              <option value="owner">Owner</option>
             </select>
           </div>
 
+          {isSuperAdmin && (
+            <div>
+              <label htmlFor="jwt_role" className="block text-sm font-medium text-gray-700 mb-1">
+                Admin Permissions (Optional)
+              </label>
+              <select
+                id="jwt_role"
+                value={formData.jwt_role || ''}
+                onChange={(e) => setFormData({ ...formData, jwt_role: e.target.value as any })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                disabled={submitting}
+              >
+                <option value="">No admin access</option>
+                <option value="hr_admin">HR Admin</option>
+                <option value="super_admin">Super Admin</option>
+              </select>
+              <p className="text-sm text-gray-500 mt-1">
+                Admin permissions allow managing invites and users. Only super admins can assign these roles.
+              </p>
+            </div>
+          )}
+
           <Button
             type="submit"
-            disabled={submitting || !formData.email.trim()}
+            disabled={submitting || !formData.email.trim() || !formData.position.trim()}
             className="w-full"
           >
             {submitting ? 'Sending Invite...' : 'Send Invitation'}
@@ -398,11 +455,22 @@ export const InviteManager: React.FC = () => {
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
                         {status}
                       </span>
-                      <span className="text-sm text-gray-500">
-                        Role: {invite.role_to_assign}
-                      </span>
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      <div className="flex flex-wrap gap-4">
+                        <span><strong>Role:</strong> {invite.role_to_assign}</span>
+                        {invite.position && (
+                          <span><strong>Position:</strong> {invite.position}</span>
+                        )}
+                        {invite.jwt_role && (
+                          <span><strong>Admin:</strong> {invite.jwt_role}</span>
+                        )}
+                      </div>
                     </div>
                     <div className="text-sm text-gray-500 mt-1">
+                      {invite.inviter_name && (
+                        <span>Invited by: {invite.inviter_name} • </span>
+                      )}
                       Sent: {new Date(invite.created_at).toLocaleDateString()}
                       {status === 'Pending' && (
                         <span> • Expires: {new Date(invite.expires_at).toLocaleDateString()}</span>

@@ -19,8 +19,22 @@ Deno.serve((req) => {
       return new Response('Missing token', { status: 400, headers: { ...corsHeaders, 'Content-Type': 'text/plain' } })
     }
 
-    const siteUrl = Deno.env.get('SITE_URL') || 'https://a-player-evaluations.onrender.com'
-    const target = `${siteUrl}/accept-invite?token=${encodeURIComponent(token)}`
+    // Check for development mode via environment variable or default to production
+    const isDevelopment = Deno.env.get('DEVELOPMENT_MODE') === 'true'
+    const customSiteUrl = Deno.env.get('SITE_URL')
+    
+    let siteUrl
+    if (customSiteUrl) {
+      siteUrl = customSiteUrl
+    } else if (isDevelopment) {
+      siteUrl = 'http://localhost:5173'  // Default Vite dev server
+    } else {
+      siteUrl = 'https://a-player-evaluations.onrender.com'  // Production default
+    }
+    
+    const target = `${siteUrl}/register-from-invite?token=${encodeURIComponent(token)}`
+    
+    console.log(`Redirecting to: ${target} (isDevelopment: ${isDevelopment})`)
 
     return new Response(null, {
       status: 302,

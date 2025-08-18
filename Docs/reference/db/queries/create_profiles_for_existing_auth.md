@@ -2,12 +2,12 @@
 
 ## Description
 Create profiles for the 4 existing auth users
-This will allow immediate login for: kolbes, blake, peter, sethr
+This will allow immediate login for: user1, user2, user3, user4
 
 ## SQL
 ```sql
 -- Create profiles for the 4 existing auth users
--- This will allow immediate login for: kolbes, blake, peter, sethr
+-- This will allow immediate login for: user1, user2, user3, user4
 
 INSERT INTO profiles (
   id, 
@@ -30,10 +30,10 @@ FROM people p
 JOIN auth.users au ON au.email = p.email  -- Link by email match
 WHERE p.active = true
   AND au.email IN (
-    'kolbes@ridgelineei.com',
-    'blake@ridgelineei.com', 
-    'peter@ridgelineei.com',
-    'sethr@ridgelineei.com'
+    'user1@example.com',
+    'user2@example.com', 
+    'user3@example.com',
+    'user4@example.com'
   )
 ON CONFLICT (id) DO UPDATE SET
   email = EXCLUDED.email,

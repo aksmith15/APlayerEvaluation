@@ -14,7 +14,9 @@ const corsHeaders = {
 interface InviteRequest {
   company_id: string
   email: string
-  role_to_assign: 'admin' | 'member' | 'viewer'
+  role_to_assign: 'admin' | 'member' | 'viewer' | 'owner'
+  position?: string
+  jwt_role?: 'hr_admin' | 'super_admin'
 }
 
 Deno.serve(async (req) => {
@@ -31,12 +33,20 @@ Deno.serve(async (req) => {
 
   try {
     // 1) Parse request body
-    const { company_id, email, role_to_assign }: InviteRequest = await req.json()
+    const { company_id, email, role_to_assign, position, jwt_role }: InviteRequest = await req.json()
     
     // Validate input
     if (!company_id || !email || !role_to_assign) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields: company_id, email, role_to_assign' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Validate jwt_role if provided
+    if (jwt_role && !['hr_admin', 'super_admin'].includes(jwt_role)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid jwt_role. Must be hr_admin or super_admin' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -128,7 +138,7 @@ Deno.serve(async (req) => {
     console.log('Looking up user in people table with email:', user.email)
     const { data: userData, error: userDataError } = await admin
       .from('people')
-      .select('id, jwt_role, active, company_id')
+      .select('id, name, jwt_role, active, company_id')
       .eq('email', user.email)
       .single()
 
@@ -163,6 +173,17 @@ Deno.serve(async (req) => {
       )
     }
 
+    // Only super_admin can assign jwt_role to invites
+    if (jwt_role && userData.jwt_role !== 'super_admin') {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Forbidden - only super_admin can assign admin roles to invites',
+          user_role: userData.jwt_role
+        }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     // Verify user is trying to create invite for their own company
     if (userData.company_id !== company_id) {
       return new Response(
@@ -189,14 +210,45 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Generate secure token for our invite system
+    // Generate secure invite link using Supabase auth.generateLink
+    const siteUrl = Deno.env.get('SITE_URL') || 'https://a-player-evaluations.onrender.com'
+    const redirectTo = `${siteUrl}/register-from-invite`
+    
+    console.log('Generating Supabase action link with redirect to:', redirectTo)
+    
+    const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+      type: 'invite',
+      email: email.toLowerCase().trim(),
+      options: {
+        redirectTo,
+        data: {
+          position: position || null,
+          jwt_role: jwt_role || null,
+          inviter_name: userData.name,
+          company_id,
+          role_to_assign
+        }
+      }
+    })
+
+    if (linkError || !linkData?.action_link) {
+      console.error('Failed to generate action link:', linkError)
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to generate secure invite link',
+          details: linkError?.message 
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const inviteToken = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '')
+    const actionLink = linkData.action_link
     
-    // Create redirect URL via Edge Function to decouple from frontend hostname
-    // Reuse the existing supabaseUrl defined above
-    const redirectTo = `${supabaseUrl}/functions/v1/invite-redirect?token=${inviteToken}`
-    
-    console.log('Using invite redirect function for link:', redirectTo)
+    console.log('Generated action link successfully:', { 
+      hasActionLink: !!actionLink,
+      redirectTo 
+    })
 
     // Send invite email directly via Resend API (bypassing Supabase auth email)
     console.log('Sending invite email directly via Resend to:', email.toLowerCase().trim());
@@ -224,20 +276,24 @@ Deno.serve(async (req) => {
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #333;">You're invited to join A-Player Evaluations</h2>
-            <p>You've been invited to join the A-Player Evaluations platform.</p>
-            <p><strong>Role:</strong> ${role_to_assign}</p>
+            <p>You've been invited by <strong>${userData.name}</strong> to join the A-Player Evaluations platform.</p>
+            <div style="background-color: #f8f9fa; padding: 16px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 4px 0;"><strong>Company Role:</strong> ${role_to_assign}</p>
+              ${position ? `<p style="margin: 4px 0;"><strong>Position:</strong> ${position}</p>` : ''}
+              ${jwt_role ? `<p style="margin: 4px 0;"><strong>Admin Access:</strong> ${jwt_role}</p>` : ''}
+            </div>
             <div style="margin: 30px 0;">
-              <a href="${redirectTo}" 
+              <a href="${actionLink}" 
                  style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
-                Accept Invitation
+                Accept Invitation & Create Account
               </a>
             </div>
             <p style="color: #666; font-size: 14px;">
-              This invitation will expire in 7 days. If you have any questions, please contact your administrator.
+              Click the button above to create your account and join the team. This invitation will expire in 7 days.
             </p>
             <p style="color: #666; font-size: 12px;">
               If you can't click the button above, copy and paste this link into your browser:<br>
-              ${redirectTo}
+              ${actionLink}
             </p>
           </div>
         `
@@ -275,7 +331,10 @@ Deno.serve(async (req) => {
         role_to_assign,
         token: inviteToken,
         expires_at: expiresAt.toISOString(),
-        created_by: userData.id  // Use people.id (from userData lookup above)
+        created_by: userData.id,  // Use people.id (from userData lookup above)
+        position: position || null,
+        jwt_role: jwt_role || null,
+        inviter_name: userData.name
       })
       .select()
       .single()
@@ -296,7 +355,8 @@ Deno.serve(async (req) => {
         email: dbInviteData.email,
         expires_at: dbInviteData.expires_at,
         email_id: emailResult.id,
-        message: 'Invite created successfully. Email sent via Resend.'
+        action_link: actionLink,
+        message: 'Invite created successfully. Email sent via Resend with secure action link.'
       }),
       {
         status: 200,

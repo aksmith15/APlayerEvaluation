@@ -47,21 +47,21 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Parse token
-    let token: string
+    // Parse invite token
+    let inviteToken: string
     if (req.method === 'GET') {
       const url = new URL(req.url)
-      token = url.searchParams.get('token') || ''
+      inviteToken = url.searchParams.get('token') || ''
     } else {
       const body = await req.json()
-      token = body.token
+      inviteToken = body.token
     }
 
-    if (!token) {
-      return new Response(
-        JSON.stringify({ error: 'Missing invite token' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    // Handle action_link flow where token may not be provided but metadata exists
+    let isActionLinkFlow = false
+    if (!inviteToken || inviteToken === 'action-link-metadata') {
+      console.log('Detected action_link flow, will extract metadata from user session')
+      isActionLinkFlow = true
     }
 
     // Check auth header
@@ -80,14 +80,14 @@ Deno.serve(async (req) => {
 
     // Extract JWT token from Authorization header
     console.log('Extracting JWT token...')
-    const token = authHeader.replace('Bearer ', '')
+    const jwtToken = authHeader.replace('Bearer ', '')
     
     // Create user client and set session manually
     console.log('Creating user client...')
     const userClient = createClient(supabaseUrl, anonKey)
     
     console.log('Getting user with JWT...')
-    const { data: { user }, error: userError } = await userClient.auth.getUser(token)
+    const { data: { user }, error: userError } = await userClient.auth.getUser(jwtToken)
     
     console.log('Auth result:', { 
       hasUser: !!user, 
@@ -111,21 +111,65 @@ Deno.serve(async (req) => {
     // Create admin client
     const admin = createClient(supabaseUrl, serviceKey)
 
-    // Validate invite token
-    const { data: invite, error: inviteError } = await admin
-      .from('invites')
-      .select(`
-        id,
-        company_id,
-        email,
-        role_to_assign,
-        expires_at,
-        claimed_at,
-        revoked_at,
-        companies!inner(name)
-      `)
-      .eq('token', token)
-      .maybeSingle()
+    let invite: any = null
+    let inviteError: any = null
+
+    if (isActionLinkFlow) {
+      // For action_link flow, construct invite data from user metadata
+      console.log('Using action_link flow - constructing invite from user metadata')
+      const metadata = user.user_metadata
+      
+      if (!metadata?.company_id || !metadata?.role_to_assign) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Invalid action link - missing required metadata',
+            debug: 'Missing company_id or role_to_assign in user metadata'
+          }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      // Look up company name
+      const { data: company } = await admin
+        .from('companies')
+        .select('name')
+        .eq('id', metadata.company_id)
+        .single()
+
+      invite = {
+        id: 'action-link',
+        company_id: metadata.company_id,
+        email: user.email,
+        role_to_assign: metadata.role_to_assign,
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+        claimed_at: null,
+        revoked_at: null,
+        companies: {
+          name: company?.name || 'Unknown Company'
+        }
+      }
+      console.log('Constructed invite from metadata:', invite)
+    } else {
+      // Traditional token-based flow
+      console.log('Using token-based flow - looking up invite by token')
+      const result = await admin
+        .from('invites')
+        .select(`
+          id,
+          company_id,
+          email,
+          role_to_assign,
+          expires_at,
+          claimed_at,
+          revoked_at,
+          companies!inner(name)
+        `)
+        .eq('token', inviteToken)
+        .maybeSingle()
+      
+      invite = result.data
+      inviteError = result.error
+    }
 
     if (inviteError) {
       console.error('Invite lookup error:', inviteError)
@@ -170,8 +214,16 @@ Deno.serve(async (req) => {
     // Verify email matches
     const userEmail = user.email?.toLowerCase().trim()
     const inviteEmail = invite.email.toLowerCase().trim()
+    const isDevelopment = Deno.env.get('DEVELOPMENT_MODE') === 'true'
 
-    if (userEmail !== inviteEmail) {
+    console.log('🔍 Email verification:', {
+      userEmail,
+      inviteEmail,
+      matches: userEmail === inviteEmail,
+      isDevelopment
+    })
+
+    if (userEmail !== inviteEmail && !isDevelopment) {
       return new Response(
         JSON.stringify({ 
           error: 'Email mismatch - this invite is for a different email address',
@@ -182,75 +234,188 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Check existing membership
-    const { data: existingMembership } = await admin
-      .from('company_memberships')
-      .select('role')
-      .eq('company_id', invite.company_id)
-      .eq('profile_id', user.id)
-      .maybeSingle()
-
-    if (existingMembership) {
-      // Mark invite as claimed
-      await admin
-        .from('invites')
-        .update({ claimed_at: now.toISOString() })
-        .eq('id', invite.id)
-
-      return new Response(
-        JSON.stringify({ 
-          success: true,
-          message: 'You already have access to this company',
-          company_name: invite.companies.name,
-          existing_role: existingMembership.role,
-          redirect_to: '/dashboard'
-        }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    if (isDevelopment && userEmail !== inviteEmail) {
+      console.log('⚠️ DEVELOPMENT MODE: Bypassing email verification check')
     }
 
-    // Create company membership
-    const { data: membershipData, error: membershipError } = await admin
-      .from('company_memberships')
-      .insert({
-        company_id: invite.company_id,
-        profile_id: user.id,
-        role: invite.role_to_assign,
-        joined_at: now.toISOString()
-      })
-      .select()
-      .single()
+    // Idempotent transaction: ensure or create all required records
+    console.log('Starting idempotent invite acceptance transaction...')
+    
+    try {
+      // Use a single transaction-like approach with upserts
+      console.log('Step 1: Ensure user profile exists...')
+      const { error: profileUpsertError } = await admin
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          email: user.email,
+          full_name: user.user_metadata?.full_name || user.email.split('@')[0],
+          default_company_id: invite.company_id,
+          is_active: true
+        }, {
+          onConflict: 'id',
+          ignoreDuplicates: false
+        })
 
-    if (membershipError) {
-      console.error('Company membership creation error:', membershipError)
+      if (profileUpsertError) {
+        console.error('Profile upsert error:', profileUpsertError)
+        return new Response(
+          JSON.stringify({ 
+            error: 'Failed to ensure user profile',
+            details: profileUpsertError.message
+          }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      console.log('✅ Profile ensured')
+
+      console.log('Step 2: Ensure people record exists...')
+      
+      // First check if people record already exists
+      const { data: existingPerson } = await admin
+        .from('people')
+        .select('id, email, jwt_role, active')
+        .eq('email', user.email)
+        .eq('company_id', invite.company_id)
+        .maybeSingle()
+
+      if (existingPerson) {
+        console.log('✅ People record already exists:', existingPerson.email)
+      } else {
+        console.log('Creating new people record for invited user...')
+        
+        // Get jwt_role from invite metadata or default based on role
+        const jwtRole = invite.jwt_role || (invite.role_to_assign === 'admin' ? 'hr_admin' : null)
+        
+        // Use clean display name - email is the unique identifier
+        const userName = user.user_metadata?.full_name || user.email.split('@')[0]
+        
+        const { data: newPerson, error: personCreateError } = await admin
+          .from('people')
+          .insert({
+            name: userName,
+            email: user.email, // Email is the unique identifier
+            role: invite.role_to_assign,
+            jwt_role: jwtRole,
+            active: true,
+            company_id: invite.company_id,
+            department: 'General',
+            hire_date: new Date().toISOString().split('T')[0]
+          })
+          .select()
+          .single()
+
+        if (personCreateError) {
+          console.error('CRITICAL: Failed to create people record:', personCreateError)
+          return new Response(
+            JSON.stringify({ 
+              error: 'Failed to create employee record - this is required for login',
+              details: personCreateError.message
+            }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+        
+        console.log('✅ People record created:', newPerson)
+      }
+
+      console.log('Step 3: Check existing company membership...')
+      const { data: existingMembership } = await admin
+        .from('company_memberships')
+        .select('role, joined_at')
+        .eq('company_id', invite.company_id)
+        .eq('profile_id', user.id)
+        .maybeSingle()
+
+      if (existingMembership) {
+        console.log('User already has membership, marking invite as claimed')
+        
+        // Mark invite as claimed (idempotent)
+        await admin
+          .from('invites')
+          .update({ claimed_at: now.toISOString() })
+          .eq('id', invite.id)
+
+        return new Response(
+          JSON.stringify({ 
+            success: true,
+            message: 'You already have access to this company',
+            company_name: invite.companies.name,
+            existing_role: existingMembership.role,
+            redirect_to: '/dashboard'
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      console.log('Step 4: Create company membership...')
+      const { error: membershipError } = await admin
+        .from('company_memberships')
+        .upsert({
+          company_id: invite.company_id,
+          profile_id: user.id,
+          role: invite.role_to_assign,
+          joined_at: now.toISOString()
+        }, {
+          onConflict: 'company_id,profile_id',
+          ignoreDuplicates: false
+        })
+
+      if (membershipError) {
+        console.error('Company membership creation error:', membershipError)
+        return new Response(
+          JSON.stringify({ 
+            error: 'Failed to create company membership',
+            details: membershipError.message
+          }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      console.log('✅ Company membership created')
+
+      console.log('Step 5: Update default company if needed...')
+      const { error: defaultCompanyError } = await admin
+        .from('profiles')
+        .update({ default_company_id: invite.company_id })
+        .eq('id', user.id)
+        .is('default_company_id', null)
+
+      if (defaultCompanyError) {
+        console.error('Failed to update default company (non-critical):', defaultCompanyError)
+        // Don't fail the whole operation for this
+      } else {
+        console.log('✅ Default company updated')
+      }
+
+      console.log('Step 6: Mark invite as claimed...')
+      // Mark invite as claimed (idempotent) - skip for action_link flow
+      if (!isActionLinkFlow && invite.id !== 'action-link') {
+        const { error: claimError } = await admin
+          .from('invites')
+          .update({ claimed_at: now.toISOString() })
+          .eq('id', invite.id)
+          .is('claimed_at', null)
+
+        if (claimError) {
+          console.error('Failed to mark invite as claimed (non-critical):', claimError)
+          // Don't fail for this
+        } else {
+          console.log('✅ Invite marked as claimed')
+        }
+      } else {
+        console.log('✅ Skipped invite claiming for action_link flow')
+      }
+
+    } catch (transactionError) {
+      console.error('Transaction error:', transactionError)
       return new Response(
         JSON.stringify({ 
-          error: 'Failed to create company membership',
-          details: membershipError.message
+          error: 'Failed to complete invite acceptance',
+          details: transactionError.message
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
-
-    // Update user's default company if needed
-    const { data: profileData } = await admin
-      .from('profiles')
-      .select('default_company_id')
-      .eq('id', user.id)
-      .single()
-
-    if (!profileData?.default_company_id) {
-      await admin
-        .from('profiles')
-        .update({ default_company_id: invite.company_id })
-        .eq('id', user.id)
-    }
-
-    // Mark invite as claimed
-    await admin
-      .from('invites')
-      .update({ claimed_at: now.toISOString() })
-      .eq('id', invite.id)
 
     // Return success
     return new Response(

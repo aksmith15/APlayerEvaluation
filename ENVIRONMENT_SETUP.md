@@ -2,7 +2,7 @@
 
 ## 🔐 **New API Key Configuration**
 
-**New Resend API Key**: `re_4KaYor7w_L2YqDgxfTRr4pkLGSVWu9cuiTryu`
+**New Resend API Key**: `re_your-resend-api-key-here`
 
 ## 📋 **Required Environment Variables**
 
@@ -18,7 +18,7 @@ You need to set these in your **Supabase Dashboard**:
 4. **Add/Update these variables**:
 
 ```env
-RESEND_API_KEY=re_4KaYor7w_L2YqDgxfTRr4pkLGSVWu9cuiTryu
+RESEND_API_KEY=re_your-resend-api-key-here
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 SUPABASE_URL=https://your-project-ref.supabase.co
 ```
@@ -29,7 +29,7 @@ If you have Supabase CLI installed:
 
 ```bash
 # Set the new API key
-supabase secrets set RESEND_API_KEY=re_4KaYor7w_L2YqDgxfTRr4pkLGSVWu9cuiTryu
+supabase secrets set RESEND_API_KEY=re_your-resend-api-key-here
 
 # Verify it was set
 supabase secrets list
@@ -52,7 +52,7 @@ VITE_SUPABASE_URL=https://your-project-ref.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key-here
 
 # Email Configuration
-RESEND_API_KEY=re_4KaYor7w_L2YqDgxfTRr4pkLGSVWu9cuiTryu
+RESEND_API_KEY=re_your-resend-api-key-here
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 
 # Application Configuration
@@ -67,7 +67,7 @@ If using Docker or other hosting platforms, ensure these environment variables a
 ```env
 VITE_SUPABASE_URL=https://your-project-ref.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key-here
-RESEND_API_KEY=re_4KaYor7w_L2YqDgxfTRr4pkLGSVWu9cuiTryu
+RESEND_API_KEY=re_your-resend-api-key-here
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 ```
 
@@ -117,4 +117,4 @@ The following Edge Functions use `RESEND_API_KEY`:
 
 ---
 
-**✅ Your new API key is ready to use: `re_4KaYor7w_L2YqDgxfTRr4pkLGSVWu9cuiTryu`**
+**✅ Your new API key is ready to use: `re_your-resend-api-key-here`**

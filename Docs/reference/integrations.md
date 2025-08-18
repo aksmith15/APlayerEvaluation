@@ -34,7 +34,7 @@ The A-Player system integrates with several external services to provide compreh
 ### Authentication
 - **Method:** Bearer token authentication
 - **Environment Variable:** `RESEND_API_KEY`
-- **Current Key:** `re_4KaYor7w_L2YqDgxfTRr4pkLGSVWu9cuiTryu` (configured)
+- **Current Key:** `re_your-resend-api-key-here` (configured)
 
 ---
 
