@@ -1,0 +1,1527 @@
+﻿{
+    "schema_file":  "docs/_generated/schema_public.sql",
+    "functions":  [
+
+                  ],
+    "views":  [
+
+              ],
+    "generated_at":  "2025-08-18T10:40:18Z",
+    "tables":  [
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "attribute_scores",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "submission_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "attribute_name",
+                                           "type":  "character",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "score",
+                                           "type":  "integer",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "company_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       }
+                                   ],
+                       "rls_enabled":  true,
+                       "primary_key":  [
+
+                                       ]
+                   },
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "evaluation_cycles",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "name",
+                                           "type":  "character",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "start_date",
+                                           "type":  "date",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "end_date",
+                                           "type":  "date",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "company_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       }
+                                   ],
+                       "rls_enabled":  true,
+                       "primary_key":  [
+
+                                       ]
+                   },
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "people",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+                                        {
+                                            "commands":  "",
+                                            "name":  "people_service_role_access",
+                                            "roles":  "",
+                                            "using":  "(\"auth\".\"role\"() = \u0027service_role\u0027::\"text\")",
+                                            "check":  ""
+                                        }
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "name",
+                                           "type":  "character",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "email",
+                                           "type":  "character",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "role",
+                                           "type":  "character",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "true",
+                                           "name":  "active",
+                                           "type":  "boolean",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "person_description",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "manager_notes",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "department",
+                                           "type":  "character",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "hire_date",
+                                           "type":  "date",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "jwt_role",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "profile_picture_url",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "company_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       }
+                                   ],
+                       "rls_enabled":  true,
+                       "primary_key":  [
+
+                                       ]
+                   },
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "submissions",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "submission_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "submission_time",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "submitter_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "evaluatee_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "evaluation_type",
+                                           "type":  "character",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "quarter_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "raw_json",
+                                           "type":  "jsonb",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "company_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       }
+                                   ],
+                       "rls_enabled":  true,
+                       "primary_key":  [
+
+                                       ]
+                   },
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "analysis_jobs",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "evaluatee_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "quarter_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "\u0027pending\u0027::character",
+                                           "name":  "status",
+                                           "type":  "character",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "stage",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "updated_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "completed_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "pdf_url",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "error_message",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "pdf_data",
+                                           "type":  "bytea",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "pdf_filename",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "company_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       }
+                                   ],
+                       "rls_enabled":  true,
+                       "primary_key":  [
+
+                                       ]
+                   },
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "app_config",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "",
+                                           "name":  "id",
+                                           "type":  "integer",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "key",
+                                           "type":  "character",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "value",
+                                           "type":  "text",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "\u0027production\u0027::character",
+                                           "name":  "environment",
+                                           "type":  "character",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp",
+                                           "nullable":  true
+                                       }
+                                   ],
+                       "rls_enabled":  true,
+                       "primary_key":  [
+
+                                       ]
+                   },
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "assignment_submissions",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "assignment_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "submission_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       }
+                                   ],
+                       "rls_enabled":  true,
+                       "primary_key":  [
+
+                                       ]
+                   },
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "evaluation_assignments",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "evaluator_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "evaluatee_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "quarter_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "evaluation_type",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\u0027pending\u0027::\"text\"",
+                                           "name":  "status",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "assigned_by",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "assigned_at",
+                                           "type":  "timestamp",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "completed_at",
+                                           "type":  "timestamp",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "survey_token",
+                                           "type":  "uuid",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "company_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       }
+                                   ],
+                       "rls_enabled":  true,
+                       "primary_key":  [
+
+                                       ]
+                   },
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "attribute_responses",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "submission_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "attribute_name",
+                                           "type":  "character",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "question_id",
+                                           "type":  "character",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "question_text",
+                                           "type":  "text",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "response_type",
+                                           "type":  "character",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "response_value",
+                                           "type":  "jsonb",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "score_context",
+                                           "type":  "integer",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "attribute_score_id",
+                                           "type":  "uuid",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       }
+                                   ],
+                       "rls_enabled":  true,
+                       "primary_key":  [
+
+                                       ]
+                   },
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "attribute_weights",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "attribute_name",
+                                           "type":  "character",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "1.0",
+                                           "name":  "weight",
+                                           "type":  "numeric",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "description",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\u0027production\u0027::character",
+                                           "name":  "environment",
+                                           "type":  "character",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "created_by",
+                                           "type":  "uuid",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "updated_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "company_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       }
+                                   ],
+                       "rls_enabled":  false,
+                       "primary_key":  [
+
+                                       ]
+                   },
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "companies",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+                                        {
+                                            "commands":  "",
+                                            "name":  "companies_people_robust_access",
+                                            "roles":  "",
+                                            "using":  "((EXISTS ( SELECT 1\n   FROM \"public\".\"people\" \"p\"\n  WHERE ((\"p\".\"company_id\" = \"companies\".\"id\") AND (\"p\".\"id\" = \"auth\".\"uid\"())))) OR (EXISTS ( SELECT 1\n   FROM \"public\".\"people\" \"p\"\n  WHERE ((\"p\".\"company_id\" = \"companies\".\"id\") AND ((\"p\".\"email\")::\"text\" = (\"auth\".\"jwt\"() -\u003e\u003e \u0027email\u0027::\"text\"))))) OR ((\"id\" = \u002700000000-0000-0000-0000-000000000001\u0027::\"uuid\") AND (\"auth\".\"role\"() = \u0027authenticated\u0027::\"text\")))",
+                                            "check":  ""
+                                        },
+                                        {
+                                            "commands":  "",
+                                            "name":  "legacy_company_temp_access",
+                                            "roles":  "",
+                                            "using":  "((\"id\" = \u002700000000-0000-0000-0000-000000000001\u0027::\"uuid\") AND (\"auth\".\"role\"() = \u0027authenticated\u0027::\"text\"))",
+                                            "check":  ""
+                                        }
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "name",
+                                           "type":  "text",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "slug",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "description",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "website",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "logo_url",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "updated_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "deleted_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       }
+                                   ],
+                       "rls_enabled":  true,
+                       "primary_key":  [
+
+                                       ]
+                   },
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "company_memberships",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+                                        {
+                                            "commands":  "",
+                                            "name":  "memberships_company_access",
+                                            "roles":  "",
+                                            "using":  "(EXISTS ( SELECT 1\n   FROM \"public\".\"company_memberships\" \"m\"\n  WHERE ((\"m\".\"company_id\" = \"company_memberships\".\"company_id\") AND (\"m\".\"profile_id\" = \"auth\".\"uid\"()))))",
+                                            "check":  ""
+                                        }
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "company_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "profile_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "\u0027member\u0027::\"public\".\"company_role\"",
+                                           "name":  "role",
+                                           "type":  "public",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "invited_by",
+                                           "type":  "uuid",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "invited_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "joined_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "updated_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false
+                                       }
+                                   ],
+                       "rls_enabled":  true,
+                       "primary_key":  [
+
+                                       ]
+                   },
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "employee_quarter_notes",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "employee_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "quarter_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "\u0027\u0027::\"text\"",
+                                           "name":  "notes",
+                                           "type":  "text",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "created_by",
+                                           "type":  "uuid",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "updated_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "company_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       }
+                                   ],
+                       "rls_enabled":  true,
+                       "primary_key":  [
+
+                                       ]
+                   },
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "evaluation_completion_status",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "evaluatee_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "quarter_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "0",
+                                           "name":  "self_assigned_count",
+                                           "type":  "integer",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "0",
+                                           "name":  "manager_assigned_count",
+                                           "type":  "integer",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "0",
+                                           "name":  "total_peer_assigned",
+                                           "type":  "integer",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "false",
+                                           "name":  "self_completed",
+                                           "type":  "boolean",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "false",
+                                           "name":  "manager_completed",
+                                           "type":  "boolean",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "0",
+                                           "name":  "peer_completed_count",
+                                           "type":  "integer",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "false",
+                                           "name":  "all_evaluations_complete",
+                                           "type":  "boolean",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "false",
+                                           "name":  "ai_analysis_triggered",
+                                           "type":  "boolean",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "false",
+                                           "name":  "ai_analysis_completed",
+                                           "type":  "boolean",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "first_submission_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "last_submission_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "completion_detected_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "ai_triggered_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "updated_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       }
+                                   ],
+                       "rls_enabled":  false,
+                       "primary_key":  [
+
+                                       ]
+                   },
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "invitations",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+                                        {
+                                            "commands":  "SELECT",
+                                            "name":  "invitations_invitee_read",
+                                            "roles":  "",
+                                            "using":  "((\"lower\"(\"email\") = \"lower\"((\"auth\".\"jwt\"() -\u003e\u003e \u0027email\u0027::\"text\"))) AND (\"accepted_at\" IS NULL) AND (\"revoked_at\" IS NULL) AND (\"expires_at\" \u003e \"now\"()))",
+                                            "check":  ""
+                                        },
+                                        {
+                                            "commands":  "",
+                                            "name":  "invitations_service_role",
+                                            "roles":  "",
+                                            "using":  "(\"auth\".\"role\"() = \u0027service_role\u0027::\"text\")",
+                                            "check":  "(\"auth\".\"role\"() = \u0027service_role\u0027::\"text\")"
+                                        },
+                                        {
+                                            "commands":  "DELETE",
+                                            "name":  "invitations_super_admin_delete",
+                                            "roles":  "",
+                                            "using":  "\"public\".\"is_super_admin_for_company\"(\"company_id\")",
+                                            "check":  ""
+                                        },
+                                        {
+                                            "commands":  "INSERT",
+                                            "name":  "invitations_super_admin_insert",
+                                            "roles":  "",
+                                            "using":  "",
+                                            "check":  "(\"public\".\"is_super_admin_for_company\"(\"company_id\") AND (\"company_id\" = \"public\".\"get_current_user_company_id\"()) AND (\"invited_by\" IN ( SELECT \"people\".\"id\"\n   FROM \"public\".\"people\"\n  WHERE (((\"people\".\"email\")::\"text\" = (\"auth\".\"jwt\"() -\u003e\u003e \u0027email\u0027::\"text\")) AND (\"people\".\"active\" = true)))))"
+                                        },
+                                        {
+                                            "commands":  "SELECT",
+                                            "name":  "invitations_super_admin_select",
+                                            "roles":  "",
+                                            "using":  "\"public\".\"is_super_admin_for_company\"(\"company_id\")",
+                                            "check":  ""
+                                        },
+                                        {
+                                            "commands":  "UPDATE",
+                                            "name":  "invitations_super_admin_update",
+                                            "roles":  "",
+                                            "using":  "\"public\".\"is_super_admin_for_company\"(\"company_id\")",
+                                            "check":  "\"public\".\"is_super_admin_for_company\"(\"company_id\")"
+                                        }
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "company_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "email",
+                                           "type":  "text",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "\u0027member\u0027::\"public\".\"company_role\"",
+                                           "name":  "role",
+                                           "type":  "public",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "token",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "invited_by",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "(\"now\"()",
+                                           "name":  "expires_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "accepted_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "revoked_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "updated_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false
+                                       }
+                                   ],
+                       "rls_enabled":  true,
+                       "primary_key":  [
+
+                                       ]
+                   },
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "invites",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+                                        {
+                                            "commands":  "INSERT",
+                                            "name":  "company_admins_can_create_invites",
+                                            "roles":  "",
+                                            "using":  "",
+                                            "check":  "((\"company_id\" = \"public\".\"get_user_company_from_auth\"()) AND \"public\".\"is_current_user_admin\"())"
+                                        },
+                                        {
+                                            "commands":  "UPDATE",
+                                            "name":  "company_admins_can_update_invites",
+                                            "roles":  "",
+                                            "using":  "((\"company_id\" = \"public\".\"get_user_company_from_auth\"()) AND \"public\".\"is_current_user_admin\"())",
+                                            "check":  "((\"company_id\" = \"public\".\"get_user_company_from_auth\"()) AND \"public\".\"is_current_user_admin\"())"
+                                        },
+                                        {
+                                            "commands":  "SELECT",
+                                            "name":  "company_admins_can_view_invites",
+                                            "roles":  "",
+                                            "using":  "((\"company_id\" = \"public\".\"get_user_company_from_auth\"()) AND \"public\".\"is_current_user_admin\"())",
+                                            "check":  ""
+                                        },
+                                        {
+                                            "commands":  "SELECT",
+                                            "name":  "public_can_view_by_token",
+                                            "roles":  "",
+                                            "using":  "((\"claimed_at\" IS NULL) AND (\"revoked_at\" IS NULL) AND (\"expires_at\" \u003e \"now\"()))",
+                                            "check":  ""
+                                        }
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "company_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "email",
+                                           "type":  "text",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "\u0027member\u0027::\"public\".\"company_role\"",
+                                           "name":  "role_to_assign",
+                                           "type":  "public",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "token",
+                                           "type":  "text",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "(\"now\"()",
+                                           "name":  "expires_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "claimed_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "revoked_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "created_by",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false
+                                       }
+                                   ],
+                       "rls_enabled":  true,
+                       "primary_key":  [
+
+                                       ]
+                   },
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "profiles",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+                                        {
+                                            "commands":  "",
+                                            "name":  "profiles_self_and_company_access",
+                                            "roles":  "",
+                                            "using":  "((\"id\" = \"auth\".\"uid\"()) OR (EXISTS ( SELECT 1\n   FROM (\"public\".\"company_memberships\" \"m1\"\n     JOIN \"public\".\"company_memberships\" \"m2\" ON ((\"m1\".\"company_id\" = \"m2\".\"company_id\")))\n  WHERE ((\"m1\".\"profile_id\" = \"auth\".\"uid\"()) AND (\"m2\".\"profile_id\" = \"profiles\".\"id\")))))",
+                                            "check":  ""
+                                        }
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "",
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "email",
+                                           "type":  "text",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "full_name",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "avatar_url",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "default_company_id",
+                                           "type":  "uuid",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\u0027UTC\u0027::\"text\"",
+                                           "name":  "timezone",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\u0027en\u0027::\"text\"",
+                                           "name":  "locale",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "updated_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "true",
+                                           "name":  "is_active",
+                                           "type":  "boolean",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "last_seen_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       }
+                                   ],
+                       "rls_enabled":  true,
+                       "primary_key":  [
+
+                                       ]
+                   },
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "reports",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "evaluatee_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "quarter_id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "report_type",
+                                           "type":  "character",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "pdf_url",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       }
+                                   ],
+                       "rls_enabled":  false,
+                       "primary_key":  [
+
+                                       ]
+                   },
+                   {
+                       "foreign_keys":  [
+
+                                        ],
+                       "name":  "webhook_logs",
+                       "unique":  [
+
+                                  ],
+                       "policies":  [
+
+                                    ],
+                       "columns":  [
+                                       {
+                                           "default":  "\"gen_random_uuid\"()",
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "submission_id",
+                                           "type":  "uuid",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "webhook_url",
+                                           "type":  "text",
+                                           "nullable":  false
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "payload",
+                                           "type":  "jsonb",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "response_status",
+                                           "type":  "integer",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "response_body",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "error_message",
+                                           "type":  "text",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "0",
+                                           "name":  "retry_count",
+                                           "type":  "integer",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "",
+                                           "name":  "delivered_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       },
+                                       {
+                                           "default":  "\"now\"()",
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true
+                                       }
+                                   ],
+                       "rls_enabled":  false,
+                       "primary_key":  [
+
+                                       ]
+                   }
+               ]
+}

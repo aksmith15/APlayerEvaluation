@@ -1,6 +1,0 @@
-# Database documentation directory
-# Generated files:
-# - schema.sql - Full database schema dump
-# - overview.md - Tables, columns, indexes, views, triggers
-# - rls-policies.md - Row Level Security policies
-# - grants.md - Database privileges and grants

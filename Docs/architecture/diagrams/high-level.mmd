@@ -1,0 +1,35 @@
+flowchart LR
+  user[Evaluator/Manager<br/>User]
+  browser[Browser<br/>Vite + React + TS]
+  sbClient[Supabase JS Client]
+  edge[Supabase Edge Functions]
+  db[(Supabase Postgres<br/>with RLS)]
+  auth[(Supabase Auth)]
+  storage[(Supabase Storage)]
+  realtime[(Supabase Realtime)]
+  ai[OpenAI/Anthropic<br/>API]
+  email[Resend<br/>Email Service]
+  monitoring[Sentry/PostHog<br/>Monitoring]
+
+  user --> browser
+  browser --> sbClient
+  sbClient <--> auth
+  sbClient <--> db
+  sbClient <--> storage
+  sbClient <--> realtime
+  browser --> edge
+  edge <--> db
+  edge <--> storage
+  edge --> email
+  edge --> ai
+  browser --> monitoring
+
+  classDef user fill:#e1f5fe
+  classDef frontend fill:#f3e5f5
+  classDef supabase fill:#e8f5e8
+  classDef external fill:#fff3e0
+  
+  class user user
+  class browser,sbClient frontend
+  class edge,db,auth,storage,realtime supabase
+  class ai,email,monitoring external

@@ -1,4 +1,8 @@
-// Minimal test function to debug CORS
+/**
+ * @category test
+ * @doc-ignore
+ * Minimal test function to debug CORS headers and preflight requests
+ */
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',

@@ -1,5 +1,9 @@
-// Minimal accept-invite function for debugging
-// No shared imports, completely self-contained
+/**
+ * @category test  
+ * @doc-ignore
+ * Minimal accept-invite function for debugging
+ * No shared imports, completely self-contained
+ */
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

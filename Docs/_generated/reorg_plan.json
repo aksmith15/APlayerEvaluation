@@ -1,0 +1,312 @@
+{
+  "reorganization_plan": {
+    "generated_date": "2025-08-18",
+    "phase": "A",
+    "summary": "Documentation reorganization plan to create structured docs/ hierarchy",
+    "mappings": {
+      "root_level_moves": {
+        "PRD.md": {
+          "target": "docs/explanation/PRD.md",
+          "reason": "Product requirements document belongs in explanation section",
+          "action": "move"
+        },
+        "workflow.md": {
+          "target": "docs/how-to/workflow.md", 
+          "reason": "Implementation workflow is procedural documentation",
+          "action": "move"
+        },
+        "A-Player-Coaching.md": {
+          "target": "docs/explanation/A-Player-Coaching.md",
+          "reason": "Coaching report explanation belongs in explanation section",
+          "action": "move"
+        },
+        "ENVIRONMENT_SETUP.md": {
+          "target": "docs/how-to/development.md",
+          "reason": "Environment setup is part of development how-to guide",
+          "action": "merge_into_existing"
+        },
+        "IMPLEMENTATION_COMPLETE.md": {
+          "target": "docs/_archive/IMPLEMENTATION_COMPLETE.md",
+          "reason": "Historical completion summary should be archived",
+          "action": "move"
+        },
+        "INVITE_FUNCTION_FIX_INSTRUCTIONS.md": {
+          "target": "docs/ops/runbooks/invite-flow-issues.md",
+          "reason": "Operational fix instructions belong in runbooks",
+          "action": "move"
+        },
+        "profiles_table_decision.md": {
+          "target": "docs/architecture/decisions/0002-profiles-table-decision.md",
+          "reason": "Architectural decision record belongs in decisions directory",
+          "action": "move"
+        }
+      },
+      "merged_files": {
+        "auth_service_fix": {
+          "sources": ["AUTHENTICATION_FIX_COMPLETE.md", "AUTHSERVICE_FIX_SUMMARY.md"],
+          "target": "docs/ops/runbooks/auth-service-fix.md",
+          "reason": "Both files document the same auth service fix process",
+          "action": "merge"
+        },
+        "deployment_guide": {
+          "sources": ["Docs/DEPLOYMENT.md", "Docs/Render_Deployment_Guide.md", "a-player-dashboard/DEPLOYMENT.md"],
+          "target": "docs/ops/deployment.md",
+          "reason": "Consolidate all deployment documentation into single canonical guide",
+          "action": "merge"
+        }
+      },
+      "a_player_dashboard_moves": {
+        "a-player-dashboard/RLS-IMPLEMENTATION-GUIDE.md": {
+          "target": "docs/reference/db/rls-policies.md",
+          "reason": "RLS guide should be appended to existing db policies documentation",
+          "action": "append_to_existing"
+        }
+      },
+      "sql_maintenance_files": {
+        "create_profiles_for_existing_auth.sql": {
+          "target": "supabase/sql/maintenance/create_profiles_for_existing_auth.sql",
+          "reason": "SQL maintenance script for profiles creation",
+          "action": "move"
+        },
+        "populate_profiles_table.sql": {
+          "target": "supabase/sql/maintenance/populate_profiles_table.sql",
+          "reason": "SQL maintenance script for profiles population",
+          "action": "move"
+        },
+        "debug_auth_users.sql": {
+          "target": "supabase/sql/maintenance/debug_auth_users.sql",
+          "reason": "SQL debugging script for auth users",
+          "action": "move"
+        }
+      },
+      "docs_directory_restructure": {
+        "Docs/ARCHITECTURE.md": {
+          "target": "docs/architecture/ARCHITECTURE.md",
+          "reason": "Main architecture documentation belongs in architecture section",
+          "action": "move"
+        },
+        "Docs/diagrams/data-flow.mmd": {
+          "target": "docs/architecture/diagrams/data-flow.mmd",
+          "reason": "Architecture diagrams belong in diagrams subdirectory",
+          "action": "move"
+        },
+        "Docs/diagrams/high-level.mmd": {
+          "target": "docs/architecture/diagrams/high-level.mmd",
+          "reason": "Architecture diagrams belong in diagrams subdirectory",
+          "action": "move"
+        },
+        "Docs/EDGE_FUNCTIONS.md": {
+          "target": "docs/reference/edge-functions.md",
+          "reason": "Edge functions documentation is reference material",
+          "action": "move"
+        },
+        "Docs/ENVIRONMENT.md": {
+          "target": "docs/reference/env.md",
+          "reason": "Environment variables reference documentation",
+          "action": "merge_into_existing"
+        },
+        "Docs/INTEGRATIONS.md": {
+          "target": "docs/reference/integrations.md",
+          "reason": "Integrations documentation is reference material",
+          "action": "move"
+        },
+        "Docs/DEVELOPMENT.md": {
+          "target": "docs/how-to/development.md",
+          "reason": "Development guide is procedural how-to documentation",
+          "action": "merge_into_existing"
+        },
+        "Docs/components/": {
+          "target": "docs/reference/components/",
+          "reason": "Component documentation is reference material",
+          "action": "move_directory"
+        },
+        "Docs/hooks/": {
+          "target": "docs/reference/hooks/",
+          "reason": "Hook documentation is reference material",
+          "action": "move_directory"
+        },
+        "Docs/db/overview.md": {
+          "target": "docs/reference/db/overview.md",
+          "reason": "Database overview is reference documentation",
+          "action": "move"
+        },
+        "Docs/db/rls-policies.md": {
+          "target": "docs/reference/db/rls-policies.md",
+          "reason": "RLS policies are reference documentation",
+          "action": "move"
+        },
+        "Docs/db/grants.md": {
+          "target": "docs/reference/db/grants.md",
+          "reason": "Database grants are reference documentation",
+          "action": "move"
+        },
+        "Docs/db/schema.sql": {
+          "target": "supabase/migrations/ (link only from docs/reference/db/overview.md)",
+          "reason": "Schema belongs with migrations; avoid docs copy that will drift",
+          "action": "keep_and_link"
+        }
+      },
+      "generated_and_inventory_files": {
+        "Docs/COMPLETENESS_REPORT.md": {
+          "target": "docs/_generated/COMPLETENESS_REPORT.md",
+          "reason": "Generated completeness report",
+          "action": "move"
+        },
+        "Docs/completeness.json": {
+          "target": "docs/_generated/completeness.json",
+          "reason": "Generated completeness data",
+          "action": "move"
+        },
+        "Docs/db_inventory_raw.json": {
+          "target": "docs/_generated/db_inventory_raw.json",
+          "reason": "Generated database inventory",
+          "action": "move"
+        },
+        "Docs/project_structure.md": {
+          "target": "docs/_generated/project_structure.md",
+          "reason": "Generated project structure documentation",
+          "action": "move"
+        },
+        "Docs/CONTEXT.md": {
+          "target": "docs/_generated/CONTEXT.md",
+          "reason": "Generated context documentation",
+          "action": "move"
+        }
+      },
+      "archive_files": {
+        "Docs/_ARCHIVE/": {
+          "target": "docs/_archive/",
+          "reason": "Keep existing archive structure",
+          "action": "move_directory"
+        },
+        "Docs/COMPONENTS.md": {
+          "target": "docs/_archive/COMPONENTS-2025-08-18.md",
+          "reason": "Superseded by component MDX files",
+          "action": "move"
+        },
+        "Docs/README.md": {
+          "target": "docs/_archive/Docs-README-2025-08-18.md",
+          "reason": "Old docs README should be archived",
+          "action": "move"
+        },
+        "Docs/Bug_tracking.md": {
+          "target": "docs/_archive/Bug_tracking-2025-08-18.md",
+          "reason": "Historical bug tracking, superseded by current workflow",
+          "action": "move"
+        },
+        "Docs/Implementation.md": {
+          "target": "docs/_archive/Implementation-2025-08-18.md",
+          "reason": "Historical implementation tracking, project now complete",
+          "action": "move"
+        },
+        "Docs/Evaluation_Questions_Reference.md": {
+          "target": "docs/_archive/Evaluation_Questions_Reference-2025-08-18.md",
+          "reason": "Historical reference, superseded by current system",
+          "action": "move"
+        },
+        "Docs/UI_UX_doc.md": {
+          "target": "docs/_archive/UI_UX_doc-2025-08-18.md",
+          "reason": "Historical UI/UX documentation",
+          "action": "move"
+        },
+        "Docs/Supabase_Database_Structure.md": {
+          "target": "docs/_archive/Supabase_Database_Structure-2025-08-18.md",
+          "reason": "Historical database structure doc, superseded by current schema",
+          "action": "move"
+        },
+        "Docs/New_Invite_System_Plan.md": {
+          "target": "docs/_archive/New_Invite_System_Plan-2025-08-18.md",
+          "reason": "Historical invite system planning document",
+          "action": "move"
+        },
+        "Docs/Email_System_Implementation_Plan.md": {
+          "target": "docs/_archive/Email_System_Implementation_Plan-2025-08-18.md",
+          "reason": "Historical email system planning document",
+          "action": "move"
+        },
+        "Docs/SMTP_Configuration_Steps.md": {
+          "target": "docs/_archive/SMTP_Configuration_Steps-2025-08-18.md",
+          "reason": "Historical SMTP configuration steps",
+          "action": "move"
+        },
+        "Docs/Webhook_Security_Architecture.md": {
+          "target": "docs/_archive/Webhook_Security_Architecture-2025-08-18.md",
+          "reason": "Historical webhook architecture document",
+          "action": "move"
+        },
+        "Docs/rls_matrix.yaml": {
+          "target": "docs/_archive/rls_matrix-2025-08-18.yaml",
+          "reason": "Historical RLS matrix configuration",
+          "action": "move"
+        },
+        "Docs/audit.config.json": {
+          "target": "docs/_generated/audit.config.json",
+          "reason": "Active auditor configuration file",
+          "action": "move"
+        },
+        "Docs/EDGE_FUNCTIONS_CLEANUP_COMPLETED.md": {
+          "target": "docs/_archive/EDGE_FUNCTIONS_CLEANUP_COMPLETED-2025-08-18.md",
+          "reason": "Historical cleanup completion record",
+          "action": "move"
+        },
+        "Docs/edge/functions.md": {
+          "target": "docs/_archive/edge-functions-old-2025-08-18.md",
+          "reason": "Historical edge functions documentation",
+          "action": "move"
+        }
+      },
+      "files_to_keep_in_place": {
+        "a-player-dashboard/database-schema.sql": {
+          "current_location": "a-player-dashboard/database-schema.sql",
+          "reason": "Keep in application directory, link from docs",
+          "action": "keep_and_link"
+        },
+        "a-player-dashboard/schema_dump.sql": {
+          "current_location": "a-player-dashboard/schema_dump.sql", 
+          "reason": "Keep in application directory, link from docs",
+          "action": "keep_and_link"
+        }
+      },
+      "create_files": {
+        "docs/README.md": {
+          "reason": "Documentation entry point with section map and quick navigation",
+          "template": "Sections: explanation, how-to, architecture, reference, ops, _generated, _archive"
+        },
+        "docs/reference/routes.md": {
+          "reason": "Canonical Routes Overview table with all 9 application routes",
+          "template": "Path | Methods | Purpose | Auth | Key Files | Notes - Include all 9 routes, mark /dev/pdf-preview as DEV-only"
+        }
+      },
+      "post_apply": {
+        "produce": ["docs/_generated/linkcheck_report.md"],
+        "delete_if_empty": ["Docs/"],
+        "ensure_directories": [
+          "supabase/sql/maintenance/",
+          "docs/ops/runbooks/", 
+          "docs/architecture/decisions/"
+        ],
+        "cross_links": {
+          "docs/architecture/ARCHITECTURE.md": "Add links to docs/explanation/PRD.md and docs/explanation/A-Player-Coaching.md for rationale"
+        }
+      }
+    },
+    "execution_notes": {
+      "untouched_directories": [
+        "a-player-dashboard/** (except RLS-IMPLEMENTATION-GUIDE.md and DEPLOYMENT.md moves)",
+        "supabase/** (except sql/maintenance placement)",
+        "src/**",
+        "tests/**",
+        "node_modules/**"
+      ],
+      "merge_strategy": "Concatenate files with clear section headers and provenance comments",
+      "link_updates_required": "All relative Markdown links will need updating after moves",
+      "rollback_plan": "git mv commands are reversible, merged files will have source provenance",
+      "safety_guards": {
+        "missing_sources": "Skip any mapping when source file doesn't exist and log it",
+        "case_normalization": "Handle Docs/ → docs/ case rename safely on Windows/macOS with two-step if needed",
+        "link_only_files": "For 'keep_and_link' action, do NOT move/copy file - only insert link in target",
+        "auditor_path_update": "Update auditor to read docs/_generated/audit.config.json if it reads fixed path"
+      }
+    }
+  }
+}

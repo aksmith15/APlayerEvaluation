@@ -25,7 +25,10 @@
     "docs": "powershell -ExecutionPolicy Bypass -File ../scripts/run_docs_simple.ps1",
     "docs:schema": "make schema -C ..",
     "docs:types": "make types -C ..",
-    "docs:clean": "make clean -C .."
+    "docs:clean": "make clean -C ..",
+    "db:dump": "powershell -ExecutionPolicy Bypass -File ../scripts/db/dump_schema.ps1 -OutRoot ../Docs",
+    "db:docs": "powershell -ExecutionPolicy Bypass -File ../scripts/db/gen_docs.ps1 -OutRoot ../Docs",
+    "db:refresh": "powershell -ExecutionPolicy Bypass -Command \"& { ../scripts/db/dump_schema.ps1 -OutRoot ../Docs; ../scripts/db/gen_docs.ps1 -OutRoot ../Docs }\""
   },
   "dependencies": {
     "@react-pdf/renderer": "^3.4.5",

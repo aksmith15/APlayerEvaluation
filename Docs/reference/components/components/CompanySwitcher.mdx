@@ -1,0 +1,304 @@
+# CompanySwitcher Component
+
+Multi-tenant company selection component enabling super administrators to switch between different company contexts.
+
+## Purpose & Usage Context
+
+The CompanySwitcher component provides multi-tenant functionality for super administrators in the A-Player Evaluation System. It allows switching between different company contexts while maintaining proper data isolation and user permissions across tenants.
+
+**Used in**: Admin interfaces, main navigation, and anywhere super administrators need to switch company contexts.
+
+## Props
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `className` | `string` | `''` | No | Additional CSS classes for the container |
+| `showLabel` | `boolean` | `true` | No | Whether to display the company name label |
+
+## Events & Callbacks
+
+### Primary Events
+- **`handleCompanySwitch`**: Fired when selecting a different company from dropdown
+- **`setIsOpen`**: Controls dropdown visibility state
+
+### Side Effects
+- **Company Context Switch**: Updates global tenant context
+- **Page Reload**: Refreshes application to load new company data
+- **Loading States**: Shows loading indicators during operations
+
+## Side Effects
+
+### Multi-Tenant Operations
+- **Context Switching**: Updates global company context via `switchCompanyContext`
+- **Data Refresh**: Reloads page to fetch new company-specific data
+- **Permission Updates**: Adjusts user permissions based on new company context
+
+### State Management
+- **Company Loading**: Fetches available companies for super admin users
+- **Current Company**: Tracks and displays currently selected company
+- **Loading States**: Manages loading and switching states
+
+### UI State Changes
+- **Dropdown Display**: Shows/hides company selection dropdown
+- **Loading Indicators**: Displays spinners during operations
+- **Current Company Highlight**: Visual indication of active company
+
+## Accessibility
+
+### ARIA Support
+- **Button Role**: Dropdown trigger properly identified as button
+- **Loading States**: Loading indicators announced to screen readers
+- **Selection States**: Current company clearly marked
+
+### Keyboard Navigation
+- **Tab Navigation**: Dropdown trigger focusable
+- **Escape Handling**: Should close dropdown (inherited from backdrop click)
+- **Enter/Space**: Activates dropdown and company selection
+
+### Screen Reader Features
+- **Company Names**: Clear announcement of company options
+- **Current State**: "Current" badge for active company
+- **Loading Feedback**: Loading states announced appropriately
+
+## Examples
+
+### Basic Usage
+```tsx
+import { CompanySwitcher } from '@/components/ui';
+
+// Standard company switcher
+<CompanySwitcher />
+
+// Compact version without label
+<CompanySwitcher showLabel={false} />
+
+// Custom styling
+<CompanySwitcher className="ml-4" />
+```
+
+### Real Application Usage
+
+#### Navigation Header (src/pages/AssignmentManagement.tsx:35-40)
+```tsx
+<div className="flex justify-between items-center mb-6">
+  <h1 className="text-2xl font-bold text-secondary-800">
+    Assignment Management
+  </h1>
+  <CompanySwitcher />
+</div>
+```
+
+#### Analytics Header (src/pages/EmployeeAnalytics.tsx:120-125)
+```tsx
+<div className="flex items-center justify-between mb-4">
+  <Breadcrumb items={breadcrumbs} />
+  <div className="flex items-center space-x-4">
+    <CompanySwitcher showLabel={false} />
+    <Button variant="secondary">Export Data</Button>
+  </div>
+</div>
+```
+
+### Conditional Rendering
+```tsx
+// Only render for super admin users
+const SuperAdminNav = () => {
+  const { user } = useAuth();
+  
+  return (
+    <nav className="flex items-center space-x-4">
+      {user?.jwtRole === 'super_admin' && (
+        <CompanySwitcher />
+      )}
+      <UserMenu />
+    </nav>
+  );
+};
+```
+
+### Integration with Company Context
+```tsx
+import { CompanySwitcher } from '@/components/ui';
+import { useCompanyContext } from '@/hooks/useCompanyContext';
+
+const AdminDashboard = () => {
+  const { currentCompany, isLoading } = useCompanyContext();
+  
+  if (isLoading) {
+    return <LoadingSpinner message="Loading company context..." />;
+  }
+  
+  return (
+    <div className="admin-dashboard">
+      <header className="flex justify-between items-center">
+        <h1>Admin Dashboard - {currentCompany?.name}</h1>
+        <CompanySwitcher />
+      </header>
+      
+      <main>
+        {/* Company-specific content */}
+      </main>
+    </div>
+  );
+};
+```
+
+## Multi-Tenant Architecture
+
+### Permission-Based Rendering
+```typescript
+// Component only renders for super_admin users
+const isSuperAdmin = user?.jwtRole === 'super_admin';
+
+if (!isSuperAdmin) {
+  return null; // Hidden from non-super admins
+}
+```
+
+### Company Loading Logic
+```typescript
+// Loads all companies accessible to super admin
+const userCompanies = await getUserCompanies(supabase);
+
+// Sets current company from context or defaults to first
+if (hasCompanyContext()) {
+  const currentCompanyId = getCurrentCompanyId();
+  const current = userCompanies.find(c => c.id === currentCompanyId);
+  setCurrentCompany(current || null);
+}
+```
+
+### Context Switching Process
+```typescript
+const handleCompanySwitch = async (company: Company) => {
+  setSwitching(true);
+  
+  // Update global tenant context
+  const result = await switchCompanyContext(supabase, company.id);
+  
+  if (result.success) {
+    setCurrentCompany(company);
+    // Reload to refresh all company-specific data
+    window.location.reload();
+  }
+  
+  setSwitching(false);
+};
+```
+
+## Styling System
+
+### Component Structure
+```css
+.company-switcher {
+  @apply relative; /* Container for dropdown positioning */
+}
+
+.switcher-button {
+  @apply flex items-center space-x-2 min-w-0; /* Button layout */
+}
+
+.company-label {
+  @apply truncate max-w-32; /* Text truncation for long names */
+}
+```
+
+### Dropdown Styling
+```css
+.dropdown-backdrop {
+  @apply fixed inset-0 z-40; /* Full-screen backdrop */
+}
+
+.dropdown-menu {
+  @apply absolute right-0 mt-2 w-64 bg-white rounded-md 
+         shadow-lg border border-gray-200 z-50;
+}
+
+.dropdown-header {
+  @apply px-3 py-2 border-b border-gray-100;
+}
+
+.dropdown-item {
+  @apply w-full text-left px-3 py-2 text-sm transition-colors;
+}
+```
+
+### State Styling
+```css
+/* Current company item */
+.current-company {
+  @apply bg-blue-50 text-blue-700 cursor-default;
+}
+
+/* Hoverable company item */
+.company-option {
+  @apply text-gray-700 hover:bg-gray-50;
+}
+
+/* Switching state */
+.switching {
+  @apply opacity-50 cursor-not-allowed;
+}
+```
+
+## Design System Integration
+
+### Button Integration
+- Uses Button component for dropdown trigger
+- Secondary variant for subtle appearance
+- Small size for compact header integration
+
+### Icon System
+- **Company Icon**: Building icon representing companies
+- **Switch Icon**: Arrows indicating switching functionality
+- **Loading Spinner**: Integrated loading states
+
+### Color Scheme
+- **Current Company**: Blue theme for active selection
+- **Hover States**: Gray background for interactions
+- **Loading States**: Opacity reduction during operations
+
+## Performance Notes
+
+### Loading Optimization
+- **Conditional Loading**: Only loads companies for super admin users
+- **Lazy Loading**: Companies loaded on component mount
+- **Caching**: Company list cached until page reload
+
+### Context Switching
+- **Immediate Feedback**: Loading states provide instant feedback
+- **Page Reload**: Ensures complete data refresh for new context
+- **Error Handling**: Graceful error handling with user feedback
+
+### Memory Management
+- **Component Cleanup**: Proper state cleanup on unmount
+- **Event Handlers**: Efficient event handling patterns
+- **DOM Optimization**: Conditional rendering reduces DOM overhead
+
+## Security Considerations
+
+### Role-Based Access
+```typescript
+// Only super_admin users can see and use component
+const isSuperAdmin = user?.jwtRole === 'super_admin';
+if (!isSuperAdmin) return null;
+```
+
+### Tenant Isolation
+- **Context Validation**: Verifies user access to companies
+- **Data Isolation**: Full page reload ensures data separation
+- **Permission Checks**: Server-side validation of company access
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ui/CompanySwitcher.tsx`](../../a-player-dashboard/src/components/ui/CompanySwitcher.tsx) (lines 1-203)
+- **Usage Examples**: Found in AssignmentManagement and EmployeeAnalytics pages
+
+**🔗 Related Components:**
+- [Button](./Button.mdx) - Used for dropdown trigger
+- [LoadingSpinner](./LoadingSpinner.mdx) - Used for loading states
+- [useAuth Hook](../hooks/useAuth.md) - Authentication integration
+- Multi-tenant context management utilities
+
+

@@ -1,0 +1,346 @@
+# EmployeeProfile Component
+
+Comprehensive employee profile display component with profile picture management, contact information, and performance integration.
+
+## Purpose & Usage Context
+
+The EmployeeProfile component provides a complete employee information display in the A-Player Evaluation System. It includes profile picture management, contact details, performance indicators, and optional persona analysis integration for a comprehensive employee overview.
+
+**Used in**: Employee analytics pages, profile views, and detailed employee information displays.
+
+## Props
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `employee` | `Person` | N/A | Yes | Employee data object with all profile information |
+| `onProfilePictureUpdate` | `(url: string \| null) => void` | N/A | Yes | Callback when profile picture is updated or removed |
+| `isEditable` | `boolean` | `false` | No | Whether current user can edit the profile picture |
+| `currentUserId` | `string` | `undefined` | No | Current user's ID for permission checking |
+| `currentGrade` | `LetterGradeType` | `undefined` | No | Current quarter letter grade to display |
+| `currentScore` | `number` | `undefined` | No | Current quarter score for grade tooltip |
+| `quarterName` | `string` | `undefined` | No | Current quarter name for context |
+| `quarterId` | `string` | `undefined` | No | Quarter ID for persona classification |
+| `showPersonaWidget` | `boolean` | `false` | No | Whether to display the persona analysis widget |
+
+### Person Interface
+```typescript
+interface Person {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  department: string;
+  active: boolean;
+  hire_date: string;
+  person_description?: string;
+  profile_picture_url?: string;
+}
+```
+
+## Events & Callbacks
+
+### Profile Picture Management
+- **`onProfilePictureUpdate`**: Fired when profile picture is uploaded, updated, or removed
+- **File Upload**: Handles profile picture file selection and upload
+- **Picture Deletion**: Manages profile picture removal
+
+### User Interactions
+- **File Selection**: Click to upload new profile picture
+- **Picture Removal**: Delete existing profile picture
+- **Email Contact**: Click email to open mail client
+
+## Side Effects
+
+### File Upload Operations
+- **Image Validation**: Validates file type and size before upload
+- **Storage Upload**: Uploads images to Supabase storage
+- **Database Update**: Updates employee record with picture URL
+
+### Visual State Changes
+- **Upload Progress**: Shows loading states during operations
+- **Error Display**: Shows validation and upload errors
+- **Image Fallback**: Displays initials when no profile picture
+
+### Performance Integration
+- **Grade Display**: Shows current performance grade
+- **Persona Widget**: Displays personality/performance classification
+- **Quarter Context**: Shows performance data for specific quarters
+
+## Accessibility
+
+### Image Accessibility
+- **Alt Text**: Proper alt text for profile pictures
+- **Fallback Content**: Initials displayed when image fails
+- **Focus Management**: Keyboard accessible upload controls
+
+### Form Controls
+- **Hidden File Input**: Properly labeled file input
+- **Button Labels**: Clear aria-labels for upload/delete actions
+- **Error Messages**: Error states announced to screen readers
+
+### Content Structure
+- **Semantic Headings**: Proper heading hierarchy
+- **Contact Information**: Structured contact data
+- **Status Indicators**: Clear active/inactive status
+
+## Examples
+
+### Basic Usage
+```tsx
+import { EmployeeProfile } from '@/components/ui';
+
+// Simple employee profile display
+<EmployeeProfile 
+  employee={employee}
+  onProfilePictureUpdate={handlePictureUpdate}
+/>
+
+// Editable profile with performance data
+<EmployeeProfile 
+  employee={employee}
+  onProfilePictureUpdate={handlePictureUpdate}
+  isEditable={canEdit}
+  currentUserId={currentUser.id}
+  currentGrade="A"
+  currentScore={95}
+  quarterName="Q4 2024"
+/>
+```
+
+### Real Application Usage
+
+#### Employee Analytics Page (src/pages/EmployeeAnalytics.tsx:150-165)
+```tsx
+import { EmployeeProfile } from '@/components/ui';
+
+const EmployeeAnalytics = () => {
+  const { employee } = useEmployee(employeeId);
+  const { grade, score } = useQuarterPerformance(employeeId, quarterId);
+  const { user } = useAuth();
+  
+  const handleProfileUpdate = (url: string | null) => {
+    // Update employee data
+    setEmployee(prev => ({ ...prev, profile_picture_url: url }));
+  };
+  
+  return (
+    <div className="analytics-page">
+      <EmployeeProfile 
+        employee={employee}
+        onProfilePictureUpdate={handleProfileUpdate}
+        isEditable={user?.role === 'hr_admin'}
+        currentUserId={user?.id}
+        currentGrade={grade}
+        currentScore={score}
+        quarterName={quarter.name}
+        quarterId={quarter.id}
+        showPersonaWidget={true}
+      />
+      
+      {/* Analytics content */}
+    </div>
+  );
+};
+```
+
+#### Profile Management Interface
+```tsx
+const ProfileManagement = () => {
+  const [employee, setEmployee] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  
+  const handlePictureUpdate = async (url: string | null) => {
+    setEmployee(prev => ({ ...prev, profile_picture_url: url }));
+    
+    // Optional: Sync with external systems
+    await syncProfilePicture(employee.id, url);
+  };
+  
+  return (
+    <div className="profile-management">
+      <EmployeeProfile 
+        employee={employee}
+        onProfilePictureUpdate={handlePictureUpdate}
+        isEditable={true}
+        currentUserId={currentUser.id}
+      />
+    </div>
+  );
+};
+```
+
+### Performance Integration Example
+```tsx
+const PerformanceProfileView = () => {
+  const { employee } = useEmployeeData(employeeId);
+  const { currentQuarter } = useCurrentQuarter();
+  const { performance } = useQuarterlyPerformance(employeeId, currentQuarter.id);
+  
+  return (
+    <EmployeeProfile 
+      employee={employee}
+      onProfilePictureUpdate={updateProfilePicture}
+      currentGrade={performance.grade}
+      currentScore={performance.score}
+      quarterName={currentQuarter.name}
+      quarterId={currentQuarter.id}
+      showPersonaWidget={true}
+      isEditable={hasEditPermission(employee.id)}
+    />
+  );
+};
+```
+
+## Profile Picture Management
+
+### File Validation
+```typescript
+// Validates uploaded files
+const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const maxSize = 5 * 1024 * 1024; // 5MB
+
+if (!allowedTypes.includes(file.type)) {
+  setUploadError('Please select a valid image file (JPEG, PNG, or WebP)');
+  return;
+}
+
+if (file.size > maxSize) {
+  setUploadError('File size must be less than 5MB');
+  return;
+}
+```
+
+### Upload Process
+```typescript
+// Upload and update process
+const handleFileSelect = async (file: File) => {
+  try {
+    setIsUploading(true);
+    
+    // Upload to storage
+    const publicUrl = await uploadProfilePicture(file, employee.id);
+    
+    // Update database
+    await updateEmployeeProfilePicture(employee.id, publicUrl);
+    
+    // Notify parent
+    onProfilePictureUpdate(publicUrl);
+    
+  } catch (error) {
+    handleUploadError(error);
+  } finally {
+    setIsUploading(false);
+  }
+};
+```
+
+### Error Handling
+- **File Type Errors**: Clear validation messages
+- **Size Limit Errors**: Helpful size guidance  
+- **Upload Failures**: Specific error messages for common issues
+- **Permission Errors**: Clear feedback about access rights
+
+## Styling System
+
+### Layout Structure
+```css
+.employee-profile {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden;
+}
+
+.profile-grid {
+  @apply grid grid-cols-1 lg:grid-cols-12 gap-8 items-start;
+}
+
+.profile-picture-column {
+  @apply lg:col-span-2 flex justify-center lg:justify-start;
+}
+
+.employee-info-column {
+  @apply lg:col-span-6 space-y-6;
+}
+
+.persona-column {
+  @apply lg:col-span-4;
+}
+```
+
+### Profile Picture Styling
+```css
+.profile-picture {
+  @apply w-24 h-24 lg:w-28 lg:h-28 rounded-2xl overflow-hidden 
+         bg-gradient-to-br from-blue-50 to-indigo-100 
+         flex items-center justify-center shadow-lg 
+         ring-4 ring-white;
+}
+
+.upload-overlay {
+  @apply absolute inset-0 flex items-center justify-center 
+         bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 
+         transition-all duration-200 rounded-2xl;
+}
+```
+
+### Status Indicators
+```css
+.status-active {
+  @apply bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200;
+}
+
+.status-inactive {
+  @apply bg-red-100 text-red-800 ring-1 ring-red-200;
+}
+
+.status-dot {
+  @apply w-2 h-2 rounded-full mr-2;
+}
+```
+
+## Design System Integration
+
+### Typography Hierarchy
+- **Name**: Large, bold heading (`text-3xl lg:text-4xl font-bold`)
+- **Role**: Prominent subtitle (`text-xl font-semibold text-indigo-600`)
+- **Department**: Secondary text (`text-lg text-gray-600 font-medium`)
+
+### Color Scheme
+- **Profile Background**: Blue gradient (`from-blue-50 to-indigo-100`)
+- **Active Status**: Green theme (`emerald-100`, `emerald-800`)
+- **Contact Section**: Light gray background (`bg-gray-50`)
+- **Persona Widget**: Indigo gradient (`from-indigo-50 to-purple-50`)
+
+### Component Integration
+- **LetterGrade**: Performance grade display
+- **PersonaQuickGlanceWidget**: Personality classification
+- **LoadingSpinner**: Upload progress indication
+
+## Performance Notes
+
+### Image Optimization
+- **File Validation**: Client-side validation prevents unnecessary uploads
+- **Size Limits**: 5MB maximum prevents large file uploads
+- **Format Support**: Modern image formats (WebP) supported
+
+### Loading States
+- **Progressive Enhancement**: Content displays before images load
+- **Fallback Content**: Initials shown immediately
+- **Error Recovery**: Graceful handling of failed image loads
+
+### Memory Management
+- **File Cleanup**: File inputs cleared after upload
+- **Error Cleanup**: Proper error state management
+- **Component Cleanup**: No memory leaks from file operations
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ui/EmployeeProfile.tsx`](../../a-player-dashboard/src/components/ui/EmployeeProfile.tsx) (lines 1-373)
+- **Usage Examples**: Found in EmployeeAnalytics and profile management interfaces
+
+**🔗 Related Components:**
+- [LetterGrade](./LetterGrade.mdx) - Performance grade display
+- [PersonaQuickGlanceWidget](./PersonaQuickGlanceWidget.mdx) - Personality classification
+- [LoadingSpinner](./LoadingSpinner.mdx) - Upload progress indication
+- [ErrorMessage](./ErrorMessage.mdx) - Error state display
+
+

@@ -8,7 +8,7 @@ export const APP_CONFIG = {
 
 export const SUPABASE_CONFIG = {
   URL: import.meta.env.VITE_SUPABASE_URL || 'https://tufjnccktzcbmaemekiz.supabase.co',
-  ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1ZmpuY2NrdHpjYm1hZW1la2l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1MDMwODMsImV4cCI6MjA2ODA3OTA4M30.XjhFQkkByu3-NC47HUOH8ESA6z1u3xDBssqkpAGMwg4'
+  ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY
 } as const;
 
 export const FEATURES = {

@@ -1,0 +1,313 @@
+# Breadcrumb Component
+
+Navigation breadcrumb component providing hierarchical navigation context and wayfinding across the application.
+
+## Purpose & Usage Context
+
+The Breadcrumb component provides clear navigation context and hierarchical wayfinding throughout the A-Player Evaluation System. It helps users understand their current location within the application structure and provides quick navigation back to parent levels.
+
+**Used in**: Page headers, analytics dashboards, and any interface requiring navigation context.
+
+## Props
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `items` | `BreadcrumbItem[]` | N/A | Yes | Array of breadcrumb items defining the navigation path |
+| `className` | `string` | `''` | No | Additional CSS classes for the navigation container |
+
+### BreadcrumbItem Interface
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `label` | `string` | N/A | Yes | Display text for the breadcrumb item |
+| `href` | `string` | `undefined` | No | Navigation URL for clickable breadcrumb items |
+| `current` | `boolean` | `undefined` | No | Indicates if this is the current page (non-clickable) |
+
+## Events & Callbacks
+
+### Navigation Events
+- **`onClick`**: Fired when clicking navigable breadcrumb items
+- **React Router Integration**: Uses `useNavigate` for client-side routing
+
+### Navigation Behavior
+- **Clickable Items**: Items with `href` become interactive buttons
+- **Current Page**: Items with `current: true` are styled as static text
+- **Keyboard Navigation**: Full keyboard accessibility for interactive items
+
+## Side Effects
+
+### Navigation Actions
+- **Route Changes**: Triggers React Router navigation when items are clicked
+- **History Management**: Integrates with browser history through React Router
+- **State Preservation**: Maintains application state during navigation
+
+### Visual Feedback
+- **Hover Effects**: Interactive items show hover states
+- **Current Page Styling**: Different styling for current vs navigable items
+- **Separator Icons**: Chevron icons between breadcrumb items
+
+## Accessibility
+
+### ARIA Support
+- **`aria-label="Breadcrumb"`**: Identifies navigation purpose
+- **`aria-current="page"`**: Marks current page breadcrumb
+- **Semantic HTML**: Uses `<nav>` and `<ol>` for proper structure
+- **Role Clarity**: Clear navigation landmark
+
+### Screen Reader Features
+- **Navigation Context**: Announces breadcrumb navigation
+- **Current Page**: Current page clearly identified
+- **Clickable Items**: Interactive elements properly announced
+- **Hierarchical Structure**: Ordered list conveys hierarchy
+
+### Keyboard Navigation
+- **Tab Navigation**: Interactive breadcrumbs focusable
+- **Enter Activation**: Keyboard activation support
+- **Focus Indicators**: Visible focus states
+- **Skip Navigation**: Integrates with skip links
+
+## Examples
+
+### Basic Usage
+```tsx
+import { Breadcrumb } from '@/components/ui';
+
+// Simple breadcrumb navigation
+const breadcrumbItems = [
+  { label: 'Dashboard', href: '/dashboard' },
+  { label: 'Employees', href: '/employees' },
+  { label: 'John Doe', current: true }
+];
+
+<Breadcrumb items={breadcrumbItems} />
+```
+
+### Real Application Usage
+
+#### Employee Analytics Breadcrumb (src/pages/EmployeeAnalytics.tsx:85-95)
+```tsx
+import { Breadcrumb, useBreadcrumbs } from '@/components/ui';
+
+const { generateBreadcrumbs } = useBreadcrumbs();
+const location = useLocation();
+
+const breadcrumbs = generateBreadcrumbs(
+  location.pathname,
+  employee?.name
+);
+
+<Breadcrumb items={breadcrumbs} className="mb-6" />
+```
+
+#### Manual Breadcrumb Construction
+```tsx
+const breadcrumbItems = [
+  { 
+    label: 'Employee Selection', 
+    href: '/employees' 
+  },
+  { 
+    label: employeeName ? `${employeeName} Analytics` : 'Employee Analytics',
+    current: true 
+  }
+];
+
+<Breadcrumb items={breadcrumbItems} />
+```
+
+### Advanced Usage Patterns
+
+#### Dynamic Breadcrumb Generation
+```tsx
+const useDynamicBreadcrumbs = (currentPath: string, context: any) => {
+  const { generateBreadcrumbs } = useBreadcrumbs();
+  
+  const getBreadcrumbs = useCallback(() => {
+    const baseBreadcrumbs = generateBreadcrumbs(currentPath);
+    
+    // Add context-specific breadcrumbs
+    if (context.employee) {
+      baseBreadcrumbs.push({
+        label: context.employee.name,
+        href: `/employee/${context.employee.id}`
+      });
+    }
+    
+    if (context.quarter) {
+      baseBreadcrumbs.push({
+        label: context.quarter.name,
+        current: true
+      });
+    }
+    
+    return baseBreadcrumbs;
+  }, [currentPath, context, generateBreadcrumbs]);
+  
+  return getBreadcrumbs();
+};
+
+// Usage
+const breadcrumbs = useDynamicBreadcrumbs(location.pathname, {
+  employee: selectedEmployee,
+  quarter: currentQuarter
+});
+
+<Breadcrumb items={breadcrumbs} />
+```
+
+#### Conditional Breadcrumb Display
+```tsx
+// Only show breadcrumbs on certain pages
+const shouldShowBreadcrumbs = location.pathname !== '/' && 
+                            location.pathname !== '/login';
+
+{shouldShowBreadcrumbs && (
+  <Breadcrumb 
+    items={generateBreadcrumbs(location.pathname, employee?.name)}
+    className="mb-4"
+  />
+)}
+```
+
+### Accessibility Examples
+
+#### Custom Breadcrumb with Enhanced Accessibility
+```tsx
+const accessibleBreadcrumbs = [
+  { 
+    label: 'Home Dashboard', 
+    href: '/dashboard',
+    ariaLabel: 'Navigate to main dashboard'
+  },
+  { 
+    label: 'Employee Management', 
+    href: '/employees',
+    ariaLabel: 'Navigate to employee list'
+  },
+  { 
+    label: 'Performance Analytics',
+    current: true,
+    ariaLabel: 'Current page: Performance analytics'
+  }
+];
+
+<Breadcrumb 
+  items={accessibleBreadcrumbs}
+  aria-label="Navigation breadcrumb showing current page location"
+/>
+```
+
+## useBreadcrumbs Hook
+
+The component exports a companion hook for generating breadcrumbs based on current route:
+
+### Hook Interface
+```typescript
+const useBreadcrumbs = () => {
+  generateBreadcrumbs: (currentPath: string, employeeName?: string) => BreadcrumbItem[]
+}
+```
+
+### Hook Usage
+```tsx
+const { generateBreadcrumbs } = useBreadcrumbs();
+
+// Generate breadcrumbs for current route
+const breadcrumbs = generateBreadcrumbs(
+  location.pathname,
+  employee?.name // Optional context
+);
+```
+
+### Supported Routes
+- **`/employees`**: Employee Selection
+- **`/analytics`**: Employee Analytics (with optional employee name)
+- **Default**: Employee Selection as root
+
+## Styling System
+
+### Navigation Structure
+```css
+.breadcrumb-nav {
+  @apply flex; /* Container styling */
+}
+
+.breadcrumb-list {
+  @apply inline-flex items-center space-x-1 md:space-x-3;
+}
+
+.breadcrumb-item {
+  @apply inline-flex items-center;
+}
+```
+
+### Item Styling
+```css
+/* Current page item */
+.breadcrumb-current {
+  @apply text-sm font-medium text-secondary-700;
+}
+
+/* Clickable breadcrumb items */
+.breadcrumb-link {
+  @apply text-sm font-medium text-secondary-500 
+         hover:text-secondary-700 transition-colors;
+}
+
+/* Non-clickable items */
+.breadcrumb-static {
+  @apply text-sm font-medium text-secondary-500;
+}
+```
+
+### Separator Styling
+```css
+.breadcrumb-separator {
+  @apply w-6 h-6 text-secondary-400 mx-1;
+}
+```
+
+## Design System Integration
+
+### Typography
+- **Font Size**: Small text (`text-sm`)
+- **Font Weight**: Medium weight (`font-medium`)
+- **Color Hierarchy**: Different colors for states
+
+### Color Scheme
+- **Current Page**: Dark gray (`text-secondary-700`)
+- **Links**: Medium gray (`text-secondary-500`)
+- **Hover**: Dark gray (`hover:text-secondary-700`)
+- **Separators**: Light gray (`text-secondary-400`)
+
+### Spacing System
+- **Item Spacing**: `space-x-1` on mobile, `space-x-3` on desktop
+- **Responsive**: Adapts spacing based on screen size
+- **Separator Margins**: `mx-1` for separator icons
+
+## Performance Notes
+
+### Component Efficiency
+- **Lightweight Rendering**: Minimal DOM structure
+- **Event Handling**: Efficient click handling with React Router
+- **No State Management**: Pure presentational component
+- **Memoization Ready**: Compatible with React.memo if needed
+
+### Navigation Performance
+- **Client-Side Routing**: Uses React Router for fast navigation
+- **No Page Reloads**: Maintains SPA performance
+- **History Integration**: Proper browser history management
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ui/Breadcrumb.tsx`](../../a-player-dashboard/src/components/ui/Breadcrumb.tsx) (lines 1-83)
+- **Hook Documentation**: [useBreadcrumbs Hook](../hooks/useBreadcrumbs.md)
+- **Usage Examples**: Found in EmployeeAnalytics and other page components
+
+**🔗 Related Components:**
+- [useBreadcrumbs Hook](../hooks/useBreadcrumbs.md) - Breadcrumb generation utility
+- Navigation components for overall wayfinding
+- Page header components that commonly include breadcrumbs
+
+

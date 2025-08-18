@@ -2,79 +2,107 @@
 alwaysApply: true
 ---
 
-# Development Agent Workflow - Cursor Rules
+# Development Agent Workflow — A-Player Evaluation System (Cursor Rules)
 
 ## Primary Directive
-You are a development agent implementing a project. Follow established documentation and maintain consistency.
+You are a development agent implementing changes in a Vite + React + TypeScript app with Supabase. You MUST use the docs below as your source of truth and keep them synchronized with code changes.
 
-## Core Workflow Process
+## Canonical Documentation Map (read before work)
+- **Overview & Architecture**
+  - `/Docs/architecture/ARCHITECTURE.md`
+  - `/Docs/architecture/diagrams/*.mmd`
+- **How-To & Dev Workflow**
+  - `/Docs/how-to/development.md` (local setup, scripts, conventions)
+  - `/Docs/how-to/workflow.md` (implementation workflow)
+- **Reference**
+  - `/Docs/reference/routes.md` (all routes)
+  - `/Docs/reference/components/**` (component docs)
+  - `/Docs/reference/hooks/**` (custom hooks)
+  - `/Docs/reference/env.md` (environment variables)
+  - `/Docs/reference/edge-functions.md`
+  - **Database**
+    - `/Docs/reference/db/overview.md` (index)
+    - `/Docs/_generated/schema_public.sql` (authoritative dump)
+    - `/Docs/reference/db/tables/*.md`
+    - `/Docs/reference/db/views.md`
+    - `/Docs/reference/db/functions.md`
+    - `/Docs/reference/db/queries/**`
+- **Ops**
+  - `/Docs/ops/deployment.md` (Render, CLI, CI/CD)
+  - `/Docs/ops/runbooks/**` (break-glass, incident fixes)
+- **Generated & Archive**
+  - `/Docs/_generated/**`
+  - `/Docs/_archive/**`
 
-### Before Starting Any Task
-- Consult `/Docs/Implementation.md` for current stage and available tasks
-- Check task dependencies and prerequisites
-- Verify scope understanding
+## Before Starting Any Task
+1. Open the relevant doc(s) from the map above.
+2. Confirm the task owner doc:
+   - Feature/bug/cleanup tasks → `/Docs/how-to/workflow.md`
+3. Resolve ambiguities using docs first. If conflict exists:
+   1) Ops/runbooks for runtime behavior
+   2) Reference (routes/components/hooks/env/db) for interfaces
+   3) Architecture for rationale and constraints
+4. List assumptions at the top of your change description.
 
-### Task Execution Protocol
+## Task Execution Protocol
 
-#### 1. Task Assessment
-- Read subtask from `/Docs/Implementation.md`
-- Assess subtask complexity:
-  - **Simple subtask:** Implement directly
-  - **Complex subtask:** Create a todo list 
+### A) Assessment
+- Extract exact scope and acceptance criteria.
+- If complex, create a TODO plan with:
+  - file changes (with **paths**),
+  - data model impacts,
+  - UI impacts,
+  - test plan,
+  - docs to update.
 
+### B) Context Loading (MANDATORY)
+Load context with file globs (read-only review before edits):
+- App: `a-player-dashboard/src/**/*.{ts,tsx}`, `a-player-dashboard/package.json`, `a-player-dashboard/vite.config.*`
+- Docs: `Docs/reference/**/*`, `Docs/how-to/**/*`, `Docs/architecture/**/*`, `Docs/ops/**/*`
+- DB (generated): `Docs/_generated/schema_public.sql`, `Docs/reference/db/**/*`
 
-#### 3. Documentation Research
-- Check `/Docs/Implementation.md` for relevant documentation links in the subtask
-- Read and understand documentation before implementing
+### C) Guardrails
+- **Never** commit secrets. Do not write passwords/tokens into code or docs.
+- **Never** move or rename files outside the approved reorg plan.
+- **Always** update relevant docs when code changes behavior or interfaces.
+- **Always** add/adjust types, tests, and error boundaries for React work.
 
-#### 4. UI/UX Implementation
-- Consult `/Docs/UI_UX_doc.md` before implementing any UI/UX elements
-- Follow design system specifications and responsive requirements
+### D) Database & Supabase Changes
+- For **read-only** docs generation (no schema change):
+  - Run: `pnpm db:refresh` (from `/a-player-dashboard`)  
+    → regenerates `/Docs/_generated/schema_public.sql` and per-table docs.
+- For **schema changes**:
+  1) Propose migration SQL.
+  2) Update `/Docs/reference/db/tables/*.md` (or generator post-refresh).
+  3) Update `/Docs/reference/routes.md` or component docs if API/shape changed.
+  4) Include RLS/Policies impacts in PR description.
 
-#### 5. Project Structure Compliance
-- Check `/Docs/project_structure.md` before:
-  - Running commands
-  - Creating files/folders
-  - Making structural changes
-  - Adding dependencies
+### E) UI/UX & Components
+- Follow component docs under `/Docs/reference/components/**`.
+- If a component lacks docs, create or extend it (props table + usage example).
+- Respect `/Docs/how-to/development.md` coding conventions.
 
-#### 6. Database & Survey Changes
-- **BEFORE** making any Supabase database changes, consult `/Docs/Supabase_Database_Structure.md`
-- **WHEN** modifying database schema, update `Supabase_Database_Structure.md` with changes
-- **BEFORE** modifying evaluation questions, consult `/Docs/Evaluation_Questions_Reference.md`
-- **WHEN** changing survey questions, update `Evaluation_Questions_Reference.md` accordingly
+### F) Validation & Completion
+- Commands (from `/a-player-dashboard`):
+  - `pnpm lint && pnpm type-check && pnpm test`
+  - `pnpm build && pnpm preview`
+  - `pnpm db:refresh` (if DB touched)
+- Update or create docs:
+  - Component/Hook/Route/Env/DB/Runbook as applicable.
+- Checklist for Done:
+  - [ ] Code compiles; types clean.
+  - [ ] Tests updated/added and passing.
+  - [ ] Docs updated (reference + how-to if workflow changed).
+  - [ ] No secrets; `.env` handled properly.
+  - [ ] Links in docs are valid (relative paths correct).
 
-#### 7. Error Handling
-- Check `/Docs/Bug_tracking.md` for similar issues before fixing
-- Document all errors and solutions in Bug_tracking.md
-- Include error details, root cause, and resolution steps
+## File Reference Priority (resolve conflicts in this order)
+1. `/Docs/ops/runbooks/**` (runtime source of truth)
+2. `/Docs/reference/**` (interfaces & contracts)
+3. `/Docs/architecture/**` (system invariants)
+4. `/Docs/how-to/**` (procedures)
+5. `/Docs/_generated/**` (derived data; don’t hand-edit)
 
-#### 8. Task Completion
-Mark tasks complete only when:
-- All functionality implemented correctly
-- Code follows project structure guidelines
-- UI/UX matches specifications (if applicable)
-- No errors or warnings remain
-- All task list items completed (if applicable)
-
-### File Reference Priority
-1. `/Docs/Bug_tracking.md` - Check for known issues first
-2. `/Docs/Implementation.md` - Main task reference
-3. `/Docs/project_structure.md` - Structure guidance
-4. `/Docs/UI_UX_doc.md` - Design requirements
-5. `/Docs/Supabase_Database_Structure.md` - Database schema reference
-6. `/Docs/Evaluation_Questions_Reference.md` - Survey questions reference
-
-## Critical Rules
-- **NEVER** skip documentation consultation
-- **NEVER** mark tasks complete without proper testing
-- **NEVER** ignore project structure guidelines
-- **NEVER** implement UI without checking UI_UX_doc.md
-- **NEVER** fix errors without checking Bug_tracking.md first
-- **NEVER** modify database schema without consulting Supabase_Database_Structure.md
-- **NEVER** change evaluation questions without consulting Evaluation_Questions_Reference.md
-- **ALWAYS** document errors and solutions
-- **ALWAYS** update reference documents when making changes
-- **ALWAYS** follow the established workflow process
-
-Remember: Build a cohesive, well-documented, and maintainable project. Every decision should support overall project goals and maintain consistency with established patterns.
+## PR Hygiene
+- Conventional commits: `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`
+- PR must link to the doc pages it changes and paste the checklist outcome.

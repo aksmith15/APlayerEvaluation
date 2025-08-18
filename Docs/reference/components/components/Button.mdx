@@ -1,0 +1,267 @@
+# Button Component
+
+Primary action component providing consistent styling and behavior across the application.
+
+## Purpose & Usage Context
+
+The Button component is the primary interactive element used throughout the A-Player Evaluation System. It provides consistent styling, accessibility features, and loading states for all user actions including form submissions, navigation, and data operations.
+
+**Used in**: All pages, forms, modals, and interactive interfaces across the application.
+
+## Props
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `variant` | `'primary' \| 'secondary' \| 'danger' \| 'ghost'` | `'primary'` | No | Visual style variant determining color scheme and emphasis |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | No | Button size affecting padding, text size, and icon spacing |
+| `loading` | `boolean` | `false` | No | Shows loading spinner and disables interaction when true |
+| `icon` | `React.ReactNode` | `undefined` | No | Icon element displayed before the button text |
+| `children` | `React.ReactNode` | N/A | Yes | Button content (text, elements, etc.) |
+| `disabled` | `boolean` | `false` | No | Disables button interaction and applies disabled styling |
+| `className` | `string` | `''` | No | Additional CSS classes to apply to the button |
+| `ariaLabel` | `string` | `undefined` | No | Accessible label for screen readers (defaults to children text) |
+| `ariaDescribedBy` | `string` | `undefined` | No | ID of element that describes the button |
+| `role` | `string` | `undefined` | No | Custom ARIA role (defaults to 'button') |
+
+### Extended Props
+The component extends `React.ButtonHTMLAttributes<HTMLButtonElement>`, inheriting all standard button props including:
+- `onClick`: Click event handler
+- `onKeyDown`: Keyboard event handler  
+- `type`: Button type (`'button'`, `'submit'`, `'reset'`)
+- `form`: Associated form ID
+- `onFocus`, `onBlur`: Focus event handlers
+
+## Events & Callbacks
+
+### Primary Events
+- **`onClick`**: Fired when button is clicked or activated via keyboard
+- **`onKeyDown`**: Handles keyboard interactions (Enter, Space)
+- **`onFocus`/`onBlur`**: Focus state management for accessibility
+
+### Loading State Behavior
+When `loading={true}`:
+- Button becomes disabled automatically
+- Loading spinner replaces the icon
+- `aria-busy="true"` is set for screen readers
+- Click events are prevented
+
+## Side Effects
+
+### Visual State Changes
+- **Hover**: Background color transitions and elevation changes
+- **Focus**: Focus ring appears for keyboard navigation
+- **Active**: Pressed state with darker background
+- **Disabled**: Opacity reduction and cursor change
+- **Loading**: Spinner animation and disabled state
+
+### Accessibility Updates
+- Dynamic `aria-label` based on content
+- `aria-busy` state during loading
+- `aria-disabled` for disabled buttons
+- Screen reader announcements for state changes
+
+## Accessibility
+
+### ARIA Support
+- **`role="button"`**: Explicit button role (inherited)
+- **`aria-label`**: Descriptive label for screen readers
+- **`aria-describedby`**: Links to descriptive content
+- **`aria-busy`**: Loading state indication
+- **`aria-disabled`**: Disabled state for assistive technology
+
+### Keyboard Navigation
+- **Enter**: Activates button
+- **Space**: Activates button
+- **Tab**: Focuses button in tab order
+- **Escape**: Custom handlers can implement escape behavior
+
+### Screen Reader Features
+- Loading spinner includes `sr-only` text
+- Icon elements marked with `aria-hidden="true"`
+- Content changes announced automatically
+- Focus management preserved during state changes
+
+### Focus Management
+- Visible focus ring with `focus:ring-2`
+- High contrast focus indicators
+- Focus preserved during loading state transitions
+- Keyboard navigation support
+
+## Examples
+
+### Basic Usage
+```tsx
+import { Button } from '@/components/ui';
+
+// Primary action button
+<Button onClick={handleSubmit}>
+  Save Changes
+</Button>
+
+// Secondary action with icon
+<Button variant="secondary" icon={<PlusIcon />}>
+  Add Employee
+</Button>
+```
+
+### Real Application Usage
+
+#### Login Form (src/pages/Login.tsx:95-99)
+```tsx
+<Button
+  type="submit" 
+  className="w-full"
+  loading={loading}
+  disabled={!email}
+>
+  {loading ? 'Signing in...' : 'Sign In'}
+</Button>
+```
+
+#### Assignment Management (src/pages/AssignmentManagement.tsx:200-205)
+```tsx
+<Button
+  variant="primary"
+  onClick={() => setShowCreateForm(true)}
+  className="mb-4"
+>
+  Create New Assignment
+</Button>
+```
+
+#### Error Retry Action (src/components/ui/ErrorMessage.tsx:27-31)
+```tsx
+{onRetry && (
+  <Button onClick={onRetry} variant="secondary">
+    {retryText}
+  </Button>
+)}
+```
+
+### Loading States
+```tsx
+// Form submission with loading
+<Button loading={isSubmitting} type="submit">
+  {isSubmitting ? 'Saving...' : 'Save Employee'}
+</Button>
+
+// Async action with loading
+const handleDelete = async () => {
+  setDeleting(true);
+  await deleteEmployee(id);
+  setDeleting(false);
+};
+
+<Button variant="danger" loading={deleting} onClick={handleDelete}>
+  {deleting ? 'Deleting...' : 'Delete'}
+</Button>
+```
+
+### Size Variants
+```tsx
+// Small button for compact interfaces
+<Button size="sm" variant="ghost">
+  Edit
+</Button>
+
+// Large button for primary actions
+<Button size="lg" variant="primary">
+  Start Evaluation
+</Button>
+```
+
+### Accessibility Examples
+```tsx
+// Button with descriptive label
+<Button 
+  ariaLabel="Delete employee John Doe"
+  ariaDescribedBy="delete-warning"
+  variant="danger"
+>
+  Delete
+</Button>
+
+// Icon-only button
+<Button 
+  ariaLabel="Close dialog"
+  variant="ghost"
+  icon={<CloseIcon />}
+>
+  <span className="sr-only">Close</span>
+</Button>
+```
+
+## Styling System
+
+### Variant Classes
+```css
+/* Primary - Main actions */
+.primary {
+  @apply bg-primary-600 text-white hover:bg-primary-700 
+         focus:ring-primary-500 active:bg-primary-800;
+}
+
+/* Secondary - Supporting actions */
+.secondary {
+  @apply bg-secondary-100 text-secondary-900 hover:bg-secondary-200 
+         focus:ring-secondary-500 active:bg-secondary-300;
+}
+
+/* Danger - Destructive actions */
+.danger {
+  @apply bg-red-600 text-white hover:bg-red-700 
+         focus:ring-red-500 active:bg-red-800;
+}
+
+/* Ghost - Minimal actions */
+.ghost {
+  @apply text-secondary-700 hover:bg-secondary-100 
+         focus:ring-secondary-500 active:bg-secondary-200;
+}
+```
+
+### Size Classes
+```css
+/* Small - Compact interfaces */
+.sm {
+  @apply px-3 py-1.5 text-sm gap-1.5;
+}
+
+/* Medium - Standard size */
+.md {
+  @apply px-4 py-2 text-sm gap-2;
+}
+
+/* Large - Prominent actions */
+.lg {
+  @apply px-6 py-3 text-base gap-2.5;
+}
+```
+
+## Performance Notes
+
+### Optimization Features
+- **Lightweight**: Minimal runtime overhead
+- **CSS-in-JS**: Uses Tailwind classes for optimal bundling
+- **No Re-renders**: Stable class string generation
+- **Event Delegation**: Efficient event handling
+
+### Memory Management
+- No internal state management
+- No effect dependencies
+- Minimal DOM manipulation
+- Garbage collection friendly
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ui/Button.tsx`](../../a-player-dashboard/src/components/ui/Button.tsx) (lines 1-74)
+- **Tests**: [`src/components/ui/Button.test.tsx`](../../a-player-dashboard/src/components/ui/Button.test.tsx)
+- **Usage Examples**: Found in 7+ files across the application
+
+**🔗 Related Components:**
+- [LoadingSpinner](./LoadingSpinner.mdx) - Used in loading state
+- [ErrorMessage](./ErrorMessage.mdx) - Uses Button for retry actions
+- [Card](./Card.mdx) - Often contains Button components
+
+

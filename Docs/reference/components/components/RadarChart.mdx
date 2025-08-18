@@ -1,0 +1,349 @@
+# RadarChart Component
+
+Interactive radar chart component for visualizing multi-dimensional employee performance evaluation data across different evaluation types.
+
+## Purpose & Usage Context
+
+The RadarChart component provides interactive visualization of employee performance across multiple attributes in the A-Player Evaluation System. It displays manager, peer, self, and weighted total evaluations in a radar chart format, allowing users to switch between different evaluation perspectives.
+
+**Used in**: Employee analytics dashboards, performance comparison views, and detailed evaluation analysis interfaces.
+
+## Props
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `data` | `AttributeData[]` | N/A | Yes | Array of attribute evaluation data |
+| `height` | `number` | `400` | No | Height of the chart in pixels |
+
+### AttributeData Interface
+```typescript
+interface AttributeData {
+  attribute: string;        // Attribute name (e.g., "Reliability")
+  manager: number;          // Manager evaluation score
+  peer: number;            // Peer evaluation score  
+  self: number;            // Self evaluation score
+  weighted: number;        // Weighted average score
+  hasManager: boolean;     // Whether manager evaluation exists
+  hasPeer: boolean;        // Whether peer evaluation exists
+  hasSelf: boolean;        // Whether self evaluation exists
+  completion: number;      // Overall completion percentage
+}
+```
+
+## Events & Callbacks
+
+### Evaluation Type Selection
+- **Type Toggle**: Switch between total, manager, peer, and self evaluations
+- **Data Transformation**: Dynamically updates chart data based on selected type
+- **Visual Updates**: Chart re-renders with new data and styling
+
+### Chart Interactions
+- **Hover Effects**: Display detailed attribute information on hover
+- **Tooltip Display**: Show exact scores and completion status
+- **Legend Interaction**: Click legend items to focus on specific data
+
+## Side Effects
+
+### Data Processing
+- **Attribute Truncation**: Long attribute names truncated for display
+- **Data Filtering**: Only shows available evaluation types
+- **Score Calculation**: Handles missing evaluations gracefully
+
+### Visual State Changes
+- **Color Updates**: Chart color changes based on selected evaluation type
+- **Data Availability**: Visual indicators for missing evaluation data
+- **Completion Tracking**: Shows progress for incomplete evaluations
+
+## Accessibility
+
+### Chart Accessibility
+- **Color Coding**: Different colors for each evaluation type
+- **Legend Support**: Clear legend with evaluation type descriptions
+- **Empty State**: Accessible empty state when no data available
+
+### Screen Reader Support
+- **Data Description**: Evaluation types and scores announced
+- **Navigation**: Keyboard accessible evaluation type selection
+- **Alternative Content**: Text alternatives for visual data
+
+## Examples
+
+### Basic Usage
+```tsx
+import { RadarChart } from '@/components/ui';
+
+// Simple radar chart display
+<RadarChart 
+  data={evaluationData}
+  height={400}
+/>
+
+// Compact radar chart
+<RadarChart 
+  data={evaluationData}
+  height={300}
+/>
+```
+
+### Real Application Usage
+
+#### Employee Analytics Dashboard (src/pages/EmployeeAnalytics.tsx:250-260)
+```tsx
+import { RadarChart } from '@/components/ui';
+
+const EmployeeAnalytics = () => {
+  const { evaluationData } = useEmployeeEvaluations(employeeId, quarterId);
+  
+  return (
+    <Card className="col-span-2">
+      <h3 className="text-lg font-semibold mb-4">Performance Overview</h3>
+      <RadarChart 
+        data={evaluationData}
+        height={500}
+      />
+    </Card>
+  );
+};
+```
+
+#### Performance Comparison View
+```tsx
+const PerformanceComparison = () => {
+  const { employeeA, employeeB } = useComparisonData();
+  
+  return (
+    <div className="comparison-view">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <h3 className="text-lg font-semibold mb-4">
+            {employeeA.name} - Performance Profile
+          </h3>
+          <RadarChart 
+            data={employeeA.evaluationData}
+            height={400}
+          />
+        </Card>
+        
+        <Card>
+          <h3 className="text-lg font-semibold mb-4">
+            {employeeB.name} - Performance Profile
+          </h3>
+          <RadarChart 
+            data={employeeB.evaluationData}
+            height={400}
+          />
+        </Card>
+      </div>
+    </div>
+  );
+};
+```
+
+### Dynamic Data Integration
+```tsx
+const DynamicRadarChart = () => {
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [selectedQuarter, setSelectedQuarter] = useState(null);
+  const { data: evaluationData, loading } = useEvaluationData(
+    selectedEmployee?.id, 
+    selectedQuarter?.id
+  );
+  
+  if (loading) {
+    return <LoadingSpinner message="Loading evaluation data..." />;
+  }
+  
+  if (!evaluationData || evaluationData.length === 0) {
+    return (
+      <div className="empty-state">
+        <p>No evaluation data available for selected criteria.</p>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="dynamic-chart">
+      <div className="controls mb-4">
+        <EmployeeSelector 
+          value={selectedEmployee}
+          onChange={setSelectedEmployee}
+        />
+        <QuarterSelector 
+          value={selectedQuarter}
+          onChange={setSelectedQuarter}
+        />
+      </div>
+      
+      <RadarChart 
+        data={evaluationData}
+        height={450}
+      />
+    </div>
+  );
+};
+```
+
+## Evaluation Types
+
+### Available Evaluation Types
+```typescript
+const evaluationTypes = [
+  { 
+    value: 'total', 
+    label: 'Total Score', 
+    color: '#F59E0B', 
+    description: 'Weighted average of all evaluations' 
+  },
+  { 
+    value: 'manager', 
+    label: 'Manager', 
+    color: '#10B981', 
+    description: 'Manager evaluation scores' 
+  },
+  { 
+    value: 'peer', 
+    label: 'Peer', 
+    color: '#EF4444', 
+    description: 'Peer evaluation scores' 
+  },
+  { 
+    value: 'self', 
+    label: 'Self', 
+    color: '#8B5CF6', 
+    description: 'Self evaluation scores' 
+  }
+];
+```
+
+### Data Transformation Logic
+```typescript
+const transformData = (data: AttributeData[], selectedType: EvaluationType) => {
+  return data.map(item => {
+    let value = 0;
+    let available = false;
+    
+    switch (selectedType) {
+      case 'total':
+        value = item.weighted;
+        available = item.completion > 0;
+        break;
+      case 'manager':
+        value = item.manager;
+        available = item.hasManager;
+        break;
+      case 'peer':
+        value = item.peer;
+        available = item.hasPeer;
+        break;
+      case 'self':
+        value = item.self;
+        available = item.hasSelf;
+        break;
+    }
+
+    return {
+      attribute: item.attribute.length > 12 ? 
+        item.attribute.substring(0, 12) + '...' : 
+        item.attribute,
+      fullAttribute: item.attribute,
+      value: available ? value : null,
+      available
+    };
+  });
+};
+```
+
+## Styling System
+
+### Chart Container
+```css
+.radar-chart-container {
+  @apply w-full bg-white rounded-lg;
+}
+
+.evaluation-type-selector {
+  @apply flex flex-wrap gap-2 mb-4;
+}
+
+.evaluation-type-button {
+  @apply px-3 py-1.5 rounded-lg text-sm font-medium transition-colors;
+}
+```
+
+### Empty State
+```css
+.empty-state {
+  @apply flex items-center justify-center h-64 text-secondary-500;
+}
+
+.empty-state-icon {
+  @apply w-16 h-16 bg-secondary-100 rounded-full 
+         flex items-center justify-center mx-auto mb-4;
+}
+```
+
+### Evaluation Type Colors
+```css
+.type-total { color: #F59E0B; }    /* Amber */
+.type-manager { color: #10B981; }  /* Emerald */
+.type-peer { color: #EF4444; }     /* Red */
+.type-self { color: #8B5CF6; }     /* Purple */
+```
+
+## Chart Integration
+
+### Recharts Configuration
+- **ResponsiveContainer**: Automatically adjusts to container size
+- **PolarGrid**: Provides grid lines for easier reading
+- **PolarAngleAxis**: Displays attribute names around the chart
+- **PolarRadiusAxis**: Shows score scales
+- **Radar**: Main data visualization element
+
+### Performance Optimization
+- **Memoization**: Component memoized to prevent unnecessary re-renders
+- **Data Processing**: Efficient data transformation
+- **Conditional Rendering**: Only renders when data is available
+
+## Design System Integration
+
+### Color Scheme
+- **Total Score**: Amber theme for weighted averages
+- **Manager**: Green theme for manager evaluations
+- **Peer**: Red theme for peer evaluations  
+- **Self**: Purple theme for self evaluations
+
+### Typography
+- **Legend Text**: Clear, readable font sizes
+- **Attribute Labels**: Truncated appropriately for chart readability
+- **Score Display**: Consistent number formatting
+
+### Layout Integration
+- **Card Compatibility**: Works well within Card components
+- **Grid Systems**: Responsive within grid layouts
+- **Dashboard Integration**: Consistent with other dashboard components
+
+## Performance Notes
+
+### Chart Rendering
+- **Responsive Design**: Adapts to different screen sizes
+- **Efficient Updates**: Minimal re-renders when switching evaluation types
+- **Data Caching**: Leverages React memo for performance
+
+### Memory Management
+- **Component Cleanup**: Proper cleanup of chart resources
+- **Data Processing**: Efficient transformation algorithms
+- **Event Handling**: Optimized interaction handlers
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ui/RadarChart.tsx`](../../a-player-dashboard/src/components/ui/RadarChart.tsx) (lines 1-184)
+- **Usage Examples**: Found in EmployeeAnalytics and performance comparison interfaces
+
+**🔗 Related Components:**
+- [LazyChart](./LazyChart.mdx) - Dynamic chart loading wrapper
+- [Card](./Card.mdx) - Common container for radar charts
+- [LoadingSpinner](./LoadingSpinner.mdx) - Loading states during data fetch
+- Other chart components (TrendLineChart, ClusteredBarChart)
+
+

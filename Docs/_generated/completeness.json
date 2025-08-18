@@ -1,0 +1,173 @@
+{
+  "analysis_date": "2025-08-17",
+  "summary": {
+    "total_components_found": 127,
+    "documented_components": 78,
+    "missing_documentation": 49,
+    "coverage_percentage": 61.4
+  },
+  "categories": {
+    "routes": {
+      "found": 9,
+      "documented": 6,
+      "missing": 3,
+      "coverage": 66.7
+    },
+    "components": {
+      "found": 67,
+      "documented": 35,
+      "missing": 32,
+      "coverage": 52.2
+    },
+    "hooks": {
+      "found": 2,
+      "documented": 0,
+      "missing": 2,
+      "coverage": 0
+    },
+    "supabase_tables": {
+      "found": 15,
+      "documented": 15,
+      "missing": 0,
+      "coverage": 100
+    },
+    "migrations": {
+      "found": 4,
+      "documented": 4,
+      "missing": 0,
+      "coverage": 100
+    },
+    "edge_functions": {
+      "found": 11,
+      "documented": 7,
+      "missing": 4,
+      "coverage": 63.6
+    },
+    "environment_variables": {
+      "found": 19,
+      "documented": 11,
+      "missing": 8,
+      "coverage": 57.9
+    }
+  },
+  "detailed_findings": {
+    "routes": {
+      "documented": [
+        "/",
+        "/employees", 
+        "/analytics",
+        "/assignments/manage",
+        "/assignments/my",
+        "/survey/:token"
+      ],
+      "missing": [
+        "/accept-invite",
+        "/dev/pdf-preview",
+        "/dashboard"
+      ]
+    },
+    "components": {
+      "documented": [
+        "ProtectedRoute",
+        "ErrorBoundary", 
+        "LoadingSpinner",
+        "Card",
+        "Button",
+        "SearchInput",
+        "EvaluationSurvey"
+      ],
+      "missing": [
+        "AnalysisJobManager",
+        "AssignmentCard",
+        "AssignmentCreationForm", 
+        "AssignmentDebugger",
+        "AttributeWeightsManager",
+        "AuthenticationTest",
+        "Breadcrumb",
+        "CharacterTab",
+        "ClusteredBarChart",
+        "CompanySwitcher",
+        "CompetenceTab",
+        "CoreGroupAnalysisTabs",
+        "CoreGroupPerformanceCard",
+        "CoverageDashboard",
+        "CuriosityTab",
+        "DebugInviteTest",
+        "DownloadAnalyticsButton",
+        "EmployeeProfile",
+        "EmptyState",
+        "ErrorMessage",
+        "EvaluationConsensusCard",
+        "GeneratePDFButton",
+        "HistoricalClusteredBarChart",
+        "InviteManager",
+        "KeyboardShortcuts",
+        "LazyChart",
+        "LetterGrade",
+        "Notification",
+        "PDFViewer",
+        "PerformanceDashboard",
+        "PersonaQuickGlanceWidget",
+        "QuarterlyNotes",
+        "QuarterRangeSelector",
+        "RadarChart"
+      ]
+    },
+    "hooks": {
+      "missing": [
+        "useDataFetch",
+        "usePerformanceMonitoring"
+      ]
+    },
+    "edge_functions": {
+      "documented": [
+        "create-invite",
+        "accept-invite-minimal",
+        "invite-redirect",
+        "ai-coaching-report",
+        "ai-descriptive-review",
+        "ai-development-insights",
+        "ai-strengths-insights"
+      ],
+      "missing": [
+        "accept-invite-v2",
+        "test-cors",
+        "test-create-invite-debug",
+        "_shared/cors.ts"
+      ]
+    },
+    "environment_variables": {
+      "documented": [
+        "VITE_SUPABASE_URL",
+        "VITE_SUPABASE_ANON_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "RESEND_API_KEY",
+        "OPENAI_API_KEY",
+        "ANTHROPIC_API_KEY",
+        "VITE_APP_TITLE",
+        "VITE_APP_ENVIRONMENT",
+        "VITE_FEATURE_PDF_GENERATION",
+        "VITE_FEATURE_EMAIL_INVITES",
+        "VITE_ANALYTICS_ENABLED"
+      ],
+      "missing": [
+        "VITE_TENANCY_ENFORCED",
+        "VITE_ANALYTICS_ENDPOINT", 
+        "SITE_URL",
+        "VITE_APP_URL",
+        "NODE_ENV",
+        "VITE_FEATURE_ANALYTICS_DASHBOARD",
+        "VITE_PERFORMANCE_MONITORING",
+        "process.env.NODE_ENV"
+      ]
+    }
+  },
+  "recommendations": [
+    "Document missing React components with their props and usage patterns",
+    "Add documentation for custom hooks (useDataFetch, usePerformanceMonitoring)",
+    "Document test/debug Edge Functions or mark them as temporary",
+    "Complete environment variable documentation with examples and defaults",
+    "Add documentation for route parameters and query strings",
+    "Document PDF-related components and their dependencies"
+  ]
+}

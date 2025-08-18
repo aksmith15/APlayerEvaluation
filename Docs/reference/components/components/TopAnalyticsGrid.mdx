@@ -1,0 +1,396 @@
+# TopAnalyticsGrid Component
+
+Strategic performance overview component that displays core group analytics in a responsive two-card grid layout with comprehensive loading and error states.
+
+## Purpose & Usage Context
+
+The TopAnalyticsGrid component provides the primary strategic performance overview in the A-Player Evaluation System. It orchestrates the display of core group analytics through two specialized cards: CoreGroupPerformanceCard (bar chart + KPIs) and EvaluationConsensusCard (radar chart + consensus metrics).
+
+**Used in**: Employee analytics dashboards, strategic performance reviews, and core group analysis interfaces.
+
+## Props
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `data` | `CoreGroupAnalyticsResponse \| null` | N/A | Yes | Core group analytics data or null |
+| `isLoading` | `boolean` | `false` | No | Whether data is currently loading |
+| `error` | `string \| null` | `null` | No | Error message if data loading failed |
+| `employeeName` | `string` | `''` | No | Employee name for display context |
+| `quarterName` | `string` | `''` | No | Quarter name for display context |
+
+### CoreGroupAnalyticsResponse Interface
+```typescript
+interface CoreGroupAnalyticsResponse {
+  metadata: {
+    evaluatee_id: string;
+    evaluatee_name: string;
+    quarter_id: string;
+    quarter_name: string;
+    quarter_start_date: string;
+    quarter_end_date: string;
+    calculated_at: string;
+  };
+  core_groups: {
+    competence: CoreGroupData;
+    character: CoreGroupData;
+    curiosity: CoreGroupData;
+  };
+  consensus_metrics: ConsensusData;
+}
+```
+
+## Events & Callbacks
+
+### Data Display States
+- **Loading State**: Shows animated skeleton placeholders
+- **Error State**: Displays error messages with retry options
+- **Empty State**: Shows no-data message with context
+- **Success State**: Renders analytics cards with data
+
+### Child Component Integration
+- **CoreGroupPerformanceCard**: Left card with bar charts and KPIs
+- **EvaluationConsensusCard**: Right card with radar charts and consensus
+- **Data Propagation**: Passes analytics data to child components
+
+## Side Effects
+
+### State Management
+- **Loading States**: Comprehensive loading skeleton animations
+- **Error Handling**: User-friendly error message display
+- **Data Validation**: Handles null/undefined data gracefully
+
+### Responsive Behavior
+- **Grid Layout**: Two-column layout on large screens, single column on mobile
+- **Card Heights**: Equal height cards using CSS Grid
+- **Legend Display**: Responsive core group legend
+
+### Visual Feedback
+- **Core Group Legend**: Color-coded performance areas
+- **Data Quality**: Timestamp and date range indicators
+- **Progressive Enhancement**: Graceful degradation for missing data
+
+## Accessibility
+
+### Content Structure
+- **Semantic Headings**: Proper heading hierarchy for screen readers
+- **Descriptive Content**: Clear section descriptions and context
+- **Error Communication**: Accessible error and loading states
+
+### Visual Accessibility
+- **Color Coding**: Consistent color scheme with text labels
+- **Legend Support**: Clear visual and text indicators
+- **Contrast**: Sufficient contrast for all text elements
+
+### Screen Reader Support
+- **Loading Announcements**: Loading states announced appropriately
+- **Error Messages**: Clear error communication
+- **Data Context**: Metadata and context information accessible
+
+## Examples
+
+### Basic Usage
+```tsx
+import { TopAnalyticsGrid } from '@/components/ui';
+
+// Simple analytics grid display
+<TopAnalyticsGrid 
+  data={analyticsData}
+  isLoading={loading}
+  error={error}
+  employeeName="John Doe"
+  quarterName="Q4 2024"
+/>
+```
+
+### Real Application Usage
+
+#### Employee Analytics Dashboard (src/pages/EmployeeAnalytics.tsx:300-320)
+```tsx
+import { TopAnalyticsGrid } from '@/components/ui';
+
+const EmployeeAnalytics = () => {
+  const { employee } = useEmployee(employeeId);
+  const { quarter } = useQuarter(quarterId);
+  const { 
+    data: analyticsData, 
+    loading, 
+    error 
+  } = useCoreGroupAnalytics(employeeId, quarterId);
+  
+  return (
+    <div className="analytics-dashboard">
+      <EmployeeProfile employee={employee} />
+      
+      <TopAnalyticsGrid 
+        data={analyticsData}
+        isLoading={loading}
+        error={error}
+        employeeName={employee.name}
+        quarterName={quarter.name}
+      />
+      
+      <CoreGroupAnalysisTabs 
+        employeeId={employeeId}
+        quarterId={quarterId}
+      />
+    </div>
+  );
+};
+```
+
+#### Performance Review Interface
+```tsx
+const PerformanceReview = () => {
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [selectedQuarter, setSelectedQuarter] = useState(null);
+  
+  const { data, loading, error, refetch } = useCoreGroupAnalytics(
+    selectedEmployee?.id,
+    selectedQuarter?.id
+  );
+  
+  return (
+    <div className="performance-review">
+      <div className="controls mb-6">
+        <EmployeeSelector 
+          value={selectedEmployee}
+          onChange={setSelectedEmployee}
+        />
+        <QuarterSelector 
+          value={selectedQuarter}
+          onChange={setSelectedQuarter}
+        />
+        <Button onClick={refetch}>Refresh Data</Button>
+      </div>
+      
+      {selectedEmployee && selectedQuarter && (
+        <TopAnalyticsGrid 
+          data={data}
+          isLoading={loading}
+          error={error}
+          employeeName={selectedEmployee.name}
+          quarterName={selectedQuarter.name}
+        />
+      )}
+    </div>
+  );
+};
+```
+
+### Error Handling Example
+```tsx
+const RobustAnalyticsGrid = () => {
+  const [retryCount, setRetryCount] = useState(0);
+  const { data, loading, error, refetch } = useCoreGroupAnalytics(
+    employeeId, 
+    quarterId,
+    { retryCount }
+  );
+  
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
+    refetch();
+  };
+  
+  return (
+    <div className="analytics-container">
+      <TopAnalyticsGrid 
+        data={data}
+        isLoading={loading}
+        error={error}
+        employeeName={employee.name}
+        quarterName={quarter.name}
+      />
+      
+      {error && (
+        <div className="error-actions mt-4">
+          <Button onClick={handleRetry}>
+            Retry ({retryCount > 0 ? `Attempt ${retryCount + 1}` : 'First Attempt'})
+          </Button>
+          {retryCount > 2 && (
+            <Button variant="secondary" onClick={() => navigate('/help')}>
+              Contact Support
+            </Button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+```
+
+## State Management
+
+### Loading State
+```tsx
+// Comprehensive loading skeleton
+if (isLoading) {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {[1, 2].map(i => (
+        <div key={i} className="bg-white rounded-lg shadow-sm border border-secondary-200 p-6">
+          <div className="animate-pulse">
+            <div className="h-6 bg-secondary-200 rounded mb-4 w-3/4"></div>
+            <div className="h-4 bg-secondary-200 rounded mb-6 w-1/2"></div>
+            <div className="h-64 bg-secondary-200 rounded mb-4"></div>
+            <div className="flex justify-between">
+              {[1, 2, 3].map(j => (
+                <div key={j} className="h-16 bg-secondary-200 rounded w-24"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+### Error State
+```tsx
+// User-friendly error display
+if (error) {
+  return (
+    <div className="col-span-full bg-red-50 border border-red-200 rounded-lg p-6">
+      <div className="flex items-center">
+        <ErrorIcon className="h-5 w-5 text-red-400 mr-3" />
+        <div>
+          <h3 className="text-sm font-medium text-red-800">
+            Unable to load core group analytics
+          </h3>
+          <p className="mt-2 text-sm text-red-700">{error}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+### Empty State
+```tsx
+// No data available state
+if (!data) {
+  return (
+    <div className="col-span-full bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+      <div className="flex items-center">
+        <WarningIcon className="h-5 w-5 text-yellow-400 mr-3" />
+        <div>
+          <h3 className="text-sm font-medium text-yellow-800">
+            No core group data available
+          </h3>
+          <p className="mt-2 text-sm text-yellow-700">
+            Core group analytics are not available for {employeeName} in {quarterName}.
+            This may be because evaluation data is incomplete or still being processed.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+## Core Group System
+
+### Core Group Legend
+```tsx
+// Color-coded core group indicators
+const coreGroups = [
+  { name: 'Competence', color: 'blue', emoji: '🎯' },
+  { name: 'Character', color: 'green', emoji: '👥' },
+  { name: 'Curiosity', color: 'purple', emoji: '🚀' }
+];
+
+{coreGroups.map(group => (
+  <div key={group.name} className="flex items-center">
+    <div className={`w-3 h-3 bg-${group.color}-500 rounded-full mr-2`}></div>
+    <span className="text-secondary-600">{group.emoji} {group.name}</span>
+  </div>
+))}
+```
+
+### Data Quality Indicators
+```tsx
+// Metadata and timestamp display
+{data && (
+  <div className="mt-4 text-xs text-secondary-500 text-center">
+    Last calculated: {new Date(data.metadata.calculated_at).toLocaleDateString()} • 
+    Data from {data.metadata.quarter_start_date} to {data.metadata.quarter_end_date}
+  </div>
+)}
+```
+
+## Layout System
+
+### Grid Structure
+```css
+.analytics-grid {
+  @apply grid grid-cols-1 lg:grid-cols-2 gap-6;
+}
+
+.grid-header {
+  @apply mb-6 flex items-center justify-between;
+}
+
+.core-group-legend {
+  @apply hidden sm:flex items-center space-x-4 text-sm;
+}
+
+.mobile-legend {
+  @apply sm:hidden mt-4 flex flex-wrap justify-center gap-4 text-sm;
+}
+```
+
+### Card Layout
+```css
+.analytics-card {
+  @apply lg:col-span-1; /* Each card takes one column */
+}
+
+.card-container {
+  @apply h-full; /* Equal height cards */
+}
+```
+
+### Responsive Design
+```css
+/* Mobile-first responsive design */
+@media (max-width: 1024px) {
+  .analytics-grid {
+    @apply grid-cols-1; /* Single column on mobile */
+  }
+  
+  .core-group-legend {
+    @apply hidden; /* Hide desktop legend */
+  }
+  
+  .mobile-legend {
+    @apply flex; /* Show mobile legend */
+  }
+}
+```
+
+## Performance Notes
+
+### Component Integration
+- **Child Card Optimization**: Cards handle their own loading and error states
+- **Data Propagation**: Efficient prop passing to child components
+- **Memory Management**: Proper cleanup of component state
+
+### Loading Optimization
+- **Skeleton Animation**: Smooth loading animations
+- **Progressive Enhancement**: Content appears as data loads
+- **Error Recovery**: Clear error handling with retry options
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ui/TopAnalyticsGrid.tsx`](../../a-player-dashboard/src/components/ui/TopAnalyticsGrid.tsx) (lines 1-226)
+- **Child Components**: CoreGroupPerformanceCard, EvaluationConsensusCard
+- **Usage Examples**: Found in EmployeeAnalytics and performance review interfaces
+
+**🔗 Related Components:**
+- [CoreGroupPerformanceCard](./CoreGroupPerformanceCard.mdx) - Left grid component *(queued)*
+- [EvaluationConsensusCard](./EvaluationConsensusCard.mdx) - Right grid component *(queued)*
+- [CoreGroupAnalysisTabs](./CoreGroupAnalysisTabs.mdx) - Detailed analysis tabs
+- [Card](./Card.mdx) - Base card structure
+

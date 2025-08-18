@@ -1,0 +1,108 @@
+# ProtectedRoute Component
+
+Authentication wrapper component that controls access to protected routes based on user authentication status.
+
+## Purpose & Usage Context
+
+The ProtectedRoute component provides authentication-based access control throughout the A-Player Evaluation System. It ensures that protected pages are only accessible to authenticated users while redirecting unauthenticated users to the login page, and vice versa for public routes.
+
+**Used in**: Route definitions in App.tsx to wrap all pages requiring authentication control.
+
+## Props
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `children` | `React.ReactNode` | N/A | Yes | The component/page to render when access is granted |
+| `requireAuth` | `boolean` | `true` | No | Whether authentication is required to access this route |
+
+## Events & Callbacks
+
+### Navigation Events
+- **Redirect to Login**: Triggers when unauthenticated user accesses protected route
+- **Redirect to Dashboard**: Triggers when authenticated user accesses public route
+- **State Preservation**: Saves attempted location for post-login redirect
+
+## Side Effects
+
+### Route Protection
+- **Authentication Check**: Verifies user authentication status
+- **Navigation Control**: Redirects based on auth state and requirements
+- **Loading States**: Shows loading spinner during auth verification
+
+### State Management
+- **Location State**: Preserves intended destination for post-login redirect
+- **Auth Integration**: Uses AuthContext for authentication state
+
+## Accessibility
+
+### Loading States
+- **Loading Spinner**: Accessible loading indicator during auth check
+- **Clear Messaging**: "Verifying authentication..." message
+- **Focus Management**: Proper focus handling during transitions
+
+## Examples
+
+### Basic Usage
+```tsx
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+
+// Protected route (requires authentication)
+<Route 
+  path="/dashboard" 
+  element={
+    <ProtectedRoute>
+      <Dashboard />
+    </ProtectedRoute>
+  } 
+/>
+
+// Public route (redirects if authenticated)
+<Route 
+  path="/login" 
+  element={
+    <ProtectedRoute requireAuth={false}>
+      <Login />
+    </ProtectedRoute>
+  } 
+/>
+```
+
+### Real Application Usage
+
+All route definitions in App.tsx use ProtectedRoute:
+
+#### Protected Routes (src/App.tsx:64-78)
+```tsx
+<Route 
+  path={ROUTES.EMPLOYEE_SELECTION} 
+  element={
+    <ProtectedRoute>
+      <EmployeeSelection />
+    </ProtectedRoute>
+  } 
+/>
+```
+
+#### Public Routes (src/App.tsx:48-55)
+```tsx
+<Route 
+  path={ROUTES.LOGIN} 
+  element={
+    <ProtectedRoute requireAuth={false}>
+      <Login />
+    </ProtectedRoute>
+  } 
+/>
+```
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ProtectedRoute.tsx`](../../a-player-dashboard/src/components/ProtectedRoute.tsx) (lines 1-36)
+- **Usage Examples**: Found in App.tsx for all route definitions
+
+**🔗 Related Components:**
+- [LoadingSpinner](./LoadingSpinner.mdx) - Used during authentication verification
+- [useAuth](../hooks/useAuth.md) - Authentication hook used by ProtectedRoute
+
+

@@ -1,6 +1,10 @@
-// Debug Test for Create Invite Function
-// Purpose: Test environment variables and basic function execution
-// Date: February 1, 2025
+/**
+ * @category test
+ * @doc-ignore
+ * Debug Test for Create Invite Function
+ * Purpose: Test environment variables and basic function execution
+ * Date: February 1, 2025
+ */
 
 import { corsHeaders } from '../_shared/cors.ts'
 

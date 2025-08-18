@@ -1,0 +1,437 @@
+# EvaluationSurvey Component
+
+Comprehensive evaluation survey interface component that manages the complete employee evaluation workflow with multi-tenant support, progress tracking, and attribute-based assessments.
+
+## Purpose & Usage Context
+
+The EvaluationSurvey component provides the main survey interface for conducting employee evaluations in the A-Player Evaluation System. It handles secure token-based access, multi-tenant data isolation, comprehensive attribute evaluation, progress tracking, and survey submission with full validation and error handling.
+
+**Used in**: Employee evaluation workflows, performance assessment interfaces, and survey completion processes.
+
+## Props
+
+This component uses React Router parameters and doesn't accept direct props. It extracts data from:
+- **URL Parameters**: `assignmentId` from route parameters
+- **Query Parameters**: `token` from URL search parameters
+- **Authentication Context**: Current user information
+
+### URL Structure
+```
+/evaluation/:assignmentId?token=<survey_token>
+```
+
+## Events & Callbacks
+
+### Survey Lifecycle
+- **Survey Initialization**: Loads assignment and survey data using secure tokens
+- **Progress Tracking**: Automatically saves progress as user completes questions
+- **Validation**: Real-time validation of responses and survey completion
+- **Submission**: Handles final survey submission and status updates
+
+### Navigation Events
+- **Section Navigation**: Navigate between survey sections and attributes
+- **Progress Updates**: Update completion status and progress indicators
+- **Exit Handling**: Graceful handling of survey exit and navigation
+
+### Data Operations
+- **Auto-save**: Automatic saving of responses as user progresses
+- **Validation**: Real-time validation of required fields and responses
+- **Submission**: Final validation and submission processing
+
+## Side Effects
+
+### Data Management
+- **Token Validation**: Validates survey tokens for secure access
+- **Assignment Loading**: Loads assignment details and survey structure
+- **Response Persistence**: Saves user responses to database
+- **Progress Tracking**: Updates survey completion progress
+
+### Multi-Tenant Operations
+- **Company Context**: Sets appropriate company context for data isolation
+- **Tenant Logging**: Logs tenancy events for audit trails
+- **Data Isolation**: Ensures proper data separation between tenants
+
+### State Management
+- **Survey State**: Manages current survey session and responses
+- **Navigation State**: Tracks current section and progress
+- **Error State**: Handles and displays various error conditions
+
+## Accessibility
+
+### Survey Interface
+- **Form Accessibility**: Proper form labels, fieldsets, and legends
+- **Progress Communication**: Screen reader announcements for progress
+- **Error Communication**: Clear error messages and validation feedback
+
+### Navigation
+- **Keyboard Navigation**: Full keyboard accessibility for survey navigation
+- **Focus Management**: Proper focus handling during section changes
+- **Skip Navigation**: Ability to navigate between survey sections
+
+### Content Structure
+- **Semantic Structure**: Proper heading hierarchy and content organization
+- **Attribute Organization**: Clear structure for evaluation attributes
+- **Progress Indicators**: Accessible progress and completion feedback
+
+## Examples
+
+### Route Integration
+```tsx
+// Route configuration in App.tsx
+import { EvaluationSurvey } from '@/components/ui';
+
+<Route 
+  path="/evaluation/:assignmentId" 
+  element={<EvaluationSurvey />} 
+/>
+```
+
+### Real Application Usage
+
+#### Assignment Card Integration (src/components/ui/AssignmentCard.tsx:75-85)
+```tsx
+import { useNavigate } from 'react-router-dom';
+
+const AssignmentCard = ({ assignment }) => {
+  const navigate = useNavigate();
+  
+  const handleStartEvaluation = () => {
+    navigate(`/evaluation/${assignment.id}?token=${assignment.survey_token}`);
+  };
+  
+  return (
+    <Card>
+      {/* Assignment details */}
+      <Button onClick={handleStartEvaluation}>
+        Start Evaluation
+      </Button>
+    </Card>
+  );
+};
+```
+
+#### My Assignments Page Integration
+```tsx
+const MyAssignments = () => {
+  const navigate = useNavigate();
+  const { assignments } = useAssignments();
+  
+  const handleStartEvaluation = (assignmentId: string, surveyToken: string) => {
+    // Navigate to evaluation survey
+    navigate(`/evaluation/${assignmentId}?token=${surveyToken}`);
+  };
+  
+  return (
+    <div className="assignments-page">
+      <h1>My Evaluations</h1>
+      
+      <div className="assignments-grid">
+        {assignments.map(assignment => (
+          <AssignmentCard 
+            key={assignment.id}
+            assignment={assignment}
+            onStartEvaluation={handleStartEvaluation}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+```
+
+### Survey Progress Tracking
+```tsx
+// Example of survey progress integration
+const SurveyProgressTracker = () => {
+  const [surveyProgress, setSurveyProgress] = useState(null);
+  
+  useEffect(() => {
+    // Track survey progress for analytics
+    const trackProgress = (progress) => {
+      setSurveyProgress(progress);
+      
+      // Send to analytics
+      analytics.track('survey_progress', {
+        assignment_id: assignment.id,
+        completion_percentage: progress.completion_percentage,
+        section: progress.current_section
+      });
+    };
+    
+    // Listen for progress updates from EvaluationSurvey
+    window.addEventListener('survey-progress', trackProgress);
+    return () => window.removeEventListener('survey-progress', trackProgress);
+  }, []);
+  
+  return (
+    <div className="progress-tracker">
+      {surveyProgress && (
+        <div className="progress-display">
+          <div className="progress-bar">
+            <div 
+              className="progress-fill"
+              style={{ width: `${surveyProgress.completion_percentage}%` }}
+            />
+          </div>
+          <span className="progress-text">
+            {surveyProgress.completion_percentage}% Complete
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
+```
+
+## Survey Structure
+
+### Attribute Evaluation System
+```typescript
+// Core performance attributes evaluated
+const PERFORMANCE_ATTRIBUTES = [
+  'Reliability',
+  'Accountability for Action', 
+  'Quality of Work',
+  'Taking Initiative',
+  'Adaptability',
+  'Problem Solving Ability',
+  'Teamwork',
+  'Continuous Improvement',
+  'Communication Skills',
+  'Leadership'
+];
+```
+
+### Evaluation Scale
+```typescript
+interface EvaluationScale {
+  excellent: string;     // 4 points
+  good: string;         // 3 points  
+  below_expectation: string; // 2 points
+  poor: string;         // 1 point
+}
+
+// Example for Reliability attribute
+const reliabilityScale = {
+  excellent: 'Exceptionally reliable',
+  good: 'Generally reliable', 
+  below_expectation: 'Below standard',
+  poor: 'Fundamentally untrustworthy'
+};
+```
+
+### Question Types
+- **Attribute Rating**: Likert scale ratings for each performance attribute
+- **Open-ended Questions**: Text responses for detailed feedback
+- **Behavioral Examples**: Specific examples supporting ratings
+- **Development Suggestions**: Recommendations for improvement
+
+## Security & Multi-Tenancy
+
+### Token-Based Security
+```typescript
+// Secure survey access via tokens
+const validateSurveyAccess = async (assignmentId: string, token: string) => {
+  const assignment = await getAssignmentByToken(assignmentId, token);
+  if (!assignment) {
+    throw new Error('Invalid survey token or assignment not found');
+  }
+  return assignment;
+};
+```
+
+### Multi-Tenant Data Isolation
+```typescript
+// Company context setup for data isolation
+useEffect(() => {
+  const setupTenantContext = async () => {
+    if (assignment?.company_id) {
+      await setCompanyContext(assignment.company_id);
+      logTenancyEvent('survey_access', {
+        assignment_id: assignment.id,
+        company_id: assignment.company_id
+      });
+    }
+  };
+  
+  setupTenantContext();
+}, [assignment]);
+```
+
+### Data Protection
+- **Token Validation**: Cryptographic validation of survey tokens
+- **Session Management**: Secure session handling throughout survey
+- **Data Encryption**: Sensitive data encrypted in transit and at rest
+- **Audit Logging**: Comprehensive audit trail for compliance
+
+## Survey Flow Management
+
+### Progress Tracking
+```typescript
+interface SurveyProgress {
+  assignment_id: string;
+  questions_answered: number;
+  total_questions: number;
+  completion_percentage: number;
+  current_section: string;
+  last_updated: string;
+}
+```
+
+### Auto-save Implementation
+```typescript
+// Automatic saving of survey progress
+useEffect(() => {
+  const autoSave = async () => {
+    if (hasUnsavedChanges) {
+      try {
+        await saveSurveyProgress(surveyResponses);
+        setHasUnsavedChanges(false);
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+        setAutoSaveError(error.message);
+      }
+    }
+  };
+  
+  // Auto-save every 30 seconds
+  const interval = setInterval(autoSave, 30000);
+  return () => clearInterval(interval);
+}, [surveyResponses, hasUnsavedChanges]);
+```
+
+### Validation System
+```typescript
+// Comprehensive survey validation
+const validateSurveyCompletion = (responses: SurveyResponses) => {
+  const errors = [];
+  
+  // Check required attribute ratings
+  PERFORMANCE_ATTRIBUTES.forEach(attribute => {
+    if (!responses.ratings[attribute]) {
+      errors.push(`Rating required for ${attribute}`);
+    }
+  });
+  
+  // Check required open-ended responses
+  if (!responses.strengths?.trim()) {
+    errors.push('Strengths section is required');
+  }
+  
+  if (!responses.development_areas?.trim()) {
+    errors.push('Development areas section is required');
+  }
+  
+  return errors;
+};
+```
+
+## Styling System
+
+### Survey Layout
+```css
+.evaluation-survey {
+  @apply min-h-screen bg-gray-50;
+}
+
+.survey-container {
+  @apply max-w-4xl mx-auto px-4 py-8;
+}
+
+.survey-header {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6;
+}
+
+.survey-content {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+}
+```
+
+### Progress Indicators
+```css
+.progress-bar {
+  @apply w-full bg-gray-200 rounded-full h-2 mb-4;
+}
+
+.progress-fill {
+  @apply bg-blue-500 h-2 rounded-full transition-all duration-300;
+}
+
+.section-indicator {
+  @apply flex items-center justify-between text-sm text-gray-600 mb-4;
+}
+```
+
+### Question Styling
+```css
+.question-section {
+  @apply mb-8 p-6 bg-gray-50 rounded-lg;
+}
+
+.attribute-rating {
+  @apply grid grid-cols-1 md:grid-cols-4 gap-4 mb-6;
+}
+
+.rating-option {
+  @apply p-4 border-2 border-gray-200 rounded-lg cursor-pointer
+         hover:border-blue-300 transition-colors;
+}
+
+.rating-selected {
+  @apply border-blue-500 bg-blue-50;
+}
+```
+
+## Error Handling
+
+### Common Error Scenarios
+```typescript
+const errorHandling = {
+  'invalid_token': 'Survey token is invalid or expired',
+  'assignment_not_found': 'Assignment not found or access denied',
+  'survey_completed': 'This survey has already been completed',
+  'network_error': 'Network connection error. Please check your connection.',
+  'validation_error': 'Please complete all required fields',
+  'save_error': 'Failed to save survey progress. Please try again.'
+};
+```
+
+### Error Recovery
+- **Auto-retry**: Automatic retry for network errors
+- **Local Storage**: Backup responses to prevent data loss
+- **Progressive Enhancement**: Survey works even with limited connectivity
+- **Error Messaging**: Clear, actionable error messages for users
+
+## Performance Notes
+
+### Component Optimization
+- **Lazy Loading**: Survey sections loaded as needed
+- **Auto-save**: Efficient background saving without blocking UI
+- **Memory Management**: Proper cleanup of intervals and event listeners
+
+### Data Management
+- **Efficient Queries**: Optimized database queries for survey data
+- **Caching**: Strategic caching of survey structure and metadata
+- **Batch Operations**: Efficient batch saving of responses
+
+### User Experience
+- **Progressive Loading**: Survey interface loads progressively
+- **Responsive Design**: Works across all device sizes
+- **Offline Support**: Basic offline capabilities for survey completion
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ui/EvaluationSurvey.tsx`](../../a-player-dashboard/src/components/ui/EvaluationSurvey.tsx) (lines 1-3519)
+- **Assignment Service**: [`src/services/assignmentService.ts`](../../a-player-dashboard/src/services/assignmentService.ts)
+- **Attribute Constants**: [`src/constants/attributes.ts`](../../a-player-dashboard/src/constants/attributes.ts)
+- **Usage Examples**: Route integration and assignment card linking
+
+**🔗 Related Components:**
+- [AssignmentCard](./AssignmentCard.mdx) - Links to survey via tokens
+- [Card](./Card.mdx) - Base container styling
+- [Button](./Button.mdx) - Navigation and action buttons
+- [LoadingSpinner](./LoadingSpinner.mdx) - Loading states
+- [ErrorMessage](./ErrorMessage.mdx) - Error state display
+- [useAuth Hook](../hooks/useAuth.md) - Authentication integration
+

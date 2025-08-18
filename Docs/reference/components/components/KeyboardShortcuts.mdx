@@ -1,0 +1,319 @@
+# KeyboardShortcuts Component
+
+Keyboard navigation helper component displaying available keyboard shortcuts to improve application accessibility and user efficiency.
+
+## Purpose & Usage Context
+
+The KeyboardShortcuts component provides a discoverable way for users to learn and access keyboard navigation shortcuts throughout the A-Player Evaluation System. It enhances accessibility and power-user efficiency by making keyboard navigation visible and accessible.
+
+**Used in**: Global application interface as a floating helper, typically in page corners for easy access.
+
+## Props
+
+This component takes no props and manages its own visibility state internally.
+
+## Events & Callbacks
+
+### State Management
+- **`setIsVisible`**: Controls whether the shortcuts panel is expanded or collapsed
+- **Toggle Display**: Switches between floating button and expanded panel views
+
+### User Interactions
+- **Show Shortcuts**: Click floating button to expand shortcuts panel
+- **Hide Shortcuts**: Click close button to collapse back to floating button
+
+## Side Effects
+
+### UI State Changes
+- **Panel Expansion**: Toggles between compact button and detailed panel
+- **Z-Index Management**: Ensures shortcuts panel appears above other content
+- **Focus Management**: Should handle focus appropriately when toggling states
+
+### Accessibility Features
+- **Keyboard Shortcut Discovery**: Makes available shortcuts visible to users
+- **Visual Keyboard Key Representation**: Shows key combinations in styled kbd elements
+
+## Accessibility
+
+### ARIA Support
+- **Button Role**: Toggle button properly identified
+- **Title Attribute**: "Show keyboard shortcuts" tooltip for floating button
+- **Close Button**: Clear close functionality for expanded panel
+
+### Screen Reader Features
+- **Descriptive Text**: Clear descriptions for each keyboard shortcut
+- **Key Combinations**: Properly announced keyboard key combinations
+- **Instructions**: Helpful text about using shortcuts anywhere on page
+
+### Keyboard Navigation
+- **Focus Management**: Focusable trigger and close buttons
+- **Escape Handling**: Should close panel when Escape is pressed
+- **Tab Navigation**: Proper tab order within expanded panel
+
+## Examples
+
+### Basic Usage
+```tsx
+import { KeyboardShortcuts } from '@/components/ui';
+
+// Global keyboard shortcuts helper
+<KeyboardShortcuts />
+```
+
+### Real Application Usage
+
+#### Page Layout Integration (src/pages/EmployeeSelection.tsx:230-235)
+```tsx
+<div className="min-h-screen bg-secondary-50">
+  <main className="container mx-auto px-4 py-8">
+    {/* Page content */}
+  </main>
+  
+  {/* Global keyboard shortcuts */}
+  <KeyboardShortcuts />
+</div>
+```
+
+#### With Navigation Context
+```tsx
+import { KeyboardShortcuts } from '@/components/ui';
+import { useNavigation } from '@/contexts/NavigationContext';
+
+const PageLayout = ({ children }) => {
+  const { shortcuts } = useNavigation();
+  
+  return (
+    <div className="page-layout">
+      {children}
+      <KeyboardShortcuts />
+    </div>
+  );
+};
+```
+
+### Integration with Keyboard Handler
+```tsx
+// Example keyboard event handler that works with shortcuts
+const useKeyboardShortcuts = () => {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Alt + B: Go back
+      if (event.altKey && event.key === 'b') {
+        event.preventDefault();
+        navigate(-1);
+      }
+      
+      // Alt + H: Go to Employee Selection  
+      if (event.altKey && event.key === 'h') {
+        event.preventDefault();
+        navigate('/employees');
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [navigate]);
+};
+
+// Usage in main app
+const App = () => {
+  useKeyboardShortcuts(); // Enable global shortcuts
+  
+  return (
+    <div className="app">
+      <Routes>
+        {/* App routes */}
+      </Routes>
+      <KeyboardShortcuts />
+    </div>
+  );
+};
+```
+
+## Current Shortcuts
+
+The component displays the following keyboard shortcuts:
+
+| Keys | Description | Action |
+|------|-------------|--------|
+| `Alt + B` | Go back | Navigate to previous page |
+| `Alt + H` | Go to Employee Selection | Navigate to main dashboard |
+
+### Extending Shortcuts
+```tsx
+// Example of extending shortcuts for specific pages
+const pageShortcuts: Shortcut[] = [
+  { keys: 'Alt + B', description: 'Go back' },
+  { keys: 'Alt + H', description: 'Go to Employee Selection' },
+  { keys: 'Ctrl + F', description: 'Focus search' },
+  { keys: 'Ctrl + N', description: 'New assignment' },
+  { keys: 'Esc', description: 'Close modal' }
+];
+
+// Dynamic shortcuts based on page context
+const useContextualShortcuts = (pageType: string) => {
+  const baseShortcuts = [
+    { keys: 'Alt + B', description: 'Go back' },
+    { keys: 'Alt + H', description: 'Go to Employee Selection' }
+  ];
+  
+  const pageSpecificShortcuts = {
+    'analytics': [
+      { keys: 'Ctrl + E', description: 'Export data' },
+      { keys: 'Ctrl + R', description: 'Refresh charts' }
+    ],
+    'assignments': [
+      { keys: 'Ctrl + N', description: 'New assignment' },
+      { keys: 'Ctrl + S', description: 'Save assignment' }
+    ]
+  };
+  
+  return [...baseShortcuts, ...(pageSpecificShortcuts[pageType] || [])];
+};
+```
+
+## Styling System
+
+### Floating Button
+```css
+.shortcuts-button {
+  @apply fixed bottom-4 right-4 bg-secondary-600 text-white 
+         p-2 rounded-full shadow-lg hover:bg-secondary-700 
+         transition-colors z-50;
+}
+
+.shortcuts-icon {
+  @apply w-5 h-5;
+}
+```
+
+### Expanded Panel
+```css
+.shortcuts-panel {
+  @apply fixed bottom-4 right-4 bg-white border border-secondary-200 
+         rounded-lg shadow-lg p-4 z-50 max-w-xs;
+}
+
+.shortcuts-header {
+  @apply flex justify-between items-center mb-3;
+}
+
+.shortcuts-title {
+  @apply font-medium text-secondary-800;
+}
+
+.close-button {
+  @apply text-secondary-400 hover:text-secondary-600;
+}
+```
+
+### Shortcut Items
+```css
+.shortcut-item {
+  @apply flex justify-between items-center text-sm;
+}
+
+.shortcut-description {
+  @apply text-secondary-600;
+}
+
+.shortcut-keys {
+  @apply bg-secondary-100 text-secondary-700 px-2 py-1 
+         rounded text-xs font-mono;
+}
+```
+
+### Footer Text
+```css
+.shortcuts-footer {
+  @apply mt-3 pt-3 border-t border-secondary-200;
+}
+
+.shortcuts-instruction {
+  @apply text-xs text-secondary-500;
+}
+```
+
+## Design System Integration
+
+### Color Scheme
+- **Button**: Secondary color scheme (`bg-secondary-600`)
+- **Panel**: White background with gray borders
+- **Text**: Hierarchical gray text colors
+- **Keys**: Light gray background for kbd elements
+
+### Typography
+- **Title**: Medium weight for prominence
+- **Descriptions**: Small text for compact display
+- **Keys**: Monospace font for keyboard key representation
+
+### Positioning
+- **Fixed Position**: Always visible in bottom-right corner
+- **High Z-Index**: Appears above all other content
+- **Responsive**: Maintains position across screen sizes
+
+## Enhancement Opportunities
+
+### Dynamic Shortcuts
+```tsx
+interface EnhancedKeyboardShortcutsProps {
+  shortcuts?: Shortcut[];
+  position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
+  theme?: 'light' | 'dark';
+}
+
+// Enhanced component with configurable shortcuts
+const EnhancedKeyboardShortcuts: React.FC<EnhancedKeyboardShortcutsProps> = ({
+  shortcuts = defaultShortcuts,
+  position = 'bottom-right',
+  theme = 'light'
+}) => {
+  // Implementation with configurable options
+};
+```
+
+### Keyboard Handler Integration
+```tsx
+// Hook for managing global keyboard shortcuts
+const useGlobalShortcuts = (shortcuts: Shortcut[]) => {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      shortcuts.forEach(shortcut => {
+        if (matchesShortcut(event, shortcut.keys)) {
+          event.preventDefault();
+          shortcut.action();
+        }
+      });
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [shortcuts]);
+};
+```
+
+## Performance Notes
+
+### Component Efficiency
+- **Lightweight State**: Minimal internal state management
+- **Event Handling**: Efficient toggle interactions
+- **DOM Minimal**: Small DOM footprint
+- **No Heavy Operations**: Simple show/hide functionality
+
+### Accessibility Performance
+- **Fast Toggle**: Instant state changes
+- **Clear Focus**: Quick focus management
+- **Screen Reader**: Efficient announcements
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ui/KeyboardShortcuts.tsx`](../../a-player-dashboard/src/components/ui/KeyboardShortcuts.tsx) (lines 1-62)
+- **Usage Examples**: Found in EmployeeSelection and other page components
+
+**🔗 Related Components:**
+- Navigation components for keyboard shortcut integration
+- Global keyboard event handlers
+- Accessibility enhancement utilities
+
+

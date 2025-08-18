@@ -1,0 +1,145 @@
+# ErrorBoundary Component
+
+Application-level error handling wrapper component that catches JavaScript errors and provides recovery options.
+
+## Purpose & Usage Context
+
+The ErrorBoundary component provides a safety net for the entire A-Player Evaluation System by catching JavaScript errors that would otherwise crash the application. It displays user-friendly error messages and provides recovery options while logging detailed error information for debugging.
+
+**Used in**: Application root level, route wrappers, and critical component boundaries for error isolation.
+
+## Props
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `children` | `ReactNode` | N/A | Yes | Child components to be wrapped in error boundary |
+| `fallback` | `ReactNode` | `undefined` | No | Custom fallback UI to display when error occurs |
+
+## Events & Callbacks
+
+### Error Lifecycle
+- **`getDerivedStateFromError`**: Static method that sets error state when error occurs
+- **`componentDidCatch`**: Logs error details and updates component state with error info
+
+### Recovery Actions
+- **Refresh Page**: Reloads the entire application
+- **Try Again**: Resets error boundary state to attempt re-rendering
+
+## Side Effects
+
+### Error Logging
+- **Console Logging**: Detailed error and component stack information
+- **Error State Management**: Tracks error occurrence and details
+- **Development Mode**: Enhanced error display with stack traces
+
+### UI State Changes
+- **Error Display**: Full-screen error interface replaces normal content
+- **Recovery Options**: Provides user actions to resolve error state
+- **Development Details**: Shows technical error information in development mode
+
+## Accessibility
+
+### Error Communication
+- **Semantic HTML**: Proper heading hierarchy and structure
+- **Screen Reader Support**: Clear error messaging
+- **Focus Management**: Focusable recovery buttons
+- **Visual Hierarchy**: Clear error state presentation
+
+### Recovery Options
+- **Keyboard Access**: All recovery actions keyboard accessible
+- **Clear Instructions**: User-friendly error explanations
+- **Action Clarity**: Distinct recovery button options
+
+## Examples
+
+### Basic Usage
+```tsx
+import { ErrorBoundary } from '@/components/ui';
+
+// Application-level error boundary
+<ErrorBoundary>
+  <App />
+</ErrorBoundary>
+
+// Route-level error boundary
+<ErrorBoundary>
+  <EmployeeAnalytics />
+</ErrorBoundary>
+```
+
+### Real Application Usage
+
+#### App Root Error Boundary (src/main.tsx:16-20)
+```tsx
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
+  </StrictMode>,
+)
+```
+
+#### Route Error Boundary (src/App.tsx:40-45)
+```tsx
+return (
+  <ErrorBoundary>
+    <AuthProvider>
+      <Router>
+        <NavigationProvider>
+          <div className="App">
+            {/* Route content */}
+          </div>
+        </NavigationProvider>
+      </Router>
+    </AuthProvider>
+  </ErrorBoundary>
+);
+```
+
+### Custom Fallback Usage
+```tsx
+// Custom error fallback component
+const CustomErrorFallback = ({ error, resetError }) => (
+  <div className="error-container">
+    <h2>Oops! Something went wrong</h2>
+    <p>We apologize for the inconvenience.</p>
+    <button onClick={resetError}>Try Again</button>
+  </div>
+);
+
+// Error boundary with custom fallback
+<ErrorBoundary fallback={<CustomErrorFallback />}>
+  <CriticalComponent />
+</ErrorBoundary>
+```
+
+## Error Handling Features
+
+### Development Mode
+- **Full Error Details**: Stack traces and component stacks
+- **Enhanced Debugging**: Comprehensive error information
+- **Console Logging**: Detailed error tracking
+
+### Production Mode
+- **User-Friendly Messages**: Clean error presentation
+- **Recovery Options**: Clear action paths
+- **Error Reporting**: Structured error data for monitoring
+
+### Recovery Mechanisms
+- **Page Refresh**: Complete application reload
+- **State Reset**: Boundary state reset for retry
+- **Graceful Degradation**: Maintains application structure
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ui/ErrorBoundary.tsx`](../../a-player-dashboard/src/components/ui/ErrorBoundary.tsx) (lines 1-99)
+- **Usage Examples**: Found in main.tsx and App.tsx for application-level error handling
+
+**🔗 Related Components:**
+- [ErrorMessage](./ErrorMessage.mdx) - Used for non-boundary errors
+- [LoadingSpinner](./LoadingSpinner.mdx) - Alternative for loading states
+- [Button](./Button.mdx) - Used for recovery actions
+
+

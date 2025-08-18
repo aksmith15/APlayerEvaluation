@@ -1,0 +1,343 @@
+# SearchInput Component
+
+Search functionality component providing consistent search interface with accessibility features.
+
+## Purpose & Usage Context
+
+The SearchInput component provides a standardized search interface throughout the A-Player Evaluation System. It offers immediate search functionality with proper accessibility features, visual feedback, and integration with search and filtering operations across the application.
+
+**Used in**: Employee lists, data filtering, content discovery, and any interface requiring search functionality.
+
+## Props
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `value` | `string` | N/A | Yes | Current search input value controlled by parent |
+| `onChange` | `(value: string) => void` | N/A | Yes | Callback fired when search value changes |
+| `placeholder` | `string` | `"Search..."` | No | Placeholder text displayed when input is empty |
+| `label` | `string` | `undefined` | No | Optional label displayed above the search input |
+| `id` | `string` | `"search"` | No | HTML id attribute for the input element |
+| `className` | `string` | `''` | No | Additional CSS classes for the container |
+| `ariaDescribedBy` | `string` | `undefined` | No | ID of element that describes the search input |
+| `required` | `boolean` | `false` | No | Whether the search input is required |
+| `autoComplete` | `string` | `"off"` | No | HTML autocomplete attribute value |
+
+## Events & Callbacks
+
+### Primary Events
+- **`onChange`**: Fired immediately as user types, receives the current input value
+- **`onFocus`**: Standard input focus event (inherited from HTML input)
+- **`onBlur`**: Standard input blur event (inherited from HTML input)
+
+### Search Behavior
+- **Real-time Search**: Updates on every keystroke
+- **Controlled Component**: Parent manages search state
+- **Debouncing**: Should be implemented by parent component for API calls
+
+## Side Effects
+
+### Visual Feedback
+- **Search Icon**: Magnifying glass icon provides visual context
+- **Focus States**: Standard input focus styling with outline
+- **Value Display**: Shows current search term clearly
+
+### Accessibility Announcements
+- **Live Region**: Screen readers announce search result updates
+- **Role Identification**: `role="searchbox"` identifies search functionality
+- **Label Association**: Proper label-input relationship
+
+## Accessibility
+
+### ARIA Support
+- **`role="searchbox"`**: Identifies input as search functionality
+- **`aria-label`**: Descriptive label for screen readers
+- **`aria-describedby`**: Links to descriptive content
+- **`aria-required`**: Indicates if search is required
+- **`aria-live="polite"`**: Announces search result updates
+
+### Screen Reader Features
+- **Label Association**: `htmlFor` links label to input
+- **Live Updates**: Search results announced as they change
+- **Required Indicator**: Visual and screen reader indication
+- **Icon Accessibility**: Search icon marked as decorative
+
+### Keyboard Navigation
+- **Tab Navigation**: Focusable in tab order
+- **Text Input**: Full keyboard text input support
+- **Standard Keys**: Cut, copy, paste, select all support
+- **Focus Management**: Clear focus indicators
+
+### Visual Accessibility
+- **High Contrast**: Clear input borders and text
+- **Focus Indicators**: Visible focus outline
+- **Icon Clarity**: Recognizable search icon
+- **Required Indicator**: Red asterisk for required fields
+
+## Examples
+
+### Basic Usage
+```tsx
+import { SearchInput } from '@/components/ui';
+
+// Simple search input
+const [search, setSearch] = useState('');
+
+<SearchInput 
+  value={search}
+  onChange={setSearch}
+  placeholder="Search employees..."
+/>
+```
+
+### Real Application Usage
+
+#### Employee Search (src/pages/EmployeeSelection.tsx:85-90)
+```tsx
+<SearchInput
+  value={searchTerm}
+  onChange={setSearchTerm}
+  placeholder="Search employees by name or department..."
+  label="Employee Search"
+  className="mb-6"
+/>
+```
+
+#### Assignment Filtering (src/pages/AssignmentManagement.tsx:120-125)
+```tsx
+<SearchInput
+  value={filters.search}
+  onChange={(value) => setFilters(prev => ({ ...prev, search: value }))}
+  placeholder="Search assignments..."
+  id="assignment-search"
+/>
+```
+
+### Advanced Search Usage
+```tsx
+// Search with debouncing
+const [searchTerm, setSearchTerm] = useState('');
+const [debouncedSearch, setDebouncedSearch] = useState('');
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setDebouncedSearch(searchTerm);
+  }, 300);
+
+  return () => clearTimeout(timer);
+}, [searchTerm]);
+
+<SearchInput
+  value={searchTerm}
+  onChange={setSearchTerm}
+  placeholder="Search with debounced API calls..."
+  label="Employee Search"
+/>
+
+// Search with validation
+<SearchInput
+  value={search}
+  onChange={setSearch}
+  placeholder="Enter at least 3 characters..."
+  required
+  ariaDescribedBy="search-help"
+  label="Required Search"
+/>
+<div id="search-help" className="text-sm text-gray-600">
+  Search requires at least 3 characters
+</div>
+```
+
+### Integrated Search Patterns
+```tsx
+// Search with results display
+const [searchTerm, setSearchTerm] = useState('');
+const [results, setResults] = useState([]);
+const [searching, setSearching] = useState(false);
+
+const handleSearch = async (value) => {
+  setSearchTerm(value);
+  if (value.length >= 2) {
+    setSearching(true);
+    const results = await searchEmployees(value);
+    setResults(results);
+    setSearching(false);
+  } else {
+    setResults([]);
+  }
+};
+
+<div>
+  <SearchInput
+    value={searchTerm}
+    onChange={handleSearch}
+    placeholder="Search employees..."
+    label="Employee Search"
+    ariaDescribedBy="search-results"
+  />
+  
+  <div id="search-results" className="mt-4">
+    {searching && <LoadingSpinner size="sm" />}
+    {results.length > 0 && (
+      <div>Found {results.length} employees</div>
+    )}
+    {searchTerm && results.length === 0 && !searching && (
+      <div>No employees found for "{searchTerm}"</div>
+    )}
+  </div>
+</div>
+
+// Search with filters
+<div className="space-y-4">
+  <SearchInput
+    value={searchTerm}
+    onChange={setSearchTerm}
+    placeholder="Search employees..."
+    label="Search & Filter"
+  />
+  
+  <div className="flex gap-4">
+    <select 
+      value={departmentFilter}
+      onChange={(e) => setDepartmentFilter(e.target.value)}
+      aria-label="Filter by department"
+    >
+      <option value="">All Departments</option>
+      <option value="engineering">Engineering</option>
+      <option value="sales">Sales</option>
+    </select>
+    
+    <select 
+      value={roleFilter}
+      onChange={(e) => setRoleFilter(e.target.value)}
+      aria-label="Filter by role"
+    >
+      <option value="">All Roles</option>
+      <option value="manager">Manager</option>
+      <option value="employee">Employee</option>
+    </select>
+  </div>
+</div>
+```
+
+### Accessibility Examples
+```tsx
+// Comprehensive accessibility
+<SearchInput
+  value={search}
+  onChange={setSearch}
+  label="Employee Search"
+  placeholder="Enter employee name or ID..."
+  id="employee-search"
+  ariaDescribedBy="search-instructions"
+  required
+  autoComplete="off"
+/>
+<div id="search-instructions" className="sr-only">
+  Search by employee name, department, or ID number. 
+  Results will appear automatically as you type.
+</div>
+
+// Search with error state
+<SearchInput
+  value={search}
+  onChange={setSearch}
+  label="Employee Search"
+  ariaDescribedBy={error ? "search-error" : "search-help"}
+  className={error ? "border-red-500" : ""}
+/>
+{error && (
+  <div id="search-error" className="text-red-600 text-sm mt-1">
+    {error}
+  </div>
+)}
+```
+
+## Styling System
+
+### Container Layout
+```css
+.search-container {
+  @apply relative;
+}
+
+.search-label {
+  @apply block text-sm font-medium text-secondary-700 mb-2;
+}
+
+.required-indicator {
+  @apply text-red-500 ml-1;
+}
+```
+
+### Input Styling
+```css
+.input-field {
+  @apply w-full px-4 py-2 border border-secondary-300 rounded-lg
+         focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+         placeholder-secondary-400;
+}
+
+.search-input {
+  @apply pl-10; /* Space for search icon */
+}
+```
+
+### Icon Styling
+```css
+.search-icon {
+  @apply absolute inset-y-0 left-0 pl-3 flex items-center 
+         pointer-events-none h-5 w-5 text-secondary-400;
+}
+```
+
+## Design System Integration
+
+### Color Scheme
+- **Border**: Light gray (`border-secondary-300`)
+- **Focus**: Primary color (`focus:ring-primary-500`)
+- **Icon**: Secondary gray (`text-secondary-400`)
+- **Label**: Dark gray (`text-secondary-700`)
+
+### Typography
+- **Label**: Small, medium weight (`text-sm font-medium`)
+- **Input**: Standard body text
+- **Placeholder**: Lighter gray for visual hierarchy
+
+### Spacing System
+- **Padding**: Standard input padding (`px-4 py-2`)
+- **Icon Space**: Left padding for icon (`pl-10`)
+- **Label Margin**: Bottom margin (`mb-2`)
+
+## Performance Notes
+
+### Search Optimization
+- **Controlled Input**: Efficient re-rendering
+- **Immediate Feedback**: No input lag
+- **Debouncing**: Recommend parent-level implementation
+- **Memory Efficient**: No internal state or subscriptions
+
+### Component Efficiency
+- **Lightweight**: Minimal DOM structure
+- **Event Handling**: Efficient onChange callback
+- **No Side Effects**: Pure input component
+- **Accessibility**: Optimized ARIA attributes
+
+### Integration Performance
+- **Real-time Search**: Suitable for live filtering
+- **API Integration**: Works with debounced requests
+- **State Management**: Compatible with all state solutions
+- **SSR Safe**: No client-only dependencies
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ui/SearchInput.tsx`](../../a-player-dashboard/src/components/ui/SearchInput.tsx) (lines 1-72)
+- **Tests**: [`src/components/ui/SearchInput.test.tsx`](../../a-player-dashboard/src/components/ui/SearchInput.test.tsx)
+- **Usage Examples**: Found in 4+ files across employee selection and data filtering interfaces
+
+**🔗 Related Components:**
+- [LoadingSpinner](./LoadingSpinner.mdx) - Used during search operations
+- [ErrorMessage](./ErrorMessage.mdx) - Used for search error states
+- [Card](./Card.mdx) - Often contains search results
+
+

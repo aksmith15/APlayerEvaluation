@@ -1,0 +1,825 @@
+﻿{
+    "queries":  [
+                    {
+                        "name":  "fks",
+                        "path":  "reference/db/queries/fks.md"
+                    },
+                    {
+                        "name":  "grants",
+                        "path":  "reference/db/queries/grants.md"
+                    },
+                    {
+                        "name":  "indexes",
+                        "path":  "reference/db/queries/indexes.md"
+                    },
+                    {
+                        "name":  "pks",
+                        "path":  "reference/db/queries/pks.md"
+                    },
+                    {
+                        "name":  "rls",
+                        "path":  "reference/db/queries/rls.md"
+                    },
+                    {
+                        "name":  "sequences",
+                        "path":  "reference/db/queries/sequences.md"
+                    },
+                    {
+                        "name":  "tables_and_columns",
+                        "path":  "reference/db/queries/tables_and_columns.md"
+                    },
+                    {
+                        "name":  "triggers",
+                        "path":  "reference/db/queries/triggers.md"
+                    },
+                    {
+                        "name":  "views",
+                        "path":  "reference/db/queries/views.md"
+                    },
+                    {
+                        "name":  "create_profiles_for_existing_auth",
+                        "path":  "reference/db/queries/create_profiles_for_existing_auth.md"
+                    },
+                    {
+                        "name":  "debug_auth_users",
+                        "path":  "reference/db/queries/debug_auth_users.md"
+                    },
+                    {
+                        "name":  "populate_profiles_table",
+                        "path":  "reference/db/queries/populate_profiles_table.md"
+                    }
+                ],
+    "functions":  [
+                      {
+                          "name":  "analyze_persona_distribution",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "calculate_all_core_group_scores",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "calculate_core_group_scores",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "calculate_core_group_scores_with_consensus",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "calculate_overall_weighted_score",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "calculate_weighted_attribute_score",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "check_evaluation_completion",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "check_evaluation_completion_manual",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "classify_all_personas_in_quarter",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "classify_employee_persona",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "cleanup_expired_invites",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "create_assignment_safe",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "current_company_id",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "debug_assignment_status_auth",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "enforce_company_id",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "generate_invite_token",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "get_attribute_weight",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "get_company_role",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "get_core_group_for_attribute",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "get_current_user_company_id",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "get_current_user_people_id",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "get_letter_grade",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "get_people_id_from_auth",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "get_user_company_from_auth",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "handle_auth_user_jwt_claims",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "is_admin",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "is_admin_user",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "is_company_admin",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "is_company_member",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "is_current_user_admin",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "is_email_already_invited",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "is_people_admin",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "is_super_admin",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "is_super_admin_for_company",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "is_super_admin_jwt_only",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "recalculate_completion_status",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "set_invite_token",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "set_updated_at",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "set_user_jwt_claims",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "switch_company",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "test_assignment_rls_debug",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "test_attribute_scores_rls_debug",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "test_submissions_rls_debug",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "trigger_attribute_ai_analysis",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "update_employee_quarter_notes_updated_at",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      },
+                      {
+                          "name":  "update_updated_at_column",
+                          "security":  "",
+                          "language":  "sql",
+                          "returns":  "",
+                          "volatility":  "",
+                          "args":  ""
+                      }
+                  ],
+    "generated_at":  "2025-08-18T11:26:38Z",
+    "schema_file":  "_generated/schema_public.sql",
+    "tables":  [
+                   {
+                       "rls_enabled":  false,
+                       "name":  "attribute_scores",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   },
+                   {
+                       "rls_enabled":  false,
+                       "name":  "evaluation_cycles",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   },
+                   {
+                       "rls_enabled":  false,
+                       "name":  "people",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   },
+                   {
+                       "rls_enabled":  false,
+                       "name":  "submissions",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   },
+                   {
+                       "rls_enabled":  false,
+                       "name":  "analysis_jobs",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   },
+                   {
+                       "rls_enabled":  false,
+                       "name":  "app_config",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   },
+                   {
+                       "rls_enabled":  false,
+                       "name":  "assignment_submissions",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   },
+                   {
+                       "rls_enabled":  false,
+                       "name":  "evaluation_assignments",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   },
+                   {
+                       "rls_enabled":  false,
+                       "name":  "attribute_responses",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   },
+                   {
+                       "rls_enabled":  false,
+                       "name":  "attribute_weights",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   },
+                   {
+                       "rls_enabled":  false,
+                       "name":  "companies",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   },
+                   {
+                       "rls_enabled":  false,
+                       "name":  "company_memberships",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   },
+                   {
+                       "rls_enabled":  false,
+                       "name":  "employee_quarter_notes",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   },
+                   {
+                       "rls_enabled":  false,
+                       "name":  "evaluation_completion_status",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   },
+                   {
+                       "rls_enabled":  false,
+                       "name":  "invitations",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   },
+                   {
+                       "rls_enabled":  false,
+                       "name":  "invites",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   },
+                   {
+                       "rls_enabled":  false,
+                       "name":  "profiles",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   },
+                   {
+                       "rls_enabled":  false,
+                       "name":  "reports",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   },
+                   {
+                       "rls_enabled":  false,
+                       "name":  "webhook_logs",
+                       "columns":  [
+
+                                   ],
+                       "foreign_keys":  [
+
+                                        ],
+                       "primary_key":  [
+
+                                       ],
+                       "policies":  [
+
+                                    ],
+                       "unique":  [
+
+                                  ]
+                   }
+               ],
+    "views":  [
+                  {
+                      "name":  "weighted_evaluation_scores"
+                  },
+                  {
+                      "name":  "quarter_final_scores"
+                  },
+                  {
+                      "name":  "a_player_summary"
+                  },
+                  {
+                      "name":  "assignment_details"
+                  },
+                  {
+                      "name":  "assignment_statistics"
+                  },
+                  {
+                      "name":  "submission_summary"
+                  },
+                  {
+                      "name":  "attribute_score_summary"
+                  },
+                  {
+                      "name":  "core_group_scores"
+                  },
+                  {
+                      "name":  "core_group_scores_with_consensus"
+                  },
+                  {
+                      "name":  "core_group_summary"
+                  },
+                  {
+                      "name":  "grade_distribution"
+                  },
+                  {
+                      "name":  "quarter_core_group_trends"
+                  }
+              ]
+}

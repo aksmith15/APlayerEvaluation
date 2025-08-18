@@ -1,0 +1,346 @@
+# ErrorMessage Component
+
+Error display component providing consistent error feedback and recovery options across the application.
+
+## Purpose & Usage Context
+
+The ErrorMessage component provides standardized error display throughout the A-Player Evaluation System. It presents error information in a user-friendly format with optional retry functionality, ensuring consistent error handling and user experience across all application features.
+
+**Used in**: Error boundaries, API error handling, form validation feedback, data loading failures, and user action failures.
+
+## Props
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `title` | `string` | `"Something went wrong"` | No | Error title displayed prominently |
+| `message` | `string` | N/A | Yes | Main error message explaining what happened |
+| `onRetry` | `() => void` | `undefined` | No | Callback function for retry action |
+| `retryText` | `string` | `"Try again"` | No | Text displayed on retry button |
+| `fullScreen` | `boolean` | `false` | No | Whether to display as full-screen error overlay |
+
+## Events & Callbacks
+
+### Primary Events
+- **`onRetry`**: Fired when user clicks the retry button (if provided)
+
+### User Interactions
+- **Retry Button**: Clickable when `onRetry` prop is provided
+- **Accessibility**: Keyboard navigation support for retry action
+
+## Side Effects
+
+### Visual Display
+- **Error Icon**: Red warning icon provides immediate visual context
+- **Color Scheme**: Red-themed styling indicates error state
+- **Layout**: Inline or full-screen presentation based on context
+
+### Error Recovery
+- **Retry Mechanism**: Optional retry button for recoverable errors
+- **User Feedback**: Clear messaging about what went wrong
+- **Action Clarity**: Explicit retry text and functionality
+
+## Accessibility
+
+### ARIA Support
+- **Error Icon**: Proper SVG accessibility with current color
+- **Text Hierarchy**: Semantic heading structure (h3 for title)
+- **Button Access**: Retry button fully keyboard accessible
+
+### Screen Reader Features
+- **Error Context**: Title and message read together
+- **Action Options**: Retry button announced as available action
+- **State Clarity**: Error state clearly communicated
+
+### Visual Accessibility
+- **High Contrast**: Red color scheme with sufficient contrast
+- **Icon Clarity**: Large, clear error icon
+- **Text Legibility**: Proper text sizing and spacing
+- **Focus Management**: Clear focus indicators on interactive elements
+
+## Examples
+
+### Basic Usage
+```tsx
+import { ErrorMessage } from '@/components/ui';
+
+// Simple error display
+<ErrorMessage message="Failed to load employee data" />
+
+// Error with custom title
+<ErrorMessage 
+  title="Network Error"
+  message="Unable to connect to server. Please check your internet connection."
+/>
+
+// Error with retry functionality
+<ErrorMessage 
+  message="Failed to save changes"
+  onRetry={handleRetry}
+  retryText="Save Again"
+/>
+```
+
+### Real Application Usage
+
+#### Data Loading Error (src/pages/EmployeeSelection.tsx:155-160)
+```tsx
+if (error) {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <ErrorMessage 
+        message={error} 
+        onRetry={() => window.location.reload()}
+      />
+    </div>
+  );
+}
+```
+
+#### Assignment Management Error (src/pages/AssignmentManagement.tsx:85-90)
+```tsx
+{error && (
+  <ErrorMessage 
+    title="Assignment Error"
+    message={error}
+    onRetry={() => setError(null)}
+    retryText="Dismiss"
+  />
+)}
+```
+
+#### Authentication Error (src/pages/Login.tsx:120-125)
+```tsx
+{error && (
+  <ErrorMessage 
+    title="Sign In Failed"
+    message={error}
+    onRetry={() => {
+      setError(null);
+      emailInputRef.current?.focus();
+    }}
+    retryText="Try Again"
+  />
+)}
+```
+
+### Full-Screen Error Usage
+```tsx
+// Application-level error
+<ErrorMessage 
+  title="Application Error"
+  message="Something went wrong. Please refresh the page."
+  onRetry={() => window.location.reload()}
+  retryText="Refresh Page"
+  fullScreen
+/>
+
+// Route loading error
+<ErrorMessage 
+  title="Page Not Found"
+  message="The requested page could not be loaded."
+  onRetry={() => navigate('/dashboard')}
+  retryText="Go to Dashboard"
+  fullScreen
+/>
+```
+
+### Error Recovery Patterns
+```tsx
+// Network error with retry
+const [retryCount, setRetryCount] = useState(0);
+
+<ErrorMessage 
+  title="Connection Error"
+  message={`Failed to connect (attempt ${retryCount + 1})`}
+  onRetry={() => {
+    setRetryCount(prev => prev + 1);
+    refetchData();
+  }}
+  retryText={retryCount > 2 ? "Try Once More" : "Retry"}
+/>
+
+// Form validation error
+<ErrorMessage 
+  title="Validation Error"
+  message="Please check the highlighted fields and try again."
+  onRetry={() => {
+    clearErrors();
+    firstErrorRef.current?.focus();
+  }}
+  retryText="Fix Errors"
+/>
+
+// API error with context
+<ErrorMessage 
+  title="Save Failed"
+  message="Unable to save employee data. Your changes have been preserved locally."
+  onRetry={() => {
+    saveToLocal();
+    reattemptSave();
+  }}
+  retryText="Retry Save"
+/>
+```
+
+### Conditional Error Display
+```tsx
+// Error boundary integration
+const ErrorFallback = ({ error, resetError }) => (
+  <ErrorMessage 
+    title="Application Error"
+    message={error.message}
+    onRetry={resetError}
+    retryText="Reset Application"
+    fullScreen
+  />
+);
+
+// Async operation error
+const handleAsyncError = (error) => {
+  setErrorState({
+    title: getErrorTitle(error.type),
+    message: getErrorMessage(error),
+    canRetry: isRetryableError(error),
+    retryAction: () => retryOperation(error.operation)
+  });
+};
+
+{errorState && (
+  <ErrorMessage 
+    title={errorState.title}
+    message={errorState.message}
+    onRetry={errorState.canRetry ? errorState.retryAction : undefined}
+    retryText="Try Again"
+  />
+)}
+```
+
+## Styling System
+
+### Error State Colors
+```css
+/* Error container styling */
+.error-container {
+  @apply bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg;
+}
+
+/* Error icon styling */
+.error-icon {
+  @apply text-red-500 w-16 h-16 mx-auto mb-4;
+}
+
+/* Error text styling */
+.error-title {
+  @apply text-lg font-medium text-secondary-800 mb-2;
+}
+
+.error-message {
+  @apply text-secondary-600 mb-4;
+}
+```
+
+### Layout Variations
+```css
+/* Inline error layout */
+.inline-error {
+  @apply text-center;
+}
+
+/* Full-screen error layout */
+.fullscreen-error {
+  @apply min-h-screen flex items-center justify-center;
+}
+```
+
+### Button Integration
+```css
+/* Retry button uses btn-primary class */
+.retry-button {
+  @apply btn-primary;
+}
+```
+
+## Design System Integration
+
+### Color Scheme
+- **Background**: Light red (`bg-red-50`)
+- **Border**: Red border (`border-red-200`)
+- **Text**: Dark red (`text-red-700`)
+- **Icon**: Red (`text-red-500`)
+
+### Typography Hierarchy
+- **Title**: Large, medium weight (`text-lg font-medium`)
+- **Message**: Standard body text (`text-secondary-600`)
+- **Button**: Primary button styling
+
+### Spacing System
+- **Internal**: Consistent padding (`px-4 py-3`)
+- **Margins**: Proper spacing between elements
+- **Button**: Standard button spacing and sizing
+
+## Error Handling Patterns
+
+### Error Categories
+```tsx
+// Network errors
+<ErrorMessage 
+  title="Connection Error"
+  message="Unable to reach server"
+  onRetry={retryRequest}
+/>
+
+// Validation errors
+<ErrorMessage 
+  title="Invalid Data"
+  message="Please check your inputs"
+  onRetry={clearAndFocus}
+/>
+
+// Permission errors
+<ErrorMessage 
+  title="Access Denied"
+  message="You don't have permission for this action"
+  // No retry for permission errors
+/>
+
+// System errors
+<ErrorMessage 
+  title="System Error"
+  message="An unexpected error occurred"
+  onRetry={reportAndRetry}
+/>
+```
+
+### Recovery Strategies
+- **Immediate Retry**: For transient network issues
+- **User Correction**: For validation or input errors
+- **Navigation**: Redirect to safe state
+- **Reset**: Clear state and start over
+- **Report**: Log error and provide feedback
+
+## Performance Notes
+
+### Component Efficiency
+- **Static Structure**: Minimal DOM changes
+- **No State**: Pure presentational component
+- **Event Handling**: Efficient callback pattern
+- **Memory Safe**: No memory leaks or subscriptions
+
+### Error Handling Performance
+- **Immediate Display**: No loading delays
+- **Clear Feedback**: Reduces user confusion
+- **Recovery Options**: Minimizes user frustration
+- **Accessibility**: Fast screen reader feedback
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ui/ErrorMessage.tsx`](../../a-player-dashboard/src/components/ui/ErrorMessage.tsx) (lines 1-48)
+- **Usage Examples**: Found in 5+ files across pages, forms, and error boundaries
+
+**🔗 Related Components:**
+- [Button](./Button.mdx) - Used for retry functionality
+- [LoadingSpinner](./LoadingSpinner.mdx) - Alternative for loading states
+- [ErrorBoundary](./ErrorBoundary.mdx) - Uses ErrorMessage for application errors
+
+

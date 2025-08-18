@@ -1,0 +1,371 @@
+# AssignmentCard Component
+
+Assignment display card component that shows evaluation assignment details, progress tracking, and action controls for survey management.
+
+## Purpose & Usage Context
+
+The AssignmentCard component provides a comprehensive display for evaluation assignments in the A-Player Evaluation System. It shows assignment details, tracks survey progress, displays completion status, and provides action buttons for starting or continuing evaluations.
+
+**Used in**: Assignment management interfaces, survey dashboards, and employee assignment listings.
+
+## Props
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `assignment` | `EvaluationAssignmentWithDetails` | N/A | Yes | Complete assignment data with details |
+| `onStartEvaluation` | `(assignmentId: string, surveyToken: string) => void` | N/A | Yes | Callback when starting/continuing evaluation |
+| `onRefresh` | `() => void` | N/A | Yes | Callback to refresh assignment list |
+
+### EvaluationAssignmentWithDetails Interface
+```typescript
+interface EvaluationAssignmentWithDetails {
+  id: string;
+  evaluatee_id: string;
+  evaluator_id: string;
+  quarter_id: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  created_at: string;
+  due_date?: string;
+  survey_token: string;
+  evaluatee_name: string;
+  evaluator_name: string;
+  quarter_name: string;
+  role_relationship: string; // 'manager', 'peer', 'self'
+}
+```
+
+## Events & Callbacks
+
+### Assignment Actions
+- **`onStartEvaluation`**: Triggered when starting or continuing an evaluation
+- **`onRefresh`**: Called after status updates to refresh the assignment list
+- **Status Updates**: Automatically updates assignment status when actions are taken
+
+### Progress Tracking
+- **Progress Loading**: Automatically loads survey progress for active assignments
+- **Status Transitions**: Handles transitions from pending to in_progress to completed
+- **Real-time Updates**: Reflects current progress and completion status
+
+## Side Effects
+
+### Data Loading
+- **Progress Fetching**: Loads survey progress for in_progress/completed assignments
+- **Status Management**: Updates assignment status when actions are performed
+- **Auto-refresh**: Triggers parent refresh after status changes
+
+### UI State Changes
+- **Loading States**: Shows loading indicators during actions
+- **Status Indicators**: Visual status badges and progress displays
+- **Action Buttons**: Context-appropriate action buttons based on status
+
+### Navigation
+- **Survey Launch**: Initiates evaluation survey interface
+- **Token Management**: Handles survey tokens for secure access
+
+## Accessibility
+
+### Card Structure
+- **Semantic Content**: Proper heading hierarchy and content structure
+- **Status Communication**: Clear status indication for screen readers
+- **Action Clarity**: Descriptive button labels and purposes
+
+### Interactive Elements
+- **Button Labels**: Clear action button descriptions
+- **Loading States**: Loading feedback announced to assistive technology
+- **Progress Information**: Survey progress accessible to screen readers
+
+### Visual Accessibility
+- **Status Colors**: Color-coded status indicators with text labels
+- **Icon Meanings**: Icons paired with descriptive text
+- **Contrast**: Sufficient contrast for all text and interactive elements
+
+## Examples
+
+### Basic Usage
+```tsx
+import { AssignmentCard } from '@/components/ui';
+
+// Simple assignment card display
+<AssignmentCard 
+  assignment={assignment}
+  onStartEvaluation={handleStartEvaluation}
+  onRefresh={refreshAssignments}
+/>
+```
+
+### Real Application Usage
+
+#### Assignment Management Dashboard (src/pages/MyAssignments.tsx:120-135)
+```tsx
+import { AssignmentCard } from '@/components/ui';
+
+const MyAssignments = () => {
+  const { assignments, refreshAssignments } = useAssignments();
+  const navigate = useNavigate();
+  
+  const handleStartEvaluation = (assignmentId: string, surveyToken: string) => {
+    navigate(`/evaluation/${assignmentId}?token=${surveyToken}`);
+  };
+  
+  return (
+    <div className="assignments-grid">
+      {assignments.map(assignment => (
+        <AssignmentCard 
+          key={assignment.id}
+          assignment={assignment}
+          onStartEvaluation={handleStartEvaluation}
+          onRefresh={refreshAssignments}
+        />
+      ))}
+    </div>
+  );
+};
+```
+
+#### Assignment List with Filtering
+```tsx
+const FilteredAssignmentList = () => {
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [assignments, setAssignments] = useState([]);
+  
+  const filteredAssignments = assignments.filter(assignment => {
+    if (statusFilter === 'all') return true;
+    return assignment.status === statusFilter;
+  });
+  
+  const handleAssignmentUpdate = () => {
+    // Refresh assignments after any updates
+    fetchAssignments().then(setAssignments);
+  };
+  
+  return (
+    <div className="assignment-management">
+      <div className="filters mb-6">
+        <select 
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="all">All Assignments</option>
+          <option value="pending">Pending</option>
+          <option value="in_progress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+      
+      <div className="assignments-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredAssignments.map(assignment => (
+          <AssignmentCard 
+            key={assignment.id}
+            assignment={assignment}
+            onStartEvaluation={handleStartEvaluation}
+            onRefresh={handleAssignmentUpdate}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+```
+
+### Assignment Analytics Integration
+```tsx
+const AssignmentAnalytics = () => {
+  const { assignments } = useAssignments();
+  const [selectedAssignment, setSelectedAssignment] = useState(null);
+  
+  const assignmentStats = {
+    pending: assignments.filter(a => a.status === 'pending').length,
+    inProgress: assignments.filter(a => a.status === 'in_progress').length,
+    completed: assignments.filter(a => a.status === 'completed').length
+  };
+  
+  return (
+    <div className="assignment-analytics">
+      <div className="stats-overview mb-6">
+        <div className="stat-card">
+          <h3>Pending</h3>
+          <span className="stat-number">{assignmentStats.pending}</span>
+        </div>
+        <div className="stat-card">
+          <h3>In Progress</h3>
+          <span className="stat-number">{assignmentStats.inProgress}</span>
+        </div>
+        <div className="stat-card">
+          <h3>Completed</h3>
+          <span className="stat-number">{assignmentStats.completed}</span>
+        </div>
+      </div>
+      
+      <div className="assignments-list">
+        {assignments.map(assignment => (
+          <AssignmentCard 
+            key={assignment.id}
+            assignment={assignment}
+            onStartEvaluation={handleStartEvaluation}
+            onRefresh={refreshAssignments}
+            onClick={() => setSelectedAssignment(assignment)}
+            className={selectedAssignment?.id === assignment.id ? 'selected' : ''}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+```
+
+## Assignment Status Management
+
+### Status Flow
+```typescript
+type AssignmentStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
+
+const statusFlow = {
+  pending: ['in_progress', 'cancelled'],
+  in_progress: ['completed', 'cancelled'],
+  completed: [], // Terminal state
+  cancelled: []  // Terminal state
+};
+```
+
+### Status Actions
+```typescript
+const getAvailableActions = (status: AssignmentStatus) => {
+  switch (status) {
+    case 'pending':
+      return ['start_evaluation'];
+    case 'in_progress':
+      return ['continue_evaluation', 'view_progress'];
+    case 'completed':
+      return ['view_results'];
+    case 'cancelled':
+      return [];
+    default:
+      return [];
+  }
+};
+```
+
+### Progress Tracking
+```typescript
+interface SurveyProgress {
+  assignment_id: string;
+  questions_answered: number;
+  total_questions: number;
+  completion_percentage: number;
+  last_updated: string;
+  sections_completed: string[];
+}
+```
+
+## Icon System
+
+### Status Icons
+- **UserIcon**: Represents evaluatee/evaluator
+- **CalendarIcon**: Shows due dates and scheduling
+- **ClockIcon**: Indicates time-sensitive information
+- **PlayIcon**: Start/continue evaluation actions
+- **CheckCircleIcon**: Completed status indication
+
+### Icon Usage
+```tsx
+const getStatusIcon = (status: AssignmentStatus) => {
+  switch (status) {
+    case 'pending':
+      return <ClockIcon className="w-5 h-5 text-yellow-500" />;
+    case 'in_progress':
+      return <PlayIcon className="w-5 h-5 text-blue-500" />;
+    case 'completed':
+      return <CheckCircleIcon className="w-5 h-5 text-green-500" />;
+    default:
+      return null;
+  }
+};
+```
+
+## Styling System
+
+### Card Layout
+```css
+.assignment-card {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 
+         p-6 hover:shadow-md transition-shadow;
+}
+
+.assignment-header {
+  @apply flex items-start justify-between mb-4;
+}
+
+.assignment-content {
+  @apply space-y-4;
+}
+
+.assignment-actions {
+  @apply flex justify-end mt-6;
+}
+```
+
+### Status Styling
+```css
+.status-pending {
+  @apply bg-yellow-100 text-yellow-800 border-yellow-200;
+}
+
+.status-in-progress {
+  @apply bg-blue-100 text-blue-800 border-blue-200;
+}
+
+.status-completed {
+  @apply bg-green-100 text-green-800 border-green-200;
+}
+
+.status-cancelled {
+  @apply bg-gray-100 text-gray-800 border-gray-200;
+}
+```
+
+### Progress Indicators
+```css
+.progress-bar {
+  @apply w-full bg-gray-200 rounded-full h-2;
+}
+
+.progress-fill {
+  @apply bg-blue-500 h-2 rounded-full transition-all duration-300;
+}
+
+.progress-text {
+  @apply text-sm text-gray-600 mt-1;
+}
+```
+
+## Performance Notes
+
+### Data Loading
+- **Conditional Progress Loading**: Only loads progress for relevant assignments
+- **Efficient Updates**: Minimal API calls during status changes
+- **Caching**: Leverages assignment data caching where possible
+
+### Component Optimization
+- **Loading States**: Clear feedback during async operations
+- **Error Handling**: Graceful handling of progress loading failures
+- **Memory Management**: Proper cleanup of async operations
+
+### User Experience
+- **Immediate Feedback**: Loading states provide instant response
+- **Progress Tracking**: Real-time progress updates for active surveys
+- **Status Clarity**: Clear visual indicators for all assignment states
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ui/AssignmentCard.tsx`](../../a-player-dashboard/src/components/ui/AssignmentCard.tsx) (lines 1-312)
+- **Assignment Service**: [`src/services/assignmentService.ts`](../../a-player-dashboard/src/services/assignmentService.ts)
+- **Usage Examples**: Found in MyAssignments and assignment management interfaces
+
+**🔗 Related Components:**
+- [Button](./Button.mdx) - Action buttons within cards
+- [LoadingSpinner](./LoadingSpinner.mdx) - Progress and loading states
+- [Card](./Card.mdx) - Base card styling and structure
+- Assignment management components (AssignmentStatusTable, AssignmentCreationForm)
+
+

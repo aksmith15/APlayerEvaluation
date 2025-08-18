@@ -1,0 +1,340 @@
+# LazyChart Component
+
+Dynamic chart loading wrapper component that implements code splitting for chart components to optimize bundle size and performance.
+
+## Purpose & Usage Context
+
+The LazyChart component provides dynamic chart loading functionality in the A-Player Evaluation System. It implements code splitting to reduce initial bundle size by loading chart components only when needed, while providing comprehensive error handling and loading states.
+
+**Used in**: Analytics dashboards, performance visualization, and any interface requiring data visualization charts.
+
+## Props
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `chartType` | `ChartType` | N/A | Yes | Type of chart to load (determines which component to import) |
+| `data` | `any` | N/A | Yes | Chart data to be passed to the loaded chart component |
+| `className` | `string` | `''` | No | Additional CSS classes for the chart container |
+| `...props` | `any` | N/A | No | Any additional props passed through to the loaded chart component |
+
+### ChartType Options
+```typescript
+type ChartType = 
+  | 'RadarChart'
+  | 'ClusteredBarChart' 
+  | 'TrendLineChart'
+  | 'HistoricalClusteredBarChart'
+  | 'PieChart'
+  | 'LineChart';
+```
+
+## Events & Callbacks
+
+### Async Loading Events
+- **Component Loading**: Triggered when chart component is being dynamically imported
+- **Load Success**: Fired when chart component loads successfully
+- **Load Error**: Triggered when chart component fails to load
+
+### Chart Component Events
+- **Pass-through Events**: All chart-specific events passed through to loaded component
+- **Data Events**: Chart interaction events handled by underlying chart component
+
+## Side Effects
+
+### Dynamic Imports
+- **Code Splitting**: Loads chart components only when requested
+- **Bundle Optimization**: Reduces initial JavaScript bundle size
+- **Memory Management**: Components loaded on-demand and cached
+
+### Loading States
+- **Loading Indicator**: Shows spinner during component loading
+- **Error Display**: Shows error message if component fails to load
+- **Fallback UI**: Provides consistent loading experience
+
+### Error Handling
+- **Component Load Errors**: Handles dynamic import failures
+- **Runtime Errors**: Wraps loaded components in ErrorBoundary
+- **Graceful Degradation**: Shows meaningful error messages
+
+## Accessibility
+
+### Loading States
+- **Loading Feedback**: Spinner with "Loading chart..." text
+- **Screen Reader Support**: Loading states announced to assistive technology
+- **Visual Indicators**: Clear visual feedback during loading
+
+### Error States
+- **Error Messages**: Clear error communication
+- **Alternative Content**: Fallback content when charts fail to load
+- **Accessible Errors**: Error states properly announced
+
+### Chart Accessibility
+- **Pass-through Support**: Chart-specific accessibility features preserved
+- **Focus Management**: Maintains proper focus handling
+- **ARIA Integration**: Chart ARIA attributes passed through
+
+## Examples
+
+### Basic Usage
+```tsx
+import { LazyChart } from '@/components/ui';
+
+// Radar chart with performance data
+<LazyChart 
+  chartType="RadarChart"
+  data={performanceData}
+  className="h-64"
+/>
+
+// Bar chart with comparison data
+<LazyChart 
+  chartType="ClusteredBarChart"
+  data={comparisonData}
+  title="Department Comparison"
+  showLegend={true}
+/>
+```
+
+### Real Application Usage
+
+#### Analytics Dashboard (src/pages/EmployeeAnalytics.tsx:180-190)
+```tsx
+import { LazyChart } from '@/components/ui';
+
+const EmployeeAnalytics = () => {
+  const { data: radarData } = useAnalyticsData('radar');
+  const { data: trendData } = useAnalyticsData('trend');
+  
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Card>
+        <h3 className="text-lg font-semibold mb-4">Performance Overview</h3>
+        <LazyChart 
+          chartType="RadarChart"
+          data={radarData}
+          height={400}
+          responsive={true}
+        />
+      </Card>
+      
+      <Card>
+        <h3 className="text-lg font-semibold mb-4">Trend Analysis</h3>
+        <LazyChart 
+          chartType="TrendLineChart" 
+          data={trendData}
+          height={400}
+          showGrid={true}
+        />
+      </Card>
+    </div>
+  );
+};
+```
+
+#### Dynamic Chart Selection
+```tsx
+const DynamicChartDisplay = () => {
+  const [selectedChartType, setSelectedChartType] = useState<ChartType>('RadarChart');
+  const { data } = useChartData(selectedChartType);
+  
+  return (
+    <div>
+      <div className="chart-controls mb-4">
+        <select 
+          value={selectedChartType}
+          onChange={(e) => setSelectedChartType(e.target.value as ChartType)}
+        >
+          <option value="RadarChart">Radar Chart</option>
+          <option value="ClusteredBarChart">Bar Chart</option>
+          <option value="TrendLineChart">Trend Chart</option>
+        </select>
+      </div>
+      
+      <LazyChart 
+        chartType={selectedChartType}
+        data={data}
+        className="min-h-96"
+        key={selectedChartType} // Force re-mount on type change
+      />
+    </div>
+  );
+};
+```
+
+### Error Handling Example
+```tsx
+const RobustChartDisplay = () => {
+  const [fallbackData, setFallbackData] = useState(null);
+  
+  const handleChartError = (error: Error) => {
+    console.error('Chart failed to load:', error);
+    // Could fetch fallback data or show alternative visualization
+    setFallbackData(generateFallbackData());
+  };
+  
+  return (
+    <div className="chart-container">
+      <LazyChart 
+        chartType="RadarChart"
+        data={primaryData}
+        onError={handleChartError}
+        fallbackComponent={
+          fallbackData ? <SimpleDataTable data={fallbackData} /> : null
+        }
+      />
+    </div>
+  );
+};
+```
+
+## Dynamic Loading Architecture
+
+### Chart Component Loading
+```typescript
+// Chart loading implemented via chartLoader service
+const loadChart = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+    
+    // Dynamic import based on chart type
+    const Component = await loadChartComponent(chartType);
+    setChartComponent(() => Component);
+  } catch (err) {
+    console.error(`Failed to load chart component: ${chartType}`, err);
+    setError(err instanceof Error ? err.message : 'Failed to load chart');
+  } finally {
+    setLoading(false);
+  }
+};
+```
+
+### Component Registry
+```typescript
+// Example chart loader implementation
+const chartComponents = {
+  RadarChart: () => import('./RadarChart'),
+  ClusteredBarChart: () => import('./ClusteredBarChart'),
+  TrendLineChart: () => import('./TrendLineChart'),
+  HistoricalClusteredBarChart: () => import('./HistoricalClusteredBarChart')
+};
+
+export const loadChartComponent = async (chartType: ChartType) => {
+  const loader = chartComponents[chartType];
+  if (!loader) {
+    throw new Error(`Unknown chart type: ${chartType}`);
+  }
+  
+  const module = await loader();
+  return module.default || module[chartType];
+};
+```
+
+## Styling System
+
+### Container Layout
+```css
+.chart-loading {
+  @apply flex items-center justify-center h-64;
+}
+
+.chart-error {
+  @apply flex items-center justify-center h-64;
+}
+
+.error-content {
+  @apply text-center;
+}
+```
+
+### Loading States
+```css
+.loading-spinner {
+  @apply flex items-center;
+}
+
+.loading-text {
+  @apply ml-2 text-gray-600;
+}
+```
+
+### Error States
+```css
+.error-message {
+  @apply text-red-500 text-sm;
+}
+
+.error-details {
+  @apply text-gray-500 text-xs mt-1;
+}
+```
+
+## Performance Benefits
+
+### Bundle Optimization
+- **Code Splitting**: Chart components loaded only when needed
+- **Reduced Initial Load**: Smaller main bundle size
+- **Progressive Loading**: Charts load as users navigate
+
+### Memory Management
+- **On-Demand Loading**: Components loaded when required
+- **Garbage Collection**: Unused components can be garbage collected
+- **Caching**: Loaded components cached for subsequent use
+
+### User Experience
+- **Faster Initial Load**: Application starts faster
+- **Progressive Enhancement**: Charts appear as they load
+- **Graceful Loading**: Smooth loading states
+
+## Error Handling Strategies
+
+### Component Load Failures
+```typescript
+// Comprehensive error handling
+if (error || !ChartComponent) {
+  return (
+    <div className="chart-error">
+      <div className="text-center">
+        <div className="text-red-500 text-sm">
+          Failed to load chart component
+        </div>
+        {error && (
+          <div className="text-gray-500 text-xs mt-1">
+            {error}
+          </div>
+        )}
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-2 text-blue-500 text-sm underline"
+        >
+          Refresh page
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+### Runtime Error Boundary
+```tsx
+// Wraps loaded component in ErrorBoundary
+<ErrorBoundary>
+  <Suspense fallback={<LoadingSpinner />}>
+    <ChartComponent {...props} />
+  </Suspense>
+</ErrorBoundary>
+```
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ui/LazyChart.tsx`](../../a-player-dashboard/src/components/ui/LazyChart.tsx) (lines 1-93)
+- **Chart Loader Service**: [`src/services/chartLoader.ts`](../../a-player-dashboard/src/services/chartLoader.ts)
+- **Usage Examples**: Found in EmployeeAnalytics and analytics dashboard components
+
+**🔗 Related Components:**
+- [LoadingSpinner](./LoadingSpinner.mdx) - Used for loading states
+- [ErrorBoundary](./ErrorBoundary.mdx) - Used for error handling
+- Chart components (RadarChart, TrendLineChart, etc.) - Dynamically loaded components
+
+

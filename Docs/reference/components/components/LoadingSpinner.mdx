@@ -1,0 +1,291 @@
+# LoadingSpinner Component
+
+Loading state indicator component providing visual feedback during data operations and page transitions.
+
+## Purpose & Usage Context
+
+The LoadingSpinner component provides consistent loading state visual feedback throughout the A-Player Evaluation System. It's used during data fetching, form submissions, page transitions, and any asynchronous operations to inform users that content is being processed.
+
+**Used in**: Data loading states, form submissions, route transitions, API calls, and asynchronous operations across all application features.
+
+## Props
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | No | Visual size of the loading spinner |
+| `message` | `string` | `undefined` | No | Optional loading message displayed below spinner |
+| `fullScreen` | `boolean` | `false` | No | Whether to display as full-screen overlay |
+| `ariaLabel` | `string` | `undefined` | No | Custom accessible label (auto-generated if not provided) |
+| `role` | `string` | `'status'` | No | ARIA role for the loading indicator |
+
+## Events & Callbacks
+
+### No Direct Events
+The LoadingSpinner is a purely presentational component with no interactive events. It responds to external state changes through props.
+
+### State Reactions
+- **Mounting**: Spinner animation begins immediately
+- **Message Changes**: Screen readers announce new loading messages
+- **Unmounting**: Animation stops and cleanup occurs
+
+## Side Effects
+
+### Visual Animations
+- **Continuous Rotation**: CSS animation rotates spinner continuously
+- **Smooth Transitions**: 200ms duration transitions for state changes
+- **Size Scaling**: Responsive size adjustments based on `size` prop
+
+### Accessibility Announcements
+- **Live Regions**: `aria-live="polite"` announces loading state changes
+- **Screen Reader Text**: Hidden text provides context for assistive technology
+- **Status Updates**: Loading messages announced automatically
+
+## Accessibility
+
+### ARIA Support
+- **`role="status"`**: Identifies loading state for assistive technology
+- **`aria-label`**: Descriptive label for screen readers
+- **`aria-live="polite"`**: Announces loading state changes
+- **`aria-hidden="true"`**: Hides decorative message from screen readers
+
+### Screen Reader Features
+- **Dynamic Labels**: Auto-generates accessible labels with context
+- **Hidden Text**: `.sr-only` content provides detailed information
+- **Live Announcements**: Loading message changes announced automatically
+- **Context Awareness**: Labels include message content when available
+
+### Visual Accessibility
+- **High Contrast**: Uses primary color scheme for visibility
+- **Motion Considerations**: Respects user motion preferences
+- **Focus Management**: Doesn't interfere with focus flow
+- **Color Independence**: Loading state clear without color alone
+
+## Examples
+
+### Basic Usage
+```tsx
+import { LoadingSpinner } from '@/components/ui';
+
+// Simple loading indicator
+<LoadingSpinner />
+
+// Loading with message
+<LoadingSpinner message="Loading employee data..." />
+
+// Small spinner for inline use
+<LoadingSpinner size="sm" />
+```
+
+### Real Application Usage
+
+#### App-Level Loading (src/App.tsx:45)
+```tsx
+<Suspense fallback={<LoadingSpinner fullScreen message="Loading application..." />}>
+  <Routes>
+    {/* Application routes */}
+  </Routes>
+</Suspense>
+```
+
+#### Protected Route Loading (src/components/ProtectedRoute.tsx:20-22)
+```tsx
+// Show loading spinner while checking auth state
+if (loading) {
+  return <LoadingSpinner fullScreen message="Verifying authentication..." />;
+}
+```
+
+#### Page-Level Loading (src/pages/EmployeeSelection.tsx:145-150)
+```tsx
+if (loading) {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <LoadingSpinner message="Loading employees..." />
+    </div>
+  );
+}
+```
+
+#### Form Submission Loading (src/pages/Login.tsx:85-90)
+```tsx
+<Button type="submit" loading={loading} className="w-full">
+  {loading ? (
+    <LoadingSpinner size="sm" message="Signing in..." />
+  ) : (
+    'Sign In'
+  )}
+</Button>
+```
+
+### Size Variations
+```tsx
+// Small - Inline with content
+<div className="flex items-center gap-2">
+  <LoadingSpinner size="sm" />
+  <span>Processing...</span>
+</div>
+
+// Medium - Standard loading states
+<LoadingSpinner size="md" message="Loading analytics..." />
+
+// Large - Full-screen or prominent loading
+<LoadingSpinner size="lg" message="Preparing dashboard..." fullScreen />
+```
+
+### Full-Screen Loading
+```tsx
+// Route transition loading
+<LoadingSpinner 
+  fullScreen 
+  message="Loading page..." 
+  ariaLabel="Loading page content"
+/>
+
+// Data operation loading
+<LoadingSpinner 
+  fullScreen
+  message="Processing evaluation data..."
+  ariaLabel="Processing employee evaluation data"
+/>
+```
+
+### Accessibility Examples
+```tsx
+// Custom accessible label
+<LoadingSpinner 
+  ariaLabel="Loading employee performance analytics"
+  message="Analyzing performance data..."
+/>
+
+// Context-specific loading
+<LoadingSpinner 
+  message="Saving assignment..."
+  ariaLabel="Saving evaluation assignment to database"
+  role="status"
+/>
+
+// Silent loading (no announcements)
+<LoadingSpinner 
+  size="sm"
+  ariaLabel="Background data sync"
+  role="presentation"
+/>
+```
+
+## Styling System
+
+### Size Classes
+```css
+/* Small - Inline loading */
+.sm {
+  @apply h-6 w-6;
+}
+
+/* Medium - Standard loading */
+.md {
+  @apply h-12 w-12;
+}
+
+/* Large - Prominent loading */
+.lg {
+  @apply h-16 w-16;
+}
+```
+
+### Animation System
+```css
+/* Spinner rotation animation */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+```
+
+### Layout Variations
+```css
+/* Inline content layout */
+.inline {
+  @apply text-center;
+}
+
+/* Full-screen overlay layout */
+.fullScreen {
+  @apply min-h-screen flex items-center justify-center;
+}
+```
+
+## Design System Integration
+
+### Color Scheme
+- **Primary**: Uses `border-primary-600` for brand consistency
+- **Text**: `text-secondary-600` for loading messages
+- **Background**: Transparent (inherits parent background)
+
+### Spacing System
+- **Internal**: `mt-4` spacing between spinner and message
+- **External**: No default margins (container-controlled)
+- **Responsive**: Consistent spacing across breakpoints
+
+### Typography Integration
+- Message uses secondary text color
+- Maintains readable contrast ratios
+- Supports text scaling and zoom
+
+## Performance Notes
+
+### Animation Performance
+- **CSS Animations**: Hardware-accelerated rotation
+- **Transform-Only**: No layout or paint triggers
+- **Efficient Rendering**: Minimal DOM manipulation
+- **Memory Efficient**: No JavaScript animation loops
+
+### Component Optimization
+- **Static Structure**: No dynamic DOM creation
+- **Minimal Re-renders**: Props-only updates
+- **Lightweight**: Small bundle footprint
+- **No Side Effects**: Pure presentational component
+
+### Accessibility Performance
+- **Live Regions**: Efficient screen reader updates
+- **ARIA Efficiency**: Minimal attribute changes
+- **Focus Safety**: No focus management overhead
+
+## Usage Guidelines
+
+### When to Use
+- Data fetching operations
+- Form submission processing
+- Page/route transitions
+- Asynchronous user actions
+- Background processing
+
+### When Not to Use
+- Instant operations (< 200ms)
+- Already-loaded content
+- Static content display
+- Error states (use ErrorMessage instead)
+
+### Best Practices
+- Always include meaningful messages for longer operations
+- Use appropriate sizes for context
+- Consider full-screen for major transitions
+- Provide custom aria-labels for context-specific loading
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ui/LoadingSpinner.tsx`](../../a-player-dashboard/src/components/ui/LoadingSpinner.tsx) (lines 1-58)
+- **Usage Examples**: Found in 8+ files including App.tsx, ProtectedRoute.tsx, and all major page components
+
+**🔗 Related Components:**
+- [ErrorMessage](./ErrorMessage.mdx) - Alternative for error states
+- [Button](./Button.mdx) - Uses LoadingSpinner in loading state
+- [ProtectedRoute](./ProtectedRoute.mdx) - Uses LoadingSpinner for auth verification

@@ -1,0 +1,395 @@
+# PerformanceDashboard Component
+
+Real-time performance monitoring dashboard component that displays Core Web Vitals, session metrics, and system performance data with export capabilities.
+
+## Purpose & Usage Context
+
+The PerformanceDashboard component provides comprehensive performance monitoring for the A-Player Evaluation System. It displays Core Web Vitals, session metrics, interaction counts, and system performance data in a floating dashboard with export functionality for performance analysis.
+
+**Used in**: Development environments, performance monitoring, quality assurance, and system optimization workflows.
+
+## Props
+
+This component takes no props and manages its own visibility and performance data collection internally.
+
+## Events & Callbacks
+
+### Performance Monitoring
+- **Performance Data Collection**: Automatically gathers performance metrics every 5 seconds
+- **Export Functionality**: Generates downloadable JSON reports of session data
+- **Real-time Updates**: Continuously monitors and displays current performance
+
+### User Interactions
+- **Dashboard Toggle**: Show/hide performance monitoring interface
+- **Data Export**: Download comprehensive performance data as JSON
+- **Session Tracking**: Monitor current session metrics and interactions
+
+## Side Effects
+
+### Performance Tracking
+- **Metrics Collection**: Continuously gathers Core Web Vitals and custom metrics
+- **Session Monitoring**: Tracks user interactions, errors, and session duration
+- **Memory Monitoring**: Monitors memory usage and browser performance
+
+### Data Operations
+- **Real-time Updates**: Updates performance display every 5 seconds
+- **Data Export**: Generates JSON files with comprehensive session data
+- **Browser Integration**: Integrates with browser performance APIs
+
+### UI State Management
+- **Floating Position**: Maintains fixed position overlay
+- **Visibility Toggle**: Manages dashboard show/hide state
+- **Responsive Display**: Adapts to different screen sizes
+
+## Accessibility
+
+### Dashboard Interface
+- **Toggle Button**: Accessible floating performance trigger button
+- **Keyboard Navigation**: Full keyboard accessibility for all controls
+- **Focus Management**: Proper focus handling for floating interface
+
+### Performance Data
+- **Screen Reader Support**: Performance metrics announced appropriately
+- **Color Coding**: Performance ratings with text indicators
+- **Clear Labels**: Descriptive labels for all metrics and sections
+
+### Export Features
+- **Download Accessibility**: Accessible file download functionality
+- **Data Description**: Clear descriptions of exported data format
+
+## Examples
+
+### Basic Usage
+```tsx
+import { PerformanceDashboard } from '@/components/ui';
+
+// Global performance monitoring
+<PerformanceDashboard />
+```
+
+### Real Application Usage
+
+#### Development Environment Integration
+```tsx
+import { PerformanceDashboard } from '@/components/ui';
+
+const App = () => {
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  return (
+    <div className="app">
+      <Routes>
+        {/* Application routes */}
+      </Routes>
+      
+      {/* Performance monitoring in development */}
+      {isDevelopment && <PerformanceDashboard />}
+    </div>
+  );
+};
+```
+
+#### Production Monitoring (Admin Users)
+```tsx
+const AdminLayout = () => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+  const [performanceEnabled, setPerformanceEnabled] = useState(false);
+  
+  return (
+    <div className="admin-layout">
+      <AdminNavigation />
+      
+      <main className="admin-content">
+        {/* Admin content */}
+      </main>
+      
+      {/* Performance dashboard for admins */}
+      {isAdmin && performanceEnabled && <PerformanceDashboard />}
+      
+      <div className="admin-controls">
+        <label>
+          <input 
+            type="checkbox"
+            checked={performanceEnabled}
+            onChange={(e) => setPerformanceEnabled(e.target.checked)}
+          />
+          Enable Performance Monitoring
+        </label>
+      </div>
+    </div>
+  );
+};
+```
+
+#### QA Testing Integration
+```tsx
+const QATestingWrapper = ({ children }) => {
+  const [sessionData, setSessionData] = useState([]);
+  const isQAEnvironment = window.location.hostname.includes('qa');
+  
+  const handleExportSession = () => {
+    const performanceData = getPerformanceMonitor()?.exportSessionData();
+    if (performanceData) {
+      setSessionData(prev => [...prev, performanceData]);
+    }
+  };
+  
+  return (
+    <div className="qa-wrapper">
+      {children}
+      
+      {isQAEnvironment && (
+        <>
+          <PerformanceDashboard />
+          
+          <div className="qa-controls fixed bottom-4 left-4">
+            <button onClick={handleExportSession}>
+              Export Session for QA
+            </button>
+            <div className="text-xs text-gray-600">
+              Sessions collected: {sessionData.length}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+```
+
+## Performance Metrics
+
+### Core Web Vitals
+```typescript
+interface CoreWebVitals {
+  largestContentfulPaint: number;    // LCP - Loading performance
+  firstContentfulPaint: number;      // FCP - Loading performance  
+  cumulativeLayoutShift: number;     // CLS - Visual stability
+  interactionToNextPaint: number;    // INP - Interactivity
+  timeToFirstByte: number;          // TTFB - Server response
+}
+```
+
+### Additional Metrics
+```typescript
+interface PerformanceMetrics {
+  pageLoadTime: number;              // Total page load time
+  timeToInteractive: number;         // Time until page is interactive
+  memoryUsage: number;              // Current memory usage
+  connectionType: string;           // Network connection type
+  deviceType: 'mobile' | 'tablet' | 'desktop'; // Device classification
+}
+```
+
+### Session Tracking
+```typescript
+interface SessionMetrics {
+  sessionDuration: number;          // Current session length
+  interactionCount: number;         // User interactions count
+  errorCount: number;              // JavaScript errors count
+}
+```
+
+## Performance Rating System
+
+### Rating Logic
+```typescript
+const getPerformanceRating = (metric: string, value: number): 'good' | 'needs-improvement' | 'poor' => {
+  switch (metric) {
+    case 'lcp': // Largest Contentful Paint
+      return value <= 2500 ? 'good' : value <= 4000 ? 'needs-improvement' : 'poor';
+    case 'fcp': // First Contentful Paint
+      return value <= 1800 ? 'good' : value <= 3000 ? 'needs-improvement' : 'poor';
+    case 'cls': // Cumulative Layout Shift
+      return value <= 0.1 ? 'good' : value <= 0.25 ? 'needs-improvement' : 'poor';
+    case 'inp': // Interaction to Next Paint
+      return value <= 200 ? 'good' : value <= 500 ? 'needs-improvement' : 'poor';
+    case 'ttfb': // Time to First Byte
+      return value <= 800 ? 'good' : value <= 1800 ? 'needs-improvement' : 'poor';
+  }
+};
+```
+
+### Visual Indicators
+```typescript
+const getRatingDisplay = (rating: 'good' | 'needs-improvement' | 'poor') => {
+  switch (rating) {
+    case 'good': 
+      return { icon: '✅', color: 'text-green-600' };
+    case 'needs-improvement': 
+      return { icon: '⚠️', color: 'text-yellow-600' };
+    case 'poor': 
+      return { icon: '❌', color: 'text-red-600' };
+  }
+};
+```
+
+## Data Export
+
+### Export Functionality
+```typescript
+const handleExportData = () => {
+  const monitor = getPerformanceMonitor();
+  if (monitor) {
+    const data = monitor.exportSessionData();
+    
+    // Generate downloadable JSON file
+    const blob = new Blob([JSON.stringify(data, null, 2)], { 
+      type: 'application/json' 
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `performance-data-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+};
+```
+
+### Export Data Structure
+```typescript
+interface ExportData {
+  session: {
+    startTime: string;
+    duration: number;
+    userAgent: string;
+    url: string;
+  };
+  metrics: PerformanceMetrics;
+  vitals: CoreWebVitals;
+  interactions: InteractionEvent[];
+  errors: ErrorEvent[];
+  timeline: PerformanceEntry[];
+}
+```
+
+## Dashboard Interface
+
+### Floating Dashboard
+```css
+.performance-dashboard {
+  @apply fixed bottom-4 right-4 z-50 w-96 max-h-96 overflow-y-auto;
+}
+
+.dashboard-card {
+  @apply bg-white shadow-xl border border-gray-200;
+}
+
+.dashboard-header {
+  @apply flex justify-between items-center mb-4;
+}
+```
+
+### Metric Sections
+```css
+.session-overview {
+  @apply bg-gray-50 p-3 rounded-lg;
+}
+
+.core-web-vitals {
+  @apply bg-blue-50 p-3 rounded-lg;
+}
+
+.additional-metrics {
+  @apply bg-green-50 p-3 rounded-lg;
+}
+```
+
+### Control Buttons
+```css
+.export-button {
+  @apply bg-green-600 hover:bg-green-700 text-white px-2 py-1 text-xs;
+}
+
+.close-button {
+  @apply bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 text-xs;
+}
+
+.toggle-button {
+  @apply bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 text-sm rounded-full shadow-lg;
+}
+```
+
+## Integration Patterns
+
+### Performance Monitor Integration
+```typescript
+// Integration with performance monitoring service
+useEffect(() => {
+  const updateSummary = () => {
+    const monitor = getPerformanceMonitor();
+    if (monitor) {
+      setSummary(monitor.getPerformanceSummary());
+    }
+  };
+
+  // Update every 5 seconds
+  const interval = setInterval(updateSummary, 5000);
+  updateSummary(); // Initial update
+
+  return () => clearInterval(interval);
+}, []);
+```
+
+### Development Tools Integration
+```typescript
+// Integration with development and debugging tools
+const PerformanceDevTools = () => {
+  const [performanceData, setPerformanceData] = useState(null);
+  
+  useEffect(() => {
+    // Listen for performance events
+    const handlePerformanceUpdate = (data) => {
+      setPerformanceData(data);
+      
+      // Send to external monitoring services
+      if (window.gtag) {
+        window.gtag('event', 'performance_metric', {
+          metric_name: data.metric,
+          value: data.value,
+          rating: data.rating
+        });
+      }
+    };
+    
+    // Register performance monitoring
+    window.addEventListener('performance-update', handlePerformanceUpdate);
+    return () => window.removeEventListener('performance-update', handlePerformanceUpdate);
+  }, []);
+  
+  return <PerformanceDashboard />;
+};
+```
+
+## Performance Notes
+
+### Monitoring Efficiency
+- **Lightweight Collection**: Minimal performance impact from monitoring
+- **Efficient Updates**: 5-second intervals balance accuracy with overhead
+- **Browser API Integration**: Uses native performance APIs when available
+
+### Memory Management
+- **Data Cleanup**: Regular cleanup of collected performance data
+- **Event Handling**: Proper event listener cleanup
+- **Export Cleanup**: URL cleanup after file downloads
+
+### Development vs Production
+- **Environment Awareness**: Different monitoring levels for different environments
+- **Feature Flags**: Configurable monitoring features
+- **Privacy Considerations**: Respect user privacy in data collection
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ui/PerformanceDashboard.tsx`](../../a-player-dashboard/src/components/ui/PerformanceDashboard.tsx) (lines 1-219)
+- **Performance Utils**: [`src/utils/performance.ts`](../../a-player-dashboard/src/utils/performance.ts)
+- **Performance Hook**: [`src/hooks/usePerformanceMonitoring.ts`](../../a-player-dashboard/src/hooks/usePerformanceMonitoring.ts)
+
+**🔗 Related Components:**
+- [Card](./Card.mdx) - Base card structure for dashboard
+- [Button](./Button.mdx) - Control buttons (export, close, toggle)
+- [usePerformanceMonitoring Hook](../hooks/usePerformanceMonitoring.md) - Performance monitoring integration
+- System monitoring and analytics utilities
+

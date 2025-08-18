@@ -1,0 +1,37 @@
+sequenceDiagram
+  participant U as User (Browser)
+  participant FE as React App (Vite)
+  participant SB as Supabase JS Client
+  participant AUTH as Supabase Auth
+  participant DB as Postgres (RLS)
+  participant EF as Edge Function
+  participant ST as Storage (Buckets)
+  participant AI as OpenAI/Anthropic
+
+  Note over U,AI: Evaluation Submission Flow
+  U->>FE: Submit Evaluation
+  FE->>SB: auth.getSession()
+  SB->>AUTH: Validate session/refresh
+  AUTH-->>SB: Session data
+  FE->>SB: Insert evaluation data
+  SB->>DB: Apply RLS policies
+  DB-->>SB: Row result
+  SB-->>FE: Success response
+  FE-->>U: Show confirmation
+
+  Note over U,AI: AI Analysis Generation Flow
+  U->>FE: Request AI Analysis
+  FE->>EF: Call AI edge function
+  EF->>DB: Fetch evaluation data
+  EF->>AI: Generate analysis
+  AI-->>EF: Analysis result
+  EF-->>FE: Return analysis
+  FE-->>U: Display analysis
+
+  Note over U,AI: Invite/Email Flow
+  U->>FE: Send invitation
+  FE->>EF: Trigger create-invite function
+  EF->>DB: Create invite record
+  EF->>EF: Generate secure token
+  EF-->>FE: Invite created
+  FE-->>U: Success notification

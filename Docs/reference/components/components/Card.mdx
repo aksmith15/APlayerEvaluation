@@ -1,0 +1,296 @@
+# Card Component
+
+Flexible content container component providing consistent layout and interaction patterns.
+
+## Purpose & Usage Context
+
+The Card component serves as a primary content container throughout the A-Player Evaluation System. It provides consistent spacing, borders, shadows, and interaction patterns for organizing information into digestible sections. Used extensively for employee profiles, analytics displays, form sections, and data presentations.
+
+**Used in**: Employee listings, analytics dashboards, assignment displays, form organization, and content grouping.
+
+## Props
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `children` | `React.ReactNode` | N/A | Yes | Content to be displayed within the card container |
+| `className` | `string` | `''` | No | Additional CSS classes to customize card styling |
+| `hoverable` | `boolean` | `false` | No | Enables hover effects and interaction styling |
+| `onClick` | `() => void` | `undefined` | No | Click handler making the card interactive |
+| `role` | `string` | `undefined` | No | Custom ARIA role (auto-set to 'button' when interactive) |
+| `ariaLabel` | `string` | `undefined` | No | Accessible label for screen readers |
+| `ariaDescribedBy` | `string` | `undefined` | No | ID of element that describes the card |
+| `tabIndex` | `number` | `undefined` | No | Tab order position (auto-set to 0 when interactive) |
+
+## Events & Callbacks
+
+### Primary Events
+- **`onClick`**: Fired when card is clicked (only when `onClick` prop is provided)
+- **`onKeyDown`**: Handles keyboard activation (Enter, Space) for interactive cards
+
+### Interactive Behavior
+When `onClick` is provided:
+- Card becomes focusable (`tabIndex={0}`)
+- Keyboard navigation support (Enter/Space activation)
+- Automatic `role="button"` assignment
+- Hover and focus styling applied
+
+## Side Effects
+
+### Visual State Changes
+- **Default**: Clean white background with subtle border and shadow
+- **Hover** (when `hoverable={true}`): Enhanced shadow and border color
+- **Focus** (when interactive): Focus ring and outline for accessibility
+- **Active**: Visual feedback during interaction
+
+### Accessibility Updates
+- Dynamic role assignment based on interactivity
+- Focus management for keyboard navigation
+- ARIA attributes for screen reader support
+
+## Accessibility
+
+### ARIA Support
+- **Dynamic Role**: Automatically assigns `role="button"` for interactive cards
+- **`aria-label`**: Descriptive label for screen readers
+- **`aria-describedby`**: Links to descriptive content
+- **Focus Management**: Proper tab order and focus indicators
+
+### Keyboard Navigation
+- **Enter**: Activates interactive card
+- **Space**: Activates interactive card  
+- **Tab**: Focuses card when interactive
+- **Custom Events**: Prevents default behavior for activation keys
+
+### Screen Reader Features
+- Semantic content structure preserved
+- Interactive state announced
+- Content changes detected automatically
+- Proper heading hierarchy maintained
+
+### Focus Management
+- Visible focus ring with `focus:ring-2`
+- High contrast focus indicators
+- Keyboard navigation between cards
+- Focus preservation during content updates
+
+## Examples
+
+### Basic Usage
+```tsx
+import { Card } from '@/components/ui';
+
+// Simple content container
+<Card>
+  <h3>Employee Information</h3>
+  <p>Details about the employee...</p>
+</Card>
+
+// Interactive card with hover effects
+<Card hoverable onClick={() => navigate('/employee/123')}>
+  <EmployeeProfile data={employee} />
+</Card>
+```
+
+### Real Application Usage
+
+#### Employee Selection Cards (src/pages/EmployeeSelection.tsx:182-190)
+```tsx
+<Card 
+  key={employee.id} 
+  className="cursor-pointer hover:shadow-lg transition-shadow" 
+  onClick={() => handleEmployeeSelect(employee)}
+  hoverable
+>
+  <div className="flex items-center space-x-4">
+    <div className="flex-1">
+      <h3 className="font-medium text-gray-900">{employee.name}</h3>
+      <p className="text-sm text-gray-500">{employee.department}</p>
+    </div>
+  </div>
+</Card>
+```
+
+#### Assignment Management Card (src/pages/AssignmentManagement.tsx:150-165)
+```tsx
+<Card className="mb-6">
+  <div className="flex justify-between items-center mb-4">
+    <h2 className="text-lg font-semibold">Create New Assignment</h2>
+    <Button variant="primary" onClick={() => setShowForm(true)}>
+      New Assignment
+    </Button>
+  </div>
+  <AssignmentCreationForm onSubmit={handleCreate} />
+</Card>
+```
+
+#### Analytics Display Card (src/pages/EmployeeAnalytics.tsx:245-255)
+```tsx
+<Card className="col-span-2">
+  <h3 className="text-lg font-semibold mb-4">Performance Overview</h3>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <RadarChart data={performanceData} />
+    <TrendLineChart data={trendData} />
+  </div>
+</Card>
+```
+
+### Interactive Cards
+```tsx
+// Clickable employee card
+<Card 
+  onClick={() => viewEmployee(employee.id)}
+  ariaLabel={`View details for ${employee.name}`}
+  hoverable
+>
+  <EmployeeProfile employee={employee} />
+</Card>
+
+// Keyboard accessible navigation card
+<Card 
+  onClick={() => navigate('/analytics')}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      navigate('/analytics');
+    }
+  }}
+  role="button"
+  tabIndex={0}
+  ariaLabel="Navigate to analytics dashboard"
+>
+  <h3>Analytics Dashboard</h3>
+  <p>View performance metrics and insights</p>
+</Card>
+```
+
+### Layout Variations
+```tsx
+// Grid layout with cards
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {employees.map(employee => (
+    <Card key={employee.id} hoverable>
+      <EmployeeCard data={employee} />
+    </Card>
+  ))}
+</div>
+
+// Full-width content card
+<Card className="w-full mb-8">
+  <div className="p-6">
+    <HeaderSection />
+    <ContentSection />
+    <ActionSection />
+  </div>
+</Card>
+```
+
+### Accessibility Examples
+```tsx
+// Card with descriptive content
+<Card 
+  ariaLabel="Employee performance summary"
+  ariaDescribedBy="performance-description"
+>
+  <h3>John Doe - Q4 Performance</h3>
+  <div id="performance-description">
+    Quarterly performance evaluation with scores and feedback
+  </div>
+</Card>
+
+// Interactive card with custom role
+<Card 
+  onClick={handleSelect}
+  role="option"
+  ariaLabel="Select this assignment template"
+  tabIndex={0}
+>
+  <TemplatePreview template={template} />
+</Card>
+```
+
+## Styling System
+
+### Base Classes
+```css
+.card {
+  @apply bg-white rounded-lg shadow-sm border border-secondary-200 
+         p-6 transition-all duration-200;
+}
+```
+
+### Interactive Classes (when hoverable)
+```css
+.hoverable {
+  @apply hover:shadow-md hover:border-secondary-300 cursor-pointer 
+         focus:outline-none focus:ring-2 focus:ring-primary-500 
+         focus:ring-offset-2;
+}
+```
+
+### State Variations
+```css
+/* Default state */
+.default {
+  @apply shadow-sm border-secondary-200;
+}
+
+/* Hover state */
+.hover {
+  @apply shadow-md border-secondary-300;
+}
+
+/* Focus state */
+.focus {
+  @apply ring-2 ring-primary-500 ring-offset-2;
+}
+```
+
+## Design System Integration
+
+### Spacing System
+- **Padding**: Consistent `p-6` (24px) internal spacing
+- **Margins**: Flexible external spacing via className
+- **Gaps**: Grid and flex gaps handled by parent containers
+
+### Color Scheme
+- **Background**: Always white (`bg-white`)
+- **Border**: Light gray (`border-secondary-200`)
+- **Shadow**: Subtle elevation (`shadow-sm`)
+- **Hover**: Enhanced contrast (`border-secondary-300`, `shadow-md`)
+
+### Typography Integration
+- Preserves heading hierarchy within content
+- Supports text color inheritance
+- Maintains reading flow and accessibility
+
+## Performance Notes
+
+### Optimization Features
+- **Lightweight**: Minimal DOM manipulation
+- **CSS Transitions**: Hardware-accelerated animations
+- **Event Delegation**: Efficient keyboard handling
+- **No Internal State**: Pure presentational component
+
+### Memory Management
+- No effect hooks or subscriptions
+- Minimal closure creation
+- Efficient re-render patterns
+- Garbage collection friendly
+
+### Rendering Performance
+- Static class string generation
+- No conditional rendering overhead
+- Minimal prop processing
+- Optimized event handling
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ui/Card.tsx`](../../a-player-dashboard/src/components/ui/Card.tsx) (lines 1-53)
+- **Tests**: [`src/components/ui/Card.test.tsx`](../../a-player-dashboard/src/components/ui/Card.test.tsx)
+- **Usage Examples**: Found in 6+ files across employee, analytics, and assignment modules
+
+**🔗 Related Components:**
+- [Button](./Button.mdx) - Often used within Card for actions
+- [EmployeeProfile](./EmployeeProfile.mdx) - Commonly wrapped in Card
+- [LoadingSpinner](./LoadingSpinner.mdx) - Used for Card loading states

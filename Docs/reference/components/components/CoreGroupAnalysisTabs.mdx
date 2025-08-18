@@ -1,0 +1,389 @@
+# CoreGroupAnalysisTabs Component
+
+Advanced tab system for detailed core group analysis, providing comprehensive attribute breakdowns across Competence, Character, and Curiosity dimensions.
+
+## Purpose & Usage Context
+
+The CoreGroupAnalysisTabs component provides detailed attribute-level analysis for the three core performance groups in the A-Player Evaluation System. It implements an intelligent tab system with eager data loading, visual progress indicators, and comprehensive analytics display for each core group.
+
+**Used in**: Employee analytics dashboards, detailed performance analysis, and strategic performance review interfaces.
+
+## Props
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `employeeId` | `string` | N/A | Yes | ID of the employee being analyzed |
+| `quarterId` | `string` | N/A | Yes | ID of the quarter for analysis period |
+| `employeeName` | `string` | `''` | No | Employee name for display context |
+| `quarterName` | `string` | `''` | No | Quarter name for display context |
+| `className` | `string` | `''` | No | Additional CSS classes for the container |
+
+## Events & Callbacks
+
+### Tab Management
+- **Tab Switching**: Seamless switching between Competence, Character, and Curiosity tabs
+- **Data Loading**: Eager loading of all tab data for immediate access
+- **Progress Tracking**: Visual indicators for data loading status
+
+### Data Integration
+- **Parallel Loading**: Loads all three core group analyses simultaneously
+- **Fallback Loading**: Individual tab data loading if parallel loading fails
+- **State Synchronization**: Maintains data state across tab switches
+
+## Side Effects
+
+### Data Operations
+- **Eager Loading**: Pre-loads all tab data on component mount
+- **Caching**: Maintains loaded data for efficient tab switching
+- **Error Handling**: Graceful handling of partial data loading failures
+
+### UI State Changes
+- **Tab Indicators**: Visual feedback for active tabs and data status
+- **Progress Display**: Loading indicators and completion status
+- **Summary Updates**: Real-time summary statistics in tab headers
+
+### Performance Optimization
+- **Parallel Requests**: Concurrent API calls for all core groups
+- **Minimal Re-renders**: Efficient state management to prevent unnecessary updates
+- **Data Persistence**: Loaded data persists across tab switches
+
+## Accessibility
+
+### Tab Navigation
+- **ARIA Support**: Proper tablist, tab, and tabpanel roles
+- **Keyboard Navigation**: Full keyboard accessibility for tab switching
+- **Focus Management**: Proper focus handling during tab changes
+
+### Content Structure
+- **Semantic Headings**: Clear heading hierarchy for each section
+- **Data Organization**: Structured attribute and insight presentation
+- **Progress Communication**: Loading and completion states announced
+
+### Screen Reader Features
+- **Tab Descriptions**: Clear tab purposes and content
+- **Data Summaries**: Summary statistics announced appropriately
+- **State Changes**: Tab switches and data updates communicated
+
+## Examples
+
+### Basic Usage
+```tsx
+import { CoreGroupAnalysisTabs } from '@/components/ui';
+
+// Standard core group analysis
+<CoreGroupAnalysisTabs 
+  employeeId={employeeId}
+  quarterId={quarterId}
+  employeeName="John Doe"
+  quarterName="Q4 2024"
+/>
+```
+
+### Real Application Usage
+
+#### Employee Analytics Integration (src/pages/EmployeeAnalytics.tsx:400-420)
+```tsx
+import { CoreGroupAnalysisTabs } from '@/components/ui';
+
+const EmployeeAnalytics = () => {
+  const { employee } = useEmployee(employeeId);
+  const { quarter } = useQuarter(quarterId);
+  
+  return (
+    <div className="analytics-page">
+      <EmployeeProfile employee={employee} />
+      <TopAnalyticsGrid data={overviewData} />
+      
+      <CoreGroupAnalysisTabs 
+        employeeId={employee.id}
+        quarterId={quarter.id}
+        employeeName={employee.name}
+        quarterName={quarter.name}
+        className="mt-8"
+      />
+    </div>
+  );
+};
+```
+
+#### Performance Review Dashboard
+```tsx
+const PerformanceReviewDashboard = () => {
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [selectedQuarter, setSelectedQuarter] = useState(null);
+  const [activeTab, setActiveTab] = useState('competence');
+  
+  return (
+    <div className="review-dashboard">
+      <div className="controls mb-6">
+        <EmployeeSelector 
+          value={selectedEmployee}
+          onChange={setSelectedEmployee}
+        />
+        <QuarterSelector 
+          value={selectedQuarter}
+          onChange={setSelectedQuarter}
+        />
+      </div>
+      
+      {selectedEmployee && selectedQuarter && (
+        <div className="analysis-section">
+          <CoreGroupAnalysisTabs 
+            employeeId={selectedEmployee.id}
+            quarterId={selectedQuarter.id}
+            employeeName={selectedEmployee.name}
+            quarterName={selectedQuarter.name}
+            defaultTab={activeTab}
+            onTabChange={setActiveTab}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+```
+
+### Advanced Usage with Analytics
+```tsx
+const AdvancedCoreGroupAnalysis = () => {
+  const [tabData, setTabData] = useState({});
+  const [analysisComplete, setAnalysisComplete] = useState(false);
+  
+  const handleTabDataLoad = (tabType) => (data) => {
+    setTabData(prev => ({ ...prev, [tabType]: data }));
+    
+    // Check if all tabs are loaded
+    const allTabsLoaded = Object.keys(tabData).length === 3;
+    if (allTabsLoaded) {
+      setAnalysisComplete(true);
+      generateAnalyticsSummary(tabData);
+    }
+  };
+  
+  return (
+    <div className="advanced-analysis">
+      <CoreGroupAnalysisTabs 
+        employeeId={employeeId}
+        quarterId={quarterId}
+        employeeName={employee.name}
+        quarterName={quarter.name}
+        onDataLoad={handleTabDataLoad}
+      />
+      
+      {analysisComplete && (
+        <div className="analytics-summary mt-6">
+          <AnalyticsSummaryCard data={tabData} />
+          <RecommendationEngine data={tabData} />
+        </div>
+      )}
+    </div>
+  );
+};
+```
+
+## Core Group Structure
+
+### Core Group Definitions
+```typescript
+const coreGroups = [
+  {
+    id: 'competence',
+    name: 'Competence',
+    emoji: '🎯',
+    description: 'Execution & Delivery',
+    color: 'blue',
+    attributes: ['Reliability', 'Accountability for Action', 'Quality of Work']
+  },
+  {
+    id: 'character',
+    name: 'Character', 
+    emoji: '👥',
+    description: 'Leadership & Interpersonal',
+    color: 'green',
+    attributes: ['Leadership', 'Communication Skills', 'Teamwork']
+  },
+  {
+    id: 'curiosity',
+    name: 'Curiosity',
+    emoji: '🚀', 
+    description: 'Growth & Innovation',
+    color: 'purple',
+    attributes: ['Problem Solving Ability', 'Adaptability', 'Taking Initiative', 'Continuous Improvement']
+  }
+];
+```
+
+### Tab Content Components
+- **CompetenceTab**: Detailed analysis of execution and delivery attributes
+- **CharacterTab**: Leadership and interpersonal skills analysis
+- **CuriosityTab**: Growth mindset and innovation attribute analysis
+
+## Data Loading Strategy
+
+### Eager Loading Implementation
+```typescript
+// Pre-load all tab data for immediate access
+useEffect(() => {
+  const loadAllTabSummaries = async () => {
+    if (!employeeId || !quarterId) return;
+    
+    try {
+      console.log('🚀 Pre-loading all core group tab summaries');
+      
+      // Load all three analyses in parallel
+      const [competenceData, characterData, curiosityData] = await Promise.all([
+        fetchCompetenceAnalysis(employeeId, quarterId),
+        fetchCharacterAnalysis(employeeId, quarterId),
+        fetchCuriosityAnalysis(employeeId, quarterId)
+      ]);
+
+      // Update all tab data at once
+      setTabData({
+        competence: competenceData,
+        character: characterData,
+        curiosity: curiosityData
+      });
+      
+      console.log('✅ All core group tab summaries loaded');
+    } catch (error) {
+      console.error('Error loading core group tab summaries:', error);
+    }
+  };
+
+  loadAllTabSummaries();
+}, [employeeId, quarterId]);
+```
+
+### Data Summary Generation
+```typescript
+const getTabDataSummary = (tabId: TabType) => {
+  const data = tabData[tabId];
+  if (!data) return null;
+  
+  const avgScore = data.attributes.reduce((acc, attr) => 
+    acc + attr.scores.weighted, 0) / data.attributes.length;
+  const strengthsCount = data.insights.filter(i => i.type === 'strength').length;
+  const developmentCount = data.insights.filter(i => i.type === 'development').length;
+  
+  return {
+    avgScore: avgScore.toFixed(1),
+    strengthsCount,
+    developmentCount,
+    attributeCount: data.attributes.length
+  };
+};
+```
+
+## Tab Navigation System
+
+### Tab Styling Logic
+```typescript
+const getTabClasses = (tabId: TabType, color: string) => {
+  const isActive = activeTab === tabId;
+  const baseClasses = 'relative px-6 py-4 text-sm font-medium rounded-lg transition-all duration-200';
+  
+  if (isActive) {
+    const activeColors = {
+      blue: 'bg-blue-100 text-blue-700 border-blue-300',
+      green: 'bg-green-100 text-green-700 border-green-300',
+      purple: 'bg-purple-100 text-purple-700 border-purple-300'
+    };
+    return `${baseClasses} ${activeColors[color]} border-2`;
+  }
+  
+  return `${baseClasses} bg-white text-secondary-600 border-2 border-gray-200 hover:border-gray-300`;
+};
+```
+
+### Tab Visual Elements
+- **Data Indicators**: Green dots show when tab data is loaded
+- **Active Indicators**: Bottom border highlights active tab
+- **Summary Display**: Average scores and attribute counts in tab headers
+- **Mobile Adaptations**: Responsive attribute previews for small screens
+
+## Styling System
+
+### Layout Structure
+```css
+.core-group-tabs {
+  @apply w-full;
+}
+
+.tab-navigation {
+  @apply grid grid-cols-1 md:grid-cols-3 gap-4 mb-6;
+}
+
+.tab-content {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 min-h-[600px];
+}
+
+.tab-footer {
+  @apply mt-6 p-4 bg-gray-50 rounded-lg;
+}
+```
+
+### Tab Button Design
+```css
+.tab-button {
+  @apply relative px-6 py-4 text-sm font-medium rounded-lg 
+         transition-all duration-200 focus:outline-none 
+         focus:ring-2 focus:ring-offset-2;
+}
+
+.tab-button-active {
+  @apply border-2; /* Color-specific border from getTabClasses */
+}
+
+.tab-button-inactive {
+  @apply bg-white text-secondary-600 border-2 border-gray-200 
+         hover:border-gray-300 hover:text-secondary-700;
+}
+```
+
+### Visual Indicators
+```css
+.data-loaded-indicator {
+  @apply absolute top-2 right-2 w-2 h-2 bg-green-400 rounded-full;
+}
+
+.active-tab-indicator {
+  @apply absolute bottom-0 left-0 right-0 h-1 bg-current rounded-b-lg opacity-50;
+}
+
+.tab-summary-stats {
+  @apply text-right ml-4;
+}
+```
+
+## Performance Notes
+
+### Loading Optimization
+- **Parallel Requests**: All core group data loaded simultaneously
+- **Error Resilience**: Individual tab failures don't block others
+- **Caching Strategy**: Loaded data persists for session duration
+
+### Component Efficiency
+- **Minimal Re-renders**: Efficient state management with useCallback
+- **Conditional Rendering**: Only active tab content rendered
+- **Memory Management**: Proper cleanup of async operations
+
+### User Experience
+- **Immediate Feedback**: Loading indicators provide instant response
+- **Progressive Enhancement**: Summary data appears as it loads
+- **Smooth Transitions**: Animated tab switching
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ui/CoreGroupAnalysisTabs.tsx`](../../a-player-dashboard/src/components/ui/CoreGroupAnalysisTabs.tsx) (lines 1-321)
+- **Tab Components**: CompetenceTab, CharacterTab, CuriosityTab
+- **Core Group Service**: [`src/services/coreGroupService.ts`](../../a-player-dashboard/src/services/coreGroupService.ts)
+- **Usage Examples**: Found in EmployeeAnalytics and performance review interfaces
+
+**🔗 Related Components:**
+- [CompetenceTab](./CompetenceTab.mdx) - Competence analysis component *(queued)*
+- [CharacterTab](./CharacterTab.mdx) - Character analysis component *(queued)*
+- [CuriosityTab](./CuriosityTab.mdx) - Curiosity analysis component *(queued)*
+- [TopAnalyticsGrid](./TopAnalyticsGrid.mdx) - Strategic overview component
+- [TabSystem](./TabSystem.mdx) - Base tab navigation component
+

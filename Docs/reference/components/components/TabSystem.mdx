@@ -1,0 +1,420 @@
+# TabSystem Components
+
+Compound tab component system providing flexible, accessible tab navigation with context-based state management.
+
+## Purpose & Usage Context
+
+The TabSystem provides a comprehensive compound component architecture for implementing tab navigation throughout the A-Player Evaluation System. It uses React Context for state management and offers flexible composition patterns for building complex tabbed interfaces.
+
+**Used in**: Analytics dashboards, assignment management, survey interfaces, and any multi-section content areas.
+
+## Component Architecture
+
+The TabSystem consists of multiple compound components that work together:
+
+- **`Tabs`** - Root container managing tab state
+- **`TabList`** - Navigation container for tab buttons
+- **`Tab`** - Individual tab navigation button
+- **`TabPanels`** - Container for tab content panels
+- **`TabPanel`** - Individual content panel for each tab
+
+## Tabs (Root Container)
+
+### Props
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `children` | `React.ReactNode` | N/A | Yes | Tab components (TabList, TabPanels, etc.) |
+| `defaultTab` | `string` | `undefined` | No | ID of tab to be active by default |
+| `onChange` | `(tabId: string) => void` | `undefined` | No | Callback fired when active tab changes |
+| `className` | `string` | `''` | No | Additional CSS classes for the container |
+
+### Usage
+```tsx
+<Tabs defaultTab="overview" onChange={handleTabChange}>
+  {/* Tab components */}
+</Tabs>
+```
+
+## TabList (Navigation Container)
+
+### Props
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `children` | `React.ReactNode` | N/A | Yes | Tab components to render |
+| `className` | `string` | `''` | No | Additional CSS classes for the tab list |
+| `variant` | `'default' \| 'pills' \| 'underline'` | `'default'` | No | Visual style variant for tabs |
+
+## Tab (Individual Tab Button)
+
+### Props
+
+| Name | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `id` | `string` | N/A | Yes | Unique identifier for the tab |
+| `children` | `React.ReactNode` | N/A | Yes | Tab content (typically text or icon + text) |
+| `disabled` | `boolean` | `false` | No | Whether the tab is disabled |
+| `count` | `number` | `undefined` | No | Optional count badge displayed in tab |
+| `icon` | `React.ReactNode` | `undefined` | No | Optional icon displayed in tab |
+
+## Events & Callbacks
+
+### Tab Management
+- **`onChange`**: Fired when user switches tabs
+- **`registerTab`**: Internal context method for tab registration
+- **`setActiveTab`**: Internal context method for tab activation
+
+### User Interactions
+- **Click Events**: Tab selection via mouse clicks
+- **Keyboard Events**: Tab navigation via arrow keys, Enter, Space
+- **Focus Events**: Focus management for accessibility
+
+## Side Effects
+
+### State Management
+- **Active Tab Tracking**: Maintains currently active tab ID
+- **Tab Registration**: Auto-registers tabs as they mount
+- **Context Updates**: Propagates state changes through context
+
+### Accessibility Updates
+- **ARIA States**: Updates `aria-selected`, `aria-controls` attributes
+- **Focus Management**: Handles keyboard navigation between tabs
+- **Role Assignment**: Applies proper ARIA roles for tab pattern
+
+## Accessibility
+
+### ARIA Support
+- **`role="tablist"`**: Tab navigation container role
+- **`role="tab"`**: Individual tab button role
+- **`role="tabpanel"`**: Content panel role
+- **`aria-selected`**: Indicates active tab state
+- **`aria-controls`**: Links tabs to their panels
+- **`aria-labelledby`**: Links panels to their tabs
+
+### Keyboard Navigation
+- **Arrow Keys**: Navigate between tabs (Left/Right or Up/Down)
+- **Enter/Space**: Activate focused tab
+- **Home/End**: Navigate to first/last tab
+- **Tab**: Focus into tab content
+
+### Screen Reader Features
+- **Tab Announcements**: Tab labels and states announced
+- **Panel Association**: Clear relationship between tabs and content
+- **Count Badges**: Tab counts announced appropriately
+
+## Examples
+
+### Basic Usage
+```tsx
+import { Tabs, TabList, Tab, TabPanels, TabPanel } from '@/components/ui/compound';
+
+<Tabs defaultTab="overview">
+  <TabList>
+    <Tab id="overview">Overview</Tab>
+    <Tab id="details">Details</Tab>
+    <Tab id="settings">Settings</Tab>
+  </TabList>
+  
+  <TabPanels>
+    <TabPanel id="overview">
+      <h2>Overview Content</h2>
+      <p>Overview information...</p>
+    </TabPanel>
+    
+    <TabPanel id="details">
+      <h2>Detailed Information</h2>
+      <p>Detailed content...</p>
+    </TabPanel>
+    
+    <TabPanel id="settings">
+      <h2>Settings Panel</h2>
+      <p>Settings content...</p>
+    </TabPanel>
+  </TabPanels>
+</Tabs>
+```
+
+### Real Application Usage
+
+#### Assignment Management Tabs
+```tsx
+import { Tabs, TabList, Tab, TabPanels, TabPanel } from '@/components/ui/compound';
+
+const AssignmentManagement = () => {
+  const [activeTab, setActiveTab] = useState('overview');
+  const assignmentCount = assignments.length;
+  
+  return (
+    <div className="assignment-management">
+      <Tabs 
+        defaultTab="overview" 
+        onChange={setActiveTab}
+        className="bg-white rounded-lg shadow"
+      >
+        <TabList variant="underline" className="border-b">
+          <Tab id="overview" icon={<OverviewIcon />}>
+            Overview
+          </Tab>
+          
+          <Tab id="create" icon={<PlusIcon />}>
+            Create Assignment
+          </Tab>
+          
+          <Tab id="manage" count={assignmentCount}>
+            Manage ({assignmentCount})
+          </Tab>
+          
+          <Tab id="analytics" disabled={!hasAnalytics}>
+            Analytics
+          </Tab>
+        </TabList>
+        
+        <TabPanels className="p-6">
+          <TabPanel id="overview">
+            <AssignmentOverview />
+          </TabPanel>
+          
+          <TabPanel id="create">
+            <AssignmentCreationForm />
+          </TabPanel>
+          
+          <TabPanel id="manage">
+            <AssignmentTable assignments={assignments} />
+          </TabPanel>
+          
+          <TabPanel id="analytics">
+            <AssignmentAnalytics />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </div>
+  );
+};
+```
+
+#### Performance Analysis Tabs
+```tsx
+const PerformanceAnalysisTabs = ({ employeeData }) => {
+  return (
+    <Tabs defaultTab="character" className="analytics-tabs">
+      <TabList variant="pills">
+        <Tab id="character" icon={<CharacterIcon />}>
+          Character
+        </Tab>
+        
+        <Tab id="competence" icon={<CompetenceIcon />}>
+          Competence  
+        </Tab>
+        
+        <Tab id="curiosity" icon={<CuriosityIcon />}>
+          Curiosity
+        </Tab>
+      </TabList>
+      
+      <TabPanels>
+        <TabPanel id="character">
+          <CharacterAnalysis data={employeeData.character} />
+        </TabPanel>
+        
+        <TabPanel id="competence">
+          <CompetenceAnalysis data={employeeData.competence} />
+        </TabPanel>
+        
+        <TabPanel id="curiosity">
+          <CuriosityAnalysis data={employeeData.curiosity} />
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
+  );
+};
+```
+
+### Advanced Usage Patterns
+
+#### Dynamic Tab Content
+```tsx
+const DynamicTabs = () => {
+  const { data: tabsData } = useTabsData();
+  const [activeTab, setActiveTab] = useState('');
+  
+  return (
+    <Tabs onChange={setActiveTab}>
+      <TabList>
+        {tabsData.map(tab => (
+          <Tab 
+            key={tab.id} 
+            id={tab.id}
+            disabled={tab.disabled}
+            count={tab.count}
+          >
+            {tab.label}
+          </Tab>
+        ))}
+      </TabList>
+      
+      <TabPanels>
+        {tabsData.map(tab => (
+          <TabPanel key={tab.id} id={tab.id}>
+            <DynamicContent tabId={tab.id} />
+          </TabPanel>
+        ))}
+      </TabPanels>
+    </Tabs>
+  );
+};
+```
+
+#### Controlled Tabs with State
+```tsx
+const ControlledTabs = () => {
+  const [currentTab, setCurrentTab] = useState('dashboard');
+  const [tabHistory, setTabHistory] = useState(['dashboard']);
+  
+  const handleTabChange = (tabId: string) => {
+    setCurrentTab(tabId);
+    setTabHistory(prev => [...prev, tabId]);
+  };
+  
+  const handleGoBack = () => {
+    if (tabHistory.length > 1) {
+      const previous = tabHistory[tabHistory.length - 2];
+      setCurrentTab(previous);
+      setTabHistory(prev => prev.slice(0, -1));
+    }
+  };
+  
+  return (
+    <div>
+      <div className="tab-controls mb-4">
+        <button onClick={handleGoBack} disabled={tabHistory.length <= 1}>
+          ← Back
+        </button>
+        <span className="ml-4">Current: {currentTab}</span>
+      </div>
+      
+      <Tabs defaultTab={currentTab} onChange={handleTabChange}>
+        {/* Tab content */}
+      </Tabs>
+    </div>
+  );
+};
+```
+
+## Context Integration
+
+### Tab Context Interface
+```typescript
+interface TabContextType {
+  activeTab: string;
+  setActiveTab: (tabId: string) => void;
+  tabs: TabConfig[];
+  registerTab: (tab: TabConfig) => void;
+}
+
+interface TabConfig {
+  id: string;
+  label: string;
+  count?: number;
+  disabled?: boolean;
+  icon?: React.ReactNode;
+}
+```
+
+### Hook Access
+```tsx
+// Custom hooks for accessing tab context
+export const useTabContext = () => {
+  const context = useContext(TabContext);
+  if (!context) {
+    throw new Error('useTabContext must be used within a Tabs component');
+  }
+  return context;
+};
+
+export const useActiveTab = () => {
+  const { activeTab } = useTabContext();
+  return activeTab;
+};
+```
+
+## Styling System
+
+### Tab List Variants
+```css
+/* Default variant */
+.tab-list-default {
+  @apply border-b border-gray-200;
+}
+
+/* Pills variant */
+.tab-list-pills {
+  @apply bg-gray-100 p-1 rounded-lg;
+}
+
+/* Underline variant */
+.tab-list-underline {
+  @apply border-b-2 border-transparent;
+}
+```
+
+### Tab Button States
+```css
+/* Default tab */
+.tab-button {
+  @apply px-4 py-2 text-sm font-medium transition-colors;
+}
+
+/* Active tab */
+.tab-active {
+  @apply text-blue-600 border-blue-600;
+}
+
+/* Inactive tab */
+.tab-inactive {
+  @apply text-gray-500 hover:text-gray-700;
+}
+
+/* Disabled tab */
+.tab-disabled {
+  @apply text-gray-300 cursor-not-allowed;
+}
+```
+
+### Count Badges
+```css
+.tab-count {
+  @apply ml-2 bg-gray-100 text-gray-600 px-2 py-1 
+         rounded-full text-xs;
+}
+
+.tab-count-active {
+  @apply bg-blue-100 text-blue-600;
+}
+```
+
+## Performance Notes
+
+### Context Optimization
+- **Minimal Re-renders**: Context updates only trigger necessary re-renders
+- **Tab Registration**: Efficient tab registration without unnecessary re-renders
+- **State Memoization**: Stable context values prevent cascade updates
+
+### Lazy Content Loading
+- **Panel Rendering**: Only active panels rendered (implementation dependent)
+- **Content Splitting**: Supports lazy loading of tab content
+- **Memory Efficiency**: Inactive tab content can be unmounted
+
+---
+
+**📁 Source Files:**
+- **Main Component**: [`src/components/ui/compound/TabSystem.tsx`](../../a-player-dashboard/src/components/ui/compound/TabSystem.tsx) (lines 1-224)
+- **Tests**: [`src/components/ui/compound/__tests__/TabSystem.test.tsx`](../../a-player-dashboard/src/components/ui/compound/__tests__/TabSystem.test.tsx)
+- **Usage Examples**: Found in assignment management and analytics components
+
+**🔗 Related Components:**
+- Assignment tabs (CreateTab, ManageTab, OverviewTab, etc.)
+- Analytics tabs (CharacterTab, CompetenceTab, CuriosityTab)
+- [Compound Components Pattern](./compound/) - Related compound components
+
+

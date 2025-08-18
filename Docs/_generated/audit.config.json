@@ -1,0 +1,68 @@
+{
+  "ignore": {
+    "edgeFunctions": [
+      "**/functions/test-*/**",
+      "**/functions/**/debug/**",
+      "**/functions/accept-invite-minimal/**",
+      "**/functions/test-cors/**",
+      "**/functions/test-create-invite-debug/**",
+      "**/functions/test-cors-accept/**"
+    ]
+  },
+  "requireCategories": {
+    "edgeFunctions": {
+      "test": [
+        "**/functions/test-*/**",
+        "**/functions/**/debug/**",
+        "**/functions/accept-invite-minimal/**",
+        "**/functions/test-cors/**",
+        "**/functions/test-create-invite-debug/**"
+      ],
+      "prod": [
+        "**/functions/create-invite/**",
+        "**/functions/accept-invite-v2/**",
+        "**/functions/invite-redirect/**",
+        "**/functions/ai-coaching-report/**",
+        "**/functions/ai-descriptive-review/**",
+        "**/functions/ai-development-insights/**",
+        "**/functions/ai-strengths-insights/**"
+      ]
+    }
+  },
+  "documentation": {
+    "required": {
+      "edgeFunctions": {
+        "prod": [
+          "purpose",
+          "authentication",
+          "environment_variables",
+          "database_operations",
+          "external_apis",
+          "error_handling"
+        ],
+        "test": [
+          "purpose",
+          "test_scope"
+        ]
+      }
+    },
+    "ignore_markers": [
+      "@doc-ignore",
+      "@category test"
+    ]
+  },
+  "validation": {
+    "edge_functions": {
+      "check_jsdoc_headers": true,
+      "require_cors_handling": true,
+      "validate_env_vars": true,
+      "check_error_responses": true
+    }
+  },
+  "coverage": {
+    "minimum_percentage": 85,
+    "exclude_test_functions": true,
+    "exclude_deprecated": true
+  }
+}
+
