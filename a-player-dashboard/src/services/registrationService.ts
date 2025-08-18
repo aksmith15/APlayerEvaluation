@@ -3,7 +3,6 @@
 // Date: February 1, 2025
 
 import { supabase } from './supabase';
-import { createClient } from '@supabase/supabase-js';
 
 export interface RegistrationData {
   fullName: string;
@@ -215,7 +214,7 @@ export async function uploadProfilePicture(file: File, userId: string): Promise<
     const fileExt = file.name.split('.').pop();
     const fileName = `${userId}-${Date.now()}.${fileExt}`;
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from('profile-pictures')
       .upload(fileName, file);
 
