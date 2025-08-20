@@ -113,7 +113,7 @@ const RegisterFromInvite: React.FC = () => {
       setState({
         status: 'error',
         message: 'Invalid invitation link',
-        error: 'No invitation token found in the URL'
+        error: 'No invitation token found in the URL. This invitation may have expired or the link may be malformed.'
       });
       return;
     }
@@ -174,6 +174,7 @@ const RegisterFromInvite: React.FC = () => {
         feedback = 'Fair password';
         break;
       case 4:
+      case 5:
         feedback = 'Strong password';
         break;
       case 5:
