@@ -81,32 +81,12 @@ const RegisterFromInvite: React.FC = () => {
           
           setInviteData(inviteFromSession);
           
-          // Try to complete the invite acceptance automatically
+          // Show the registration form instead of auto-completing
           setState({
-            status: 'submitting',
-            message: 'Completing your invitation...'
+            status: 'ready',
+            message: `Welcome! Please complete your profile for ${inviteFromSession.companies.name}.`
           });
-          
-          const result = await completeInviteAcceptance(inviteFromSession);
-          if (result.success) {
-            setState({
-              status: 'success',
-              message: `Welcome to ${inviteFromSession.companies.name}! Your account has been set up successfully.`
-            });
-            
-            setTimeout(() => {
-              navigate('/dashboard');
-            }, 2000);
-            return;
-          } else {
-            // If auto-completion fails, show error
-            setState({
-              status: 'error',
-              message: 'Failed to complete invitation',
-              error: result.error
-            });
-            return;
-          }
+          return;
         } else {
           console.log('Session found but no invite metadata. This might be an existing user.');
           console.log('Checking for token-based flow...');

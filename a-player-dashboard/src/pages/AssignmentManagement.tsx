@@ -1,10 +1,12 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { CompanyProvider, useCompany } from '../contexts/CompanyContext';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { ErrorMessage } from '../components/ui/ErrorMessage';
-import { CompanySwitcher } from '../components/ui/CompanySwitcher';
+import { Page } from '../components/layout';
+import { ManagerDashboardNav } from '../components/ui/ManagerDashboardNav';
 
 // import { QuarterRangeSelector } from '../components/ui/QuarterRangeSelector';
 import { AssignmentCreationForm } from '../components/ui/AssignmentCreationForm';
@@ -25,12 +27,10 @@ const LazyDebugInviteTest = React.lazy(() =>
 
 import { 
   fetchAllAssignments, 
-  getAssignmentStatistics,
   deleteBulkAssignments 
 } from '../services/assignmentService';
 import type { 
   EvaluationAssignmentWithDetails, 
-  AssignmentStatistics,
   EvaluationType,
   AssignmentStatus 
 } from '../types/database';
@@ -39,31 +39,6 @@ import type {
 const UsersIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 20 20">
     <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-  </svg>
-);
-
-const PlusIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-    <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-  </svg>
-);
-
-const UploadIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-  </svg>
-);
-
-const BarChartIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-    <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
-    <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
-  </svg>
-);
-
-const FilterIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-    <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
   </svg>
 );
 
@@ -79,29 +54,7 @@ const DownloadIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" 
   </svg>
 );
 
-const RefreshIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-    <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
-  </svg>
-);
 
-const WeightsIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clipRule="evenodd" />
-  </svg>
-);
-
-const DebugIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-  </svg>
-);
-
-const UserPlusIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-    <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
-  </svg>
-);
 
 const CheckCircleIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 20 20">
@@ -114,14 +67,15 @@ interface AssignmentFilters {
   evaluation_type?: EvaluationType;
   status?: AssignmentStatus;
   search?: string;
+  company_id?: string;
 }
 
-const AssignmentManagement: React.FC = () => {
+const AssignmentManagementContent: React.FC = () => {
   const { user } = useAuth();
+  const { selectedCompanyId, companies, loading: companyLoading } = useCompany();
 
   // State management
   const [assignments, setAssignments] = useState<EvaluationAssignmentWithDetails[]>([]);
-  const [statistics, setStatistics] = useState<AssignmentStatistics[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedAssignments, setSelectedAssignments] = useState<string[]>([]);
@@ -129,7 +83,7 @@ const AssignmentManagement: React.FC = () => {
   // UI state
   const [activeTab, setActiveTab] = useState<'overview' | 'create' | 'upload' | 'manage' | 'coverage' | 'weights' | 'invitations' | 'debug'>('overview');
   const [filters, setFilters] = useState<AssignmentFilters>({});
-  const [refreshing, setRefreshing] = useState(false);
+
 
   // Check admin permissions
   const isAdmin = user?.jwtRole === 'super_admin' || user?.jwtRole === 'hr_admin';
@@ -141,20 +95,21 @@ const AssignmentManagement: React.FC = () => {
       return;
     }
 
-    console.log('🔄 useEffect triggered - loading data with filters:', filters);
-    loadData();
-  }, [isAdmin, filters]);
+    // Only load data if we have a company selected (or company loading is complete)
+    if (!companyLoading && selectedCompanyId) {
+      console.log('🔄 useEffect triggered - loading data with filters:', filters, 'for company:', selectedCompanyId);
+      loadData();
+    }
+  }, [isAdmin, filters, selectedCompanyId, companyLoading]);
 
   const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      console.log('📡 Fetching assignments with filters:', filters);
-      const [assignmentsData, statisticsData] = await Promise.all([
-        fetchAllAssignments(filters),
-        getAssignmentStatistics() // Remove selectedQuarters for now
-      ]);
+      console.log('📡 Fetching assignments with filters:', filters, 'for company:', selectedCompanyId);
+      const filtersWithCompany = { ...filters, company_id: selectedCompanyId || undefined };
+      const assignmentsData = await fetchAllAssignments(filtersWithCompany);
 
       console.log('✅ Data loaded:', {
         assignmentsCount: assignmentsData.length,
@@ -162,7 +117,6 @@ const AssignmentManagement: React.FC = () => {
       });
 
       setAssignments(assignmentsData);
-      setStatistics(statisticsData);
     } catch (err) {
       console.error('Error loading assignment data:', err);
       setError(err instanceof Error ? err.message : 'Failed to load assignment data');
@@ -171,11 +125,7 @@ const AssignmentManagement: React.FC = () => {
     }
   };
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await loadData();
-    setRefreshing(false);
-  };
+
 
   const handleBulkDelete = async () => {
     if (selectedAssignments.length === 0) return;
@@ -220,16 +170,7 @@ const AssignmentManagement: React.FC = () => {
     console.log('🔄 Triggering data reload with new filters...');
   };
 
-  const getTabCount = (tab: string) => {
-    switch (tab) {
-      case 'overview':
-        return statistics.reduce((sum, stat) => sum + stat.total_assignments, 0);
-      case 'manage':
-        return assignments.length;
-      default:
-        return null;
-    }
-  };
+
 
   // Access control check
   if (!isAdmin) {
@@ -255,7 +196,7 @@ const AssignmentManagement: React.FC = () => {
     );
   }
 
-  if (loading && !refreshing) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" />
@@ -277,125 +218,63 @@ const AssignmentManagement: React.FC = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <UsersIcon className="w-6 h-6 text-primary-600" />
-                <h1 className="text-xl font-semibold text-gray-900">
-                  Assignment Management
-                </h1>
-              </div>
-              {refreshing && <LoadingSpinner size="sm" />}
+  // Show company selection required message
+  if (!companyLoading && !selectedCompanyId) {
+    return (
+      <Page>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center">
+            <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+              <UsersIcon className="w-8 h-8 text-blue-600" />
             </div>
-            
-            <div className="flex items-center space-x-3">
-              {/* Company Switcher */}
-              <CompanySwitcher />
-              
-              {/* Navigation Links */}
-              <button
-                onClick={() => window.location.href = '/employees'}
-                className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                </svg>
-                <span>Employee Selection</span>
-              </button>
-              
-              <button
-                onClick={() => window.location.href = '/assignments/my'}
-                className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                  <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                </svg>
-                <span>My Assignments</span>
-              </button>
-
-              {/* QuarterRangeSelector integration pending */}
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="flex items-center space-x-2"
-              >
-                <RefreshIcon className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-                <span>Refresh</span>
-              </Button>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Select Company to Manage Assignments</h2>
+            <p className="text-gray-600 mb-6">
+              Choose a company from the header dropdown to view and manage assignments, invitations, and settings.
+            </p>
+            <div className="text-sm text-gray-500">
+              {companies.length > 0 ? (
+                <p>Available companies: {companies.map((c: any) => c.name).join(', ')}</p>
+              ) : (
+                <p>Loading companies...</p>
+              )}
             </div>
           </div>
         </div>
-      </div>
+      </Page>
+    );
+  }
 
-      {/* Navigation Tabs */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex space-x-8" aria-label="Tabs">
-            {[
-              { id: 'overview', name: 'Overview', icon: BarChartIcon },
-              { id: 'create', name: 'Create Assignments', icon: PlusIcon },
-              { id: 'upload', name: 'Bulk Upload', icon: UploadIcon },
-              { id: 'manage', name: 'Manage Assignments', icon: FilterIcon },
-              { id: 'coverage', name: 'Coverage Tracking', icon: UsersIcon },
-              { id: 'weights', name: 'Attribute Weights', icon: WeightsIcon },
-              { id: 'invitations', name: 'Company Invitations', icon: UserPlusIcon },
-              { id: 'debug', name: 'Debug', icon: DebugIcon }
-            ].map((tab) => {
-              const count = getTabCount(tab.id);
-              const isActive = activeTab === tab.id;
-              
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`
-                    group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors
-                    ${isActive
-                      ? 'border-primary-500 text-primary-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }
-                  `}
-                >
-                  <tab.icon className={`
-                    -ml-0.5 mr-2 h-5 w-5 transition-colors
-                    ${isActive ? 'text-primary-500' : 'text-gray-400 group-hover:text-gray-500'}
-                  `} />
-                  {tab.name}
-                  {count !== null && (
-                    <span className={`
-                      ml-2 py-0.5 px-2 rounded-full text-xs font-medium
-                      ${isActive 
-                        ? 'bg-primary-100 text-primary-600' 
-                        : 'bg-gray-100 text-gray-600'
-                      }
-                    `}>
-                      {count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
+  const subNav = (
+    <div className="flex items-center justify-center w-full relative">
+      {/* Centered Manager Dashboard Navigation */}
+      <div className="flex-1 flex justify-center">
+        <ManagerDashboardNav
+          activeTab={activeTab}
+          onTabChange={(tab) => setActiveTab(tab as any)}
+        />
       </div>
+      
+      {/* Right: Minimal Company Info */}
+      <div className="absolute right-0 flex items-center">
+        {selectedCompanyId && (
+          <span className="text-xs text-slate-400 hidden lg:inline whitespace-nowrap">
+            {companies.find((c: any) => c.id === selectedCompanyId)?.name || 'Company'}
+          </span>
+        )}
+      </div>
+    </div>
+  );
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  return (
+    <Page subNav={subNav}>
+      <div className="mx-auto max-w-7xl px-4 md:px-6 space-y-6 md:space-y-8">
         {/* Overview Tab */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
             {/* Header */}
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900">Assignment Management Dashboard</h2>
-              <p className="text-gray-600 mt-2">Manage evaluation assignments and track completion progress</p>
+              <h2 className="text-3xl font-bold text-slate-900">Dashboard Overview</h2>
+              <p className="text-slate-600 mt-2">Track completion progress and assignment statistics</p>
             </div>
 
             {/* Completion Tracking Stats */}
@@ -637,7 +516,16 @@ const AssignmentManagement: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+    </Page>
+  );
+};
+
+// Wrapper component with CompanyProvider
+const AssignmentManagement: React.FC = () => {
+  return (
+    <CompanyProvider>
+      <AssignmentManagementContent />
+    </CompanyProvider>
   );
 };
 

@@ -3197,8 +3197,9 @@ export const EvaluationSurvey: React.FC = () => {
       }));
 
     if (questionData.length > 0) {
-      // NEW: Use tenant-aware upsert (automatically adds company_id)
-      const { error: responseError } = await fromTenantSafe(supabase, 'attribute_responses')
+      // Use regular supabase client (attribute_responses doesn't have company_id)
+      const { error: responseError } = await supabase
+        .from('attribute_responses')
         .upsert(questionData, {
           onConflict: 'submission_id,attribute_name,question_id'
         });

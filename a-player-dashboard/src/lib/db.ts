@@ -58,17 +58,18 @@ export function fromTenant<T extends string>(sb: SupabaseClient, table: T) {
       return query;
     },
     
-    upsert: (payload: any) => {
+    upsert: (payload: any, options?: any) => {
       const enrichedPayload = Array.isArray(payload)
         ? payload.map(r => enrichPayloadWithCompany(r, table, companyId, userId))
         : enrichPayloadWithCompany(payload, table, companyId, userId);
       
       console.log(`[DB] Upsert to ${table} with tenant context:`, { 
         records: Array.isArray(payload) ? payload.length : 1,
-        companyId: isCompanyScoped(table) ? companyId : 'not required'
+        companyId: isCompanyScoped(table) ? companyId : 'not required',
+        options: options || 'none'
       });
       
-      return sb.from(table).upsert(enrichedPayload);
+      return sb.from(table).upsert(enrichedPayload, options);
     },
     
     delete: () => {
@@ -107,7 +108,7 @@ const COMPANY_SCOPED_TABLES = new Set([
   'evaluation_assignments',
   'submissions',
   'attribute_scores',
-  'attribute_responses',
+  // Note: attribute_responses doesn't have company_id - gets context via submission_id
   'analysis_jobs',
   'core_group_calculations',
   'core_group_breakdown',

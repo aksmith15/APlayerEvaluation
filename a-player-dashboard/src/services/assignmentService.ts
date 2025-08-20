@@ -78,6 +78,7 @@ export const fetchAllAssignments = async (filters?: {
   quarter_id?: string;
   evaluation_type?: EvaluationType;
   status?: AssignmentStatus;
+  company_id?: string;
 }): Promise<EvaluationAssignmentWithDetails[]> => {
   try {
     let query = supabase.from('assignment_details').select('*');
@@ -90,6 +91,26 @@ export const fetchAllAssignments = async (filters?: {
     }
     if (filters?.status) {
       query = query.eq('status', filters.status);
+    }
+    if (filters?.company_id) {
+      // Filter by company - we want assignments where the EVALUATEE belongs to the company
+      // This shows all assignments for people being evaluated from the selected company
+      const { data: companyPeople } = await supabase
+        .from('people')
+        .select('id')
+        .eq('company_id', filters.company_id)
+        .eq('active', true);
+      
+      if (companyPeople && companyPeople.length > 0) {
+        const peopleIds = companyPeople.map(p => p.id);
+        // Filter by evaluatee_id instead of evaluator_id
+        query = query.in('evaluatee_id', peopleIds);
+        console.log(`Filtering assignments for ${peopleIds.length} people from company ${filters.company_id}`);
+      } else {
+        // If no people found for this company, return empty results gracefully
+        console.log(`No active people found for company ${filters.company_id}, returning empty results`);
+        query = query.eq('id', '00000000-0000-0000-0000-000000000000');
+      }
     }
 
     const { data, error } = await query.order('assigned_at', { ascending: false });
@@ -517,12 +538,93 @@ export const linkAssignmentToSubmission = async (assignmentId: string, submissio
 /**
  * Get assignment statistics
  */
-export const getAssignmentStatistics = async (quarterIds?: string[]): Promise<AssignmentStatistics[]> => {
+export const getAssignmentStatistics = async (quarterIds?: string[], companyId?: string): Promise<AssignmentStatistics[]> => {
   try {
     let query = supabase.from('assignment_statistics').select('*');
 
     if (quarterIds && quarterIds.length > 0) {
       query = query.in('quarter_id', quarterIds);
+    }
+    
+    if (companyId) {
+      // Calculate company-specific statistics by querying assignments directly
+      console.log(`Calculating company-specific statistics for company: ${companyId}`);
+      
+      // Get people from the company
+      const { data: companyPeople } = await supabase
+        .from('people')
+        .select('id')
+        .eq('company_id', companyId)
+        .eq('active', true);
+      
+      if (companyPeople && companyPeople.length > 0) {
+        const peopleIds = companyPeople.map(p => p.id);
+        
+        // Get assignments for company people grouped by quarter and evaluation type
+        const { data: assignmentData } = await supabase
+          .from('evaluation_assignments')
+          .select(`
+            quarter_id,
+            evaluation_type,
+            status,
+            evaluation_cycles!inner(name)
+          `)
+          .in('evaluatee_id', peopleIds);
+        
+        if (assignmentData && assignmentData.length > 0) {
+          // Calculate statistics manually
+          const statsMap = new Map<string, any>();
+          
+          assignmentData.forEach(assignment => {
+            const key = `${assignment.quarter_id}-${assignment.evaluation_type}`;
+            
+            if (!statsMap.has(key)) {
+              statsMap.set(key, {
+                quarter_id: assignment.quarter_id,
+                quarter_name: (assignment.evaluation_cycles as any)?.name || 'Unknown Quarter',
+                evaluation_type: assignment.evaluation_type,
+                total_assignments: 0,
+                pending_count: 0,
+                in_progress_count: 0,
+                completed_count: 0,
+                completion_percentage: 0
+              });
+            }
+            
+            const stats = statsMap.get(key);
+            stats.total_assignments++;
+            
+            switch (assignment.status) {
+              case 'pending':
+                stats.pending_count++;
+                break;
+              case 'in_progress':
+                stats.in_progress_count++;
+                break;
+              case 'completed':
+                stats.completed_count++;
+                break;
+            }
+          });
+          
+          // Calculate completion percentages
+          const companyStats = Array.from(statsMap.values()).map(stats => ({
+            ...stats,
+            completion_percentage: stats.total_assignments > 0 
+              ? Math.round((stats.completed_count / stats.total_assignments) * 100 * 100) / 100
+              : 0
+          }));
+          
+          console.log(`Generated ${companyStats.length} company-specific statistics`);
+          return companyStats;
+        } else {
+          console.log('No assignments found for company people');
+          return [];
+        }
+      } else {
+        console.log('No people found for company, returning empty statistics');
+        return [];
+      }
     }
 
     const { data, error } = await query.order('quarter_name', { ascending: false });

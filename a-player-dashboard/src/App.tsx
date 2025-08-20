@@ -22,6 +22,7 @@ const MyAssignments = React.lazy(() => import('./pages/MyAssignments'));
 const EvaluationSurvey = React.lazy(() => import('./components/ui').then(module => ({ default: module.EvaluationSurvey })));
 const AcceptInvite = React.lazy(() => import('./pages/AcceptInvite'));
 const RegisterFromInvite = React.lazy(() => import('./pages/RegisterFromInvite'));
+const ProfileEditor = React.lazy(() => import('./pages/ProfileEditor'));
 
 // Dev-only React-PDF live preview
 const DevPdfPreview = React.lazy(() => import('./pages/react-pdf/DevPdfPreview'));
@@ -103,6 +104,16 @@ const App: React.FC = () => {
                     } 
                   />
                   
+                  {/* Profile management route - require authentication */}
+                  <Route 
+                    path="/profile" 
+                    element={
+                      <ProtectedRoute>
+                        <ProfileEditor />
+                      </ProtectedRoute>
+                    } 
+                  />
+
                   {/* Admin routes - require authentication + admin role (validated in component) */}
                   <Route 
                     path={ROUTES.ASSIGNMENT_MANAGEMENT} 

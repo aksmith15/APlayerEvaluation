@@ -9,6 +9,7 @@ import {
   EmptyState,
   AssignmentCard
 } from '../components/ui';
+import { Page } from '../components/layout';
 import { 
   fetchUserAssignments
 } from '../services/assignmentService';
@@ -26,11 +27,7 @@ const ClipboardIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6"
   </svg>
 );
 
-const FilterIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-    <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
-  </svg>
-);
+
 
 const RefreshIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 20 20">
@@ -213,78 +210,47 @@ const MyAssignments: React.FC = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <ClipboardIcon className="w-6 h-6 text-primary-600" />
-                <h1 className="text-xl font-semibold text-gray-900">
-                  My Assignments
-                </h1>
-              </div>
-              {refreshing && <LoadingSpinner size="sm" />}
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              {/* Navigation Links */}
-              <button
-                onClick={() => window.location.href = '/employees'}
-                className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                </svg>
-                <span>Employee Selection</span>
-              </button>
-
-              {/* Assignment Management - Admin only */}
-              {user?.jwtRole === 'super_admin' || user?.jwtRole === 'hr_admin' ? (
-                <button
-                  onClick={() => window.location.href = '/assignments/manage'}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-primary-700 bg-primary-100 hover:bg-primary-200 rounded-lg transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                  </svg>
-                  <span>Assignment Management</span>
-                </button>
-              ) : null}
-
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center space-x-2"
-              >
-                <FilterIcon className="w-4 h-4" />
-                <span>Filters</span>
-                {Object.keys(filters).length > 0 && (
-                  <span className="bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded-full">
-                    {Object.keys(filters).length}
-                  </span>
-                )}
-              </Button>
-              
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="flex items-center space-x-2"
-              >
-                <RefreshIcon className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-                <span>Refresh</span>
-              </Button>
-            </div>
-          </div>
-        </div>
+  const subNav = (
+    <>
+      {/* Left: Page Title and Controls */}
+      <span className="text-sm font-medium text-slate-900 whitespace-nowrap">My Assignments</span>
+      <button
+        onClick={() => setShowFilters(!showFilters)}
+        className={`
+          px-2 py-1.5 text-slate-600 hover:text-slate-900 transition-colors text-sm whitespace-nowrap
+          ${showFilters ? 'font-medium text-slate-900 underline underline-offset-4' : ''}
+        `}
+      >
+        Filters
+        {Object.keys(filters).length > 0 && (
+          <span className="ml-1 text-xs bg-slate-200 text-slate-700 px-1 rounded">
+            {Object.keys(filters).length}
+          </span>
+        )}
+      </button>
+      
+      {/* Right: Page Actions */}
+      <div className="ml-auto flex items-center gap-2">
+        {refreshing && <LoadingSpinner size="sm" />}
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="h-8 px-2 text-xs"
+          title="Refresh"
+        >
+          <RefreshIcon className={`w-3.5 h-3.5 mr-1 hidden sm:inline ${refreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
       </div>
+    </>
+  );
 
-      {/* Filters Panel */}
+  return (
+    <Page subNav={subNav}>
+      <div className="mx-auto max-w-7xl px-4 md:px-6 space-y-6">
+        {/* Filters Panel */}
       {showFilters && (
         <div className="bg-white border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -475,6 +441,7 @@ const MyAssignments: React.FC = () => {
         )}
       </div>
     </div>
+    </Page>
   );
 };
 

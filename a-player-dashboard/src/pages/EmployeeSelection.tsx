@@ -1,32 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigation, useKeyboardNavigation } from '../contexts/NavigationContext';
-import { fetchEmployees } from '../services/dataFetching';
+import { CompanyProvider, useCompany } from '../contexts/CompanyContext';
+import { supabase } from '../services/supabase';
 import { LoadingSpinner, ErrorMessage, SearchInput, Card, EmployeeCardSkeleton, NoEmployeesFound, KeyboardShortcuts } from '../components/ui';
-import { ROUTES, APP_CONFIG } from '../constants/config';
+import { Page } from '../components/layout';
+
 import type { Employee } from '../types/evaluation';
 import { batchCheckCurrentQuarterDataAvailability, formatQuarterDataStatus, type QuarterDataStatus } from '../services/evaluationDataService';
 
-// Icon components for navigation
-const ClipboardIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-    <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-  </svg>
-);
 
-const UsersIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-  </svg>
-);
 
-export const EmployeeSelection: React.FC = () => {
-  const navigate = useNavigate();
+const EmployeeSelectionContent: React.FC = () => {
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { navigateToEmployee, updateNavigationState } = useNavigation();
+  const { selectedCompanyId, loading: companyLoading } = useCompany();
   
   // Enable keyboard navigation shortcuts
   useKeyboardNavigation();
@@ -38,14 +28,16 @@ export const EmployeeSelection: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [quarterDataStatuses, setQuarterDataStatuses] = useState<Record<string, QuarterDataStatus | null>>({});
 
-  // Check if user is admin
-  const isAdmin = user?.jwtRole === 'super_admin' || user?.jwtRole === 'hr_admin';
+
 
   // Get unique departments for filtering
   const departments = ['all', ...Array.from(new Set(employees.map(emp => emp.department)))];
 
   useEffect(() => {
-    loadEmployees();
+    // Wait for company context to be ready before loading employees
+    if (!companyLoading && selectedCompanyId) {
+      loadEmployees();
+    }
     
     // Restore filters from navigation state if returning from analytics
     const state = location.state as { searchFilters?: { searchTerm: string; department: string } } | null;
@@ -53,14 +45,58 @@ export const EmployeeSelection: React.FC = () => {
       setSearchTerm(state.searchFilters.searchTerm);
       setSelectedDepartment(state.searchFilters.department);
     }
-  }, [location.state]);
+  }, [location.state, companyLoading, selectedCompanyId]);
 
   const loadEmployees = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const employeeData = await fetchEmployees();
+      if (!selectedCompanyId) {
+        console.log('No company selected, skipping employee loading');
+        setEmployees([]);
+        setFilteredEmployees([]);
+        setLoading(false);
+        return;
+      }
+
+      console.log(`Loading employees for company: ${selectedCompanyId}`);
+      
+      // Use direct Supabase query with explicit company filtering
+      const { data: people, error: peopleError } = await supabase
+        .from('people')
+        .select('*')
+        .eq('company_id', selectedCompanyId)
+        .eq('active', true)
+        .order('name');
+
+      if (peopleError) {
+        console.error('Error fetching employees:', peopleError);
+        throw peopleError;
+      }
+
+      if (!people || people.length === 0) {
+        console.log(`No employees found for company ${selectedCompanyId}`);
+        setEmployees([]);
+        setFilteredEmployees([]);
+        setQuarterDataStatuses({});
+        setLoading(false);
+        return;
+      }
+
+      console.log(`✅ Found ${people.length} employees for company ${selectedCompanyId}`);
+
+      // Convert to Employee format (simplified from fetchEmployees)
+      const employeeData: Employee[] = people.map((person) => ({
+        ...person,
+        role: person.role || 'Unknown',
+        hire_date: person.hire_date || new Date().toISOString().split('T')[0], // Default to today if not set
+        department: person.department || 'Unknown',
+        email: person.email || '',
+        overallScore: undefined, // Will be calculated if needed
+        latestQuarter: undefined // Will be loaded if needed
+      }));
+
       setEmployees(employeeData);
       setFilteredEmployees(employeeData);
       
@@ -88,14 +124,7 @@ export const EmployeeSelection: React.FC = () => {
     navigateToEmployee(employee.id, employee.name);
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate(ROUTES.LOGIN);
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
+
 
   // Filter employees based on search and department
   useEffect(() => {
@@ -131,56 +160,17 @@ export const EmployeeSelection: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-secondary-50">
-      {/* Header */}
-      <header className="bg-white border-b border-secondary-200">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-secondary-800">
-                {APP_CONFIG.TITLE}
-              </h1>
-              <p className="text-secondary-600">
-                Welcome, {user?.name || user?.email} • Select an employee to view their evaluation analytics
-              </p>
-            </div>
-
-            {/* Navigation Links */}
-            <div className="flex items-center space-x-4">
-              {/* My Assignments - Available to all users */}
-              <button
-                onClick={() => navigate(ROUTES.MY_ASSIGNMENTS)}
-                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-              >
-                <ClipboardIcon className="w-4 h-4" />
-                <span>My Assignments</span>
-              </button>
-
-              {/* Assignment Management - Admin only */}
-              {isAdmin && (
-                <button
-                  onClick={() => navigate(ROUTES.ASSIGNMENT_MANAGEMENT)}
-                  className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-primary-700 bg-primary-100 hover:bg-primary-200 rounded-lg transition-colors"
-                >
-                  <UsersIcon className="w-4 h-4" />
-                  <span>Assignment Management</span>
-                </button>
-              )}
-
-              {/* Logout Button */}
-              <button
-                onClick={handleLogout}
-                className="btn-secondary"
-              >
-                Sign Out
-              </button>
-            </div>
-          </div>
+    <Page>
+      <div className="mx-auto max-w-7xl px-4 md:px-6 space-y-6 md:space-y-8">
+        {/* Page Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-secondary-800 mb-2">
+            Employee Selection
+          </h1>
+          <p className="text-secondary-600">
+            Welcome, {user?.name || user?.email} • Select an employee to view their evaluation analytics
+          </p>
         </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Filters Section */}
         <div className="mb-8 space-y-4 md:space-y-0 md:flex md:items-end md:gap-6">
           <div className="flex-1">
@@ -228,7 +218,26 @@ export const EmployeeSelection: React.FC = () => {
           />
         )}
 
-        {/* Employee Grid */}
+        {/* No Company Selected State */}
+        {!companyLoading && !selectedCompanyId ? (
+          <Card className="p-8 text-center">
+            <div className="mb-4">
+              <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                Select a Company
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Please select a company using the selector in the header to view employees.
+              </p>
+            </div>
+          </Card>
+        ) : (
+          <>
+            {/* Employee Grid */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {Array.from({ length: 8 }).map((_, index) => (
@@ -306,10 +315,21 @@ export const EmployeeSelection: React.FC = () => {
             onReset={searchTerm || selectedDepartment !== 'all' ? () => { setSearchTerm(''); setSelectedDepartment('all'); } : undefined}
           />
         )}
-      </main>
-      
-      {/* Keyboard Shortcuts Helper */}
-      <KeyboardShortcuts />
-    </div>
+          </>
+        )}
+        
+        {/* Keyboard Shortcuts Helper */}
+        <KeyboardShortcuts />
+      </div>
+    </Page>
+  );
+};
+
+// Main component with Company Provider wrapper
+export const EmployeeSelection: React.FC = () => {
+  return (
+    <CompanyProvider>
+      <EmployeeSelectionContent />
+    </CompanyProvider>
   );
 }; 
