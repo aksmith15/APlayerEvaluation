@@ -49,7 +49,7 @@ export async function registerUserFromInvite(
   try {
     // Step 1: Check if user is already authenticated (from invite link)
     console.log('Step 1: Checking existing session...');
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    const { data: { session } } = await supabase.auth.getSession();
     
     let authData;
     let finalSession = session;
