@@ -152,54 +152,6 @@ const RegisterFromInvite: React.FC = () => {
     }
   };
 
-  const completeInviteAcceptance = async (inviteData: InviteData) => {
-    try {
-      // Get the current session to include auth header
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        console.error('No session available for invite acceptance');
-        return { success: false, error: 'No authentication session available' };
-      }
-
-      console.log('🔍 DEBUG: Session info:', {
-        userEmail: session.user?.email,
-        inviteEmail: inviteData.email,
-        hasAccessToken: !!session.access_token,
-        userMetadata: session.user?.user_metadata
-      });
-
-      console.log('Calling accept-invite-v2 with session for user:', session.user?.email);
-      console.log('Invite is for:', inviteData.email);
-
-      // Call accept-invite-v2 directly since user is already authenticated via action_link
-      const { data: result, error } = await supabase.functions.invoke('accept-invite-v2', {
-        body: {
-          token: inviteData.token === 'action-link' ? 'action-link-metadata' : inviteData.token
-        },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`
-        }
-      });
-
-      if (error) {
-        console.error('Accept invite error:', error);
-        console.error('Full error object:', error);
-        return { success: false, error: error.message };
-      }
-
-      if (result?.error) {
-        console.error('Accept invite failed:', result.error);
-        return { success: false, error: result.error };
-      }
-
-      console.log('✅ Invite acceptance completed successfully');
-      return { success: true, result };
-    } catch (error: any) {
-      console.error('Complete invite acceptance error:', error);
-      return { success: false, error: error.message };
-    }
-  };
-
   const validatePassword = (password: string) => {
     let score = 0;
     let feedback = '';

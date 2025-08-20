@@ -242,7 +242,7 @@ export const BulkInviteUpload: React.FC<BulkInviteUploadProps> = ({
       try {
         console.log('Attempting direct fetch to get error details...');
         const authHeader = (await supabase.auth.getSession()).data.session?.access_token;
-        const response = await fetch(`${supabase.supabaseUrl}/functions/v1/create-invite`, {
+        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-invite`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${authHeader}`,
